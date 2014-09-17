@@ -1,10 +1,10 @@
-DROP TABLE IF EXISTS Koie;
-DROP TABLE IF EXISTS Ekstrautstyr;
-DROP TABLE IF EXISTS Ved;
-DROP TABLE IF EXISTS Booking;
-DROP TABLE IF EXISTS Rapport;
-DROP TABLE IF EXISTS Odelagt;
 DROP TABLE IF EXISTS Glemt;
+DROP TABLE IF EXISTS Odelagt;
+DROP TABLE IF EXISTS Rapport;
+DROP TABLE IF EXISTS Booking;
+DROP TABLE IF EXISTS Ved;
+DROP TABLE IF EXISTS Ekstrautstyr;
+DROP TABLE IF EXISTS Koie;
 
 CREATE TABLE Koie (
     ID                      INT NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE Booking (
     Antall                  INT NOT NULL default '1',
     Kommentar               TEXT,
     PRIMARY KEY (ID),
-    FOREIGN KEY (Koie) REFERENCES Koier(ID)
+    FOREIGN KEY (Koie) REFERENCES Koie(ID)
 );
 
 CREATE TABLE Rapport (
@@ -50,7 +50,7 @@ CREATE TABLE Rapport (
     Booking                 INT NOT NULL,
     Kommentar               TEXT,
     PRIMARY KEY (ID),
-    FOREIGN KEY (Booking) REFERENCES Bookinger(ID)
+    FOREIGN KEY (Booking) REFERENCES Booking(ID)
 );
 
 CREATE TABLE Odelagt (
@@ -59,7 +59,7 @@ CREATE TABLE Odelagt (
     Ting                    VARCHAR(20) NOT NULL,
     Fikset                  BOOL NOT NULL default 0,
     PRIMARY KEY (ID),
-    FOREIGN KEY (Booking) REFERENCES Bookinger(ID)
+    FOREIGN KEY (Booking) REFERENCES Booking(ID)
 );
 
 CREATE TABLE Glemt (
@@ -69,6 +69,6 @@ CREATE TABLE Glemt (
     Levert                  BOOL NOT NULL default 0,
     Kommentar               TEXT,
     PRIMARY KEY (ID),
-    FOREIGN KEY (Booking) REFERENCES Bookinger(ID)
+    FOREIGN KEY (Booking) REFERENCES Booking(ID)
 );
 
