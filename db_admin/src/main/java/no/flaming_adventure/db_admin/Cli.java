@@ -13,7 +13,7 @@ public class Cli {
 
         CommandLine line = parser.parse( options, args );
 
-        if (true) {
+        if (line.hasOption("h")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp( "db_admin", options );
         }
