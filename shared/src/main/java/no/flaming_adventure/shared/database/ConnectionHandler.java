@@ -8,8 +8,8 @@ import java.sql.SQLException;
  * Singleton providing access to the database connection.
  */
 public class ConnectionHandler {
-    public static final String DB_DRIVER = "org.sqlite.JDBC";
-    public static final String DB_URI = "jdbc:sqlite::memory:";
+    public static final String DB_DRIVER = "com.mysql.jdbc.Driver";
+    public static final String DB_URI = "jdbc:mysql://mysql.stud.ntnu.no/eriknyh_flaming";
 
     private static ConnectionHandler instance = null;
     private Connection connection = null;
@@ -35,7 +35,7 @@ public class ConnectionHandler {
         if (connection == null) {
             try {
                 Class.forName(DB_DRIVER);
-                connection = DriverManager.getConnection(DB_URI);
+                connection = DriverManager.getConnection(DB_URI, "eriknyh_flaming", "PASSWORD");
             } catch (ClassNotFoundException e) {
                 /* TODO: replace with logging, cleanup, and exit. */
                 System.err.println(e);

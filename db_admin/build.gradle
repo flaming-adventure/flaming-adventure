@@ -4,7 +4,6 @@ dependencies {
     compile project(':shared')
     compile 'commons-cli:commons-cli:1.2'
     compile 'commons-io:commons-io:2.4'
-    runtime group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
 }
 
 mainClassName = 'no.flaming_adventure.db_admin.DBAdmin'
