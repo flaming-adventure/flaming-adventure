@@ -1,0 +1,8 @@
+apply plugin: 'application'
+
+dependencies {
+    runtime group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
+}
+
+mainClassName = 'no.flaming_adventure.db_admin.DBAdmin'
+
