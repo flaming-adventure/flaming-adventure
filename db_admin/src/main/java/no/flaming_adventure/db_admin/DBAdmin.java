@@ -2,11 +2,15 @@ package no.flaming_adventure.db_admin;
 
 import java.sql.*;
 
+import org.apache.commons.cli.CommandLine;
+
 public class DBAdmin {
     public static void main(String[] args) {
-        /* With a lack of something better to do, lets test if sqlit works. */
+        /* With a lack of something better to do, lets test if sqlite works. */
         Connection conn = null;
         try {
+            CommandLine line = Cli.parse(args);
+
             Class.forName("org.sqlite.JDBC");
             conn = DriverManager.getConnection("jdbc:sqlite::memory:");
             Statement stmt = conn.createStatement();
