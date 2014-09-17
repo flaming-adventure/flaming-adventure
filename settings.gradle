@@ -1,2 +1,2 @@
-include "db_admin"
+include "db_admin", 'shared'
 
