@@ -7,13 +7,14 @@ import java.sql.*;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.IOUtils;
 
+import no.flaming_adventure.shared.database.ConnectionHandler;
+
 public class DBAdmin {
     public static void main(String[] args) {
         try {
-            Class.forName("org.sqlite.JDBC");
             CommandLine line = Cli.parse(args);
             if (line.hasOption("reset")) {
-                DBAdmin.reset("./test.db");
+                DBAdmin.reset();
             }
         } catch (Exception e) {
             System.err.println(e);
@@ -23,16 +24,14 @@ public class DBAdmin {
 
     /**
      * Reset the database at the given path.
-     *
-     * @param db_path path to the database file to reset.
-     * @throws SQLException
+     * @throws SQLException, IOException
      */
-    public static void reset(String db_path) throws SQLException, IOException {
+    public static void reset() throws SQLException, IOException {
         InputStream stream = DBAdmin.class.getClassLoader().getResourceAsStream("db_reset.sql");
         /* FIXME: Hack to allow execution of all statements in the file. */
         String[] sql = IOUtils.toString(stream).split(";");
 
-        Connection connection = DriverManager.getConnection("jdbc:sqlite:" + db_path);
+        Connection connection = ConnectionHandler.getInstance().getConnection();
         Statement statement = connection.createStatement();
 
         for (String s: sql) {
