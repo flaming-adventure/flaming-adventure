@@ -29,7 +29,7 @@ public class BookingModel {
             ret.add(new Booking(
                     resultSet.getInt("ID"),
                     resultSet.getInt("Koie"),
-                    resultSet.getDate("Dato"),
+                    resultSet.getDate("Dato").toString(),
                     resultSet.getString("Navn"),
                     resultSet.getString("Epost"),
                     resultSet.getInt("Antall"),

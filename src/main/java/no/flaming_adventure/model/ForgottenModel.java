@@ -32,7 +32,7 @@ public class ForgottenModel {
                     resultSet.getString("Ting"),
                     resultSet.getBoolean("Levert"),
                     resultSet.getString("Kommentar"),
-                    dateFormat.format(booking.getDate()),
+                    booking.getDate(),
                     booking.getName(),
                     booking.getEmail()));
         }
