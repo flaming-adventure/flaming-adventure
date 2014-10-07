@@ -31,14 +31,7 @@ public class BookingModel {
 
         ResultSet resultSet = forHutStmt.executeQuery();
         while (resultSet.next()) {
-            ret.add(new Booking(
-                    resultSet.getInt("ID"),
-                    resultSet.getInt("Koie"),
-                    dateFormat.format(resultSet.getDate("Dato")),
-                    resultSet.getString("Navn"),
-                    resultSet.getString("Epost"),
-                    resultSet.getInt("Antall"),
-                    resultSet.getString("Kommentar")));
+            ret.add(Booking.fromResultSet(resultSet, dateFormat));
         }
 
         return ret;

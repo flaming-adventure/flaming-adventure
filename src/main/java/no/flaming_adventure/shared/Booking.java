@@ -5,6 +5,10 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+
 public class Booking {
     protected final IntegerProperty ID;
     protected final IntegerProperty hutID;
@@ -22,6 +26,18 @@ public class Booking {
         this.email = new SimpleStringProperty(email);
         this.count = new SimpleIntegerProperty(count);
         this.comment = new SimpleStringProperty(comment);
+    }
+
+    public static Booking fromResultSet(ResultSet resultSet, SimpleDateFormat dateFormat) throws SQLException {
+        return new Booking(
+                resultSet.getInt("ID"),
+                resultSet.getInt("Koie"),
+                dateFormat.format(resultSet.getDate("Dato")),
+                resultSet.getString("Navn"),
+                resultSet.getString("Epost"),
+                resultSet.getInt("Antall"),
+                resultSet.getString("Kommentar")
+        );
     }
 
     public int getID() {
