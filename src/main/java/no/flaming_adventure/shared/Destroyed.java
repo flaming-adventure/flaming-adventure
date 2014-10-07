@@ -3,12 +3,14 @@ package no.flaming_adventure.shared;
 import javafx.beans.property.*;
 
 public class Destroyed {
-    protected IntegerProperty ID;
-    protected StringProperty item;
-    protected BooleanProperty fixed;
+    protected final IntegerProperty ID;
+    protected final IntegerProperty bookingID;
+    protected final StringProperty item;
+    protected final BooleanProperty fixed;
 
-    public Destroyed(Integer ID, String item, Boolean fixed) {
+    public Destroyed(Integer ID, Integer bookingID, String item, Boolean fixed) {
         this.ID = new SimpleIntegerProperty(ID);
+        this.bookingID = new SimpleIntegerProperty(bookingID);
         this.item = new SimpleStringProperty(item);
         this.fixed = new SimpleBooleanProperty(fixed);
     }
@@ -19,6 +21,14 @@ public class Destroyed {
 
     public IntegerProperty IDProperty() {
         return ID;
+    }
+
+    public int getBookingID() {
+        return bookingID.get();
+    }
+
+    public IntegerProperty bookingIDProperty() {
+        return bookingID;
     }
 
     public String getItem() {

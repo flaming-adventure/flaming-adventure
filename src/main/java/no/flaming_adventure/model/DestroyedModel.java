@@ -26,6 +26,7 @@ public class DestroyedModel {
         while (resultSet.next()) {
             ret.add(new Destroyed(
                             resultSet.getInt("ID"),
+                            resultSet.getInt("Booking"),
                             resultSet.getString("Ting"),
                             resultSet.getBoolean("Fikset"))
             );
