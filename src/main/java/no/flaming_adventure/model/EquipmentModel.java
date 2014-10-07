@@ -7,13 +7,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class EquipmentModel {
+    protected final SimpleDateFormat dateFormat;
+
     protected PreparedStatement forHutStmt;
 
-    public EquipmentModel(Connection connection) throws SQLException {
+    public EquipmentModel(Connection connection, SimpleDateFormat dateFormat) throws SQLException {
+        this.dateFormat = dateFormat;
         forHutStmt = connection.prepareStatement("SELECT * FROM Ekstrautstyr WHERE Koie=?;");
     }
 
@@ -26,7 +30,7 @@ public class EquipmentModel {
         while (resultSet.next()) {
             ret.add(new Equipment(
                             resultSet.getString("Navn"),
-                            resultSet.getDate("Innkjopt").toString(),
+                            dateFormat.format(resultSet.getDate("Innkjopt")),
                             resultSet.getInt("Antall"))
             );
         }

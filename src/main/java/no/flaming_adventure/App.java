@@ -12,14 +12,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 
 /**
  * Main application class, contains the application entry point as well as being instantiated by JavaFX on launch.
  * Handles loading of models, views and controller as well as switching between views.
  */
 public class App extends Application {
+    protected final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     protected Stage stage;
-
     protected HutModel hutModel;
     protected BookingModel bookingModel;
     protected ForgottenModel forgottenModel;
@@ -96,10 +97,10 @@ public class App extends Application {
      */
     public void connectionHook(Connection connection) throws SQLException {
         hutModel = new HutModel(connection);
-        bookingModel = new BookingModel(connection);
+        bookingModel = new BookingModel(connection, dateFormat);
         forgottenModel = new ForgottenModel(connection);
         destroyedModel = new DestroyedModel(connection);
-        equipmentModel = new EquipmentModel(connection);
+        equipmentModel = new EquipmentModel(connection, dateFormat);
 
         bookingScene = loadScene("booking.fxml",
                 new BookingController(this, hutModel, bookingModel));

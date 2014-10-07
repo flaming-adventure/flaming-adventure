@@ -7,14 +7,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class BookingModel {
+    protected final SimpleDateFormat dateFormat;
+
     protected PreparedStatement forHutStmt;
     protected PreparedStatement forHutDateStmt;
 
-    public BookingModel(Connection connection) throws SQLException {
+    public BookingModel(Connection connection, SimpleDateFormat dateFormat) throws SQLException {
+        this.dateFormat = dateFormat;
+
         forHutStmt = connection.prepareStatement("SELECT * FROM Booking WHERE Koie=?;");
         forHutDateStmt = connection.prepareStatement("SELECT * FROM Booking WHERE Koie=? AND Dato=?;");
     }
@@ -29,7 +34,7 @@ public class BookingModel {
             ret.add(new Booking(
                     resultSet.getInt("ID"),
                     resultSet.getInt("Koie"),
-                    resultSet.getDate("Dato").toString(),
+                    dateFormat.format(resultSet.getDate("Dato")),
                     resultSet.getString("Navn"),
                     resultSet.getString("Epost"),
                     resultSet.getInt("Antall"),
