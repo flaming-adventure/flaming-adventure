@@ -1,10 +1,15 @@
 package no.flaming_adventure.shared;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 public class Hut {
-    protected final Integer ID;
-    protected final String name;
-    protected final Integer capacity;
-    protected final Integer firewood;
+    protected final IntegerProperty ID;
+    protected final StringProperty name;
+    protected final IntegerProperty capacity;
+    protected final IntegerProperty firewood;
 
     /**
      * Constructor.
@@ -15,30 +20,41 @@ public class Hut {
      * @param firewood The number of sacks of firewood in the hut.
      */
     public Hut(Integer ID, String name, Integer capacity, Integer firewood) {
-        this.ID = ID;
-        this.name = name;
-        this.capacity = capacity;
-        this.firewood = firewood;
+        this.ID = new SimpleIntegerProperty(ID);
+        this.name = new SimpleStringProperty(name);
+        this.capacity = new SimpleIntegerProperty(capacity);
+        this.firewood = new SimpleIntegerProperty(firewood);
     }
 
-    @Override
-    public String toString() {
-        return name;
+    public int getID() {
+        return ID.get();
     }
 
-    public Integer getID() {
+    public IntegerProperty IDProperty() {
         return ID;
     }
 
     public String getName() {
+        return name.get();
+    }
+
+    public StringProperty nameProperty() {
         return name;
     }
 
-    public Integer getCapacity() {
+    public int getCapacity() {
+        return capacity.get();
+    }
+
+    public IntegerProperty capacityProperty() {
         return capacity;
     }
 
-    public Integer getFirewood() {
+    public int getFirewood() {
+        return firewood.get();
+    }
+
+    public IntegerProperty firewoodProperty() {
         return firewood;
     }
 }

@@ -133,7 +133,8 @@ public class HutStatusController {
 
     protected void updateData(Hut newHut) {
         // Set firewood count.
-        firewoodText.setText("Ved: " + newHut.getFirewood().toString() + " sekker.");
+        Integer firewood = newHut.getFirewood();
+        firewoodText.setText("Ved: " + firewood.toString() + " sekker.");
 
         // Retrieve data from the database.
         try {
