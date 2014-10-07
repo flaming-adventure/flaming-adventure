@@ -6,11 +6,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class Equipment {
-    protected StringProperty item;
-    protected StringProperty date;
-    protected IntegerProperty count;
+    protected final IntegerProperty ID;
+    protected final IntegerProperty hutID;
+    protected final StringProperty item;
+    protected final StringProperty date;
+    protected final IntegerProperty count;
 
-    public Equipment(String item, String date, Integer count) {
+    public Equipment(Integer ID, Integer hutID, String item, String date, Integer count) {
+        this.ID = new SimpleIntegerProperty(ID);
+        this.hutID = new SimpleIntegerProperty(hutID);
         this.item = new SimpleStringProperty(item);
         this.date = new SimpleStringProperty(date);
         this.count = new SimpleIntegerProperty(count);
@@ -18,6 +22,22 @@ public class Equipment {
 
     public String getItem() {
         return item.get();
+    }
+
+    public int getID() {
+        return ID.get();
+    }
+
+    public IntegerProperty IDProperty() {
+        return ID;
+    }
+
+    public int getHutID() {
+        return hutID.get();
+    }
+
+    public IntegerProperty hutIDProperty() {
+        return hutID;
     }
 
     public StringProperty itemProperty() {

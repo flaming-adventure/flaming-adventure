@@ -29,6 +29,8 @@ public class EquipmentModel {
         ResultSet resultSet = forHutStmt.executeQuery();
         while (resultSet.next()) {
             ret.add(new Equipment(
+                            resultSet.getInt("ID"),
+                            resultSet.getInt("Koie"),
                             resultSet.getString("Navn"),
                             dateFormat.format(resultSet.getDate("Innkjopt")),
                             resultSet.getInt("Antall"))
