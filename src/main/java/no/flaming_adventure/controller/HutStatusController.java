@@ -141,11 +141,6 @@ public class HutStatusController {
             equipmentItems.setAll(equipmentModel.itemsForHut(newHut));
             forgottenItems.clear();
             destroyedItems.clear();
-            // TODO: Replace this with "SELECT * FROM ? WHERE Booking IN ?".
-            // Note that this will require us to do a reverse lookup on the foreign keys of the retrieved rows to
-            // retrieve the required data from the bookings we already have. We can achieve this by storing the
-            // bookings in a ID/booking dictionary, which will work nicely for this view as bookings are never
-            // required to be explicitly listed.
             for (Booking booking : bookings) {
                 forgottenItems.addAll(forgottenModel.itemsForBooking(booking));
                 destroyedItems.addAll(destroyedModel.itemsForBooking(booking));

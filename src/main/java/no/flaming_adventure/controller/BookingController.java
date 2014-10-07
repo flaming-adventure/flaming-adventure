@@ -111,7 +111,6 @@ public class BookingController {
      * added.
      */
     protected void initializeDatePicker() {
-        // TODO: Disable dates with no capacity.
         // DayCellFactory that disables all dates before today.
         final Callback<DatePicker, DateCell> dayCellFactory = new Callback<DatePicker, DateCell>() {
             @Override
@@ -217,13 +216,10 @@ public class BookingController {
         commitButton.setDisable(false);
     }
 
-    // TODO: Determine if we should return to the menu or reset the window.
-
     /**
      * Validate the current form data and commit it to the database as a booking if it is valid.
      */
     protected void commitAction() {
-        // TODO
     }
 
     /**

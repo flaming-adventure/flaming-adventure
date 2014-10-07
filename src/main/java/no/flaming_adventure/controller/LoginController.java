@@ -51,25 +51,16 @@ public class LoginController {
             Connection connection = DriverManager.getConnection(databaseURL.getText(), databaseUser.getText(), databasePass.getText());
             app.connectionHook(connection);
         } catch (ClassNotFoundException e) {
-            // TODO: Language.
-            // TODO: Extract constant.
             errorText.setText("Unable to find database driver");
             errorText.setVisible(true);
             return;
         } catch (SQLException e) {
             int error = e.getErrorCode();
             if (error == 0) {
-                // TODO: Language.
-                // TODO: Extract constant.
                 errorText.setText("Cannot connect to server");
             } else if (error == 1045) {
-                // TODO: Language.
-                // TODO: Extract constant.
                 errorText.setText("Access denied for user");
             } else {
-                // TODO: More informative (error code), formatted text.
-                // TODO: Language.
-                // TODO: Extract constant.
                 errorText.setText("Unknown SQL error: " + e);
             }
             errorText.setVisible(true);
