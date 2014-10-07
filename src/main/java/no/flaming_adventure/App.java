@@ -13,18 +13,6 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-// TODO: Booking database commit.
-// TODO: Forgotten class.
-// TODO: ForgottenMode class.
-// TODO: Destroyed class.
-// TODO: DestroyedModel class.
-// TODO: HutItem class.
-// TODO: HutItemModel class.
-// TODO: Status view (one hut).
-// TODO: Status view (multiple huts).
-// TODO: List of bookings (one hut).
-// TODO: List of bookings (multiple huts).
-
 /**
  * Main application class, contains the application entry point as well as being instantiated by JavaFX on launch.
  * Handles loading of models, views and controller as well as switching between views.
