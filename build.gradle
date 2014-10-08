@@ -4,9 +4,12 @@ apply plugin: 'application'
 mainClassName = 'no.flaming_adventure.App'
 version = '0.0.0'
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
+
 repositories { mavenCentral() }
 
-dependencies
-        {
-            runtime 'mysql:mysql-connector-java:5.1.32'
-        }
+dependencies {
+    runtime 'mysql:mysql-connector-java:5.1.32'
+}
