@@ -4,8 +4,21 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.util.StringConverter;
 
 public class Hut {
+    public static final StringConverter<Hut> stringConverter = new StringConverter<Hut>() {
+        @Override
+        public String toString(Hut object) {
+            return object.getName();
+        }
+
+        @Override
+        public Hut fromString(String string) {
+            return null;
+        }
+    };
+
     protected final IntegerProperty ID;
     protected final StringProperty name;
     protected final IntegerProperty capacity;

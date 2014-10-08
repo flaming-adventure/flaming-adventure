@@ -100,6 +100,8 @@ public class HutStatusController {
             app.showError("SQL Exception: " + e);
         }
 
+        hutChoiceBox.setConverter(Hut.stringConverter);
+
         hutChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Hut>() {
             @Override
             public void changed(ObservableValue<? extends Hut> observable, Hut oldHut, Hut newHut) {

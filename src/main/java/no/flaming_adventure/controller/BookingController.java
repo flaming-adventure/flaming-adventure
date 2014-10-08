@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import no.flaming_adventure.App;
 import no.flaming_adventure.model.BookingModel;
 import no.flaming_adventure.model.HutModel;
@@ -90,6 +91,8 @@ public class BookingController {
         } catch (SQLException e) {
             app.showError("SQL Exception: " + e);
         }
+
+        hutChoiceBox.setConverter(Hut.stringConverter);
 
         // XXX: The controller is not necessarily fully initialized at this
         //  point, so we should avoid having updateCapacity called.
