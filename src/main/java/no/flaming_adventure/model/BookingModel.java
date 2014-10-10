@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 public class BookingModel {
     protected final SimpleDateFormat dateFormat;
@@ -32,6 +33,20 @@ public class BookingModel {
         ResultSet resultSet = forHutStmt.executeQuery();
         while (resultSet.next()) {
             ret.add(Booking.fromResultSet(resultSet, dateFormat));
+        }
+
+        return ret;
+    }
+
+    public HashMap<Integer, Booking> bookingMapForHut(Hut hut) throws SQLException {
+        HashMap<Integer, Booking> ret = new HashMap<>();
+
+        forHutStmt.setInt(1, hut.getID());
+
+        ResultSet resultSet = forHutStmt.executeQuery();
+        while (resultSet.next()) {
+            Booking booking = Booking.fromResultSet(resultSet, dateFormat);
+            ret.put(booking.getID(), booking);
         }
 
         return ret;

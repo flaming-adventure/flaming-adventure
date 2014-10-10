@@ -8,7 +8,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 
 public class DestroyedModel {
     protected PreparedStatement forBookingStmt;
@@ -17,7 +16,7 @@ public class DestroyedModel {
         forBookingStmt = connection.prepareStatement("SELECT * FROM Odelagt WHERE Booking=?;");
     }
 
-    public Collection<Destroyed> itemsForBooking(Booking booking) throws SQLException {
+    public ArrayList<Destroyed> itemsForBooking(Booking booking) throws SQLException {
         ArrayList<Destroyed> ret = new ArrayList<Destroyed>();
 
         forBookingStmt.setInt(1, booking.getID());
@@ -30,6 +29,16 @@ public class DestroyedModel {
                             resultSet.getString("Ting"),
                             resultSet.getBoolean("Fikset"))
             );
+        }
+
+        return ret;
+    }
+
+    public ArrayList<Destroyed> itemsForBookings(Iterable<Booking> bookings) throws SQLException {
+        ArrayList<Destroyed> ret = new ArrayList<>();
+
+        for (Booking booking : bookings) {
+            ret.addAll(itemsForBooking(booking));
         }
 
         return ret;

@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 
 public class ForgottenModel {
     protected PreparedStatement forBookingStmt;
@@ -19,7 +18,7 @@ public class ForgottenModel {
         forBookingStmt = connection.prepareStatement("SELECT * FROM Glemt WHERE Booking=?;");
     }
 
-    public Collection<Forgotten> itemsForBooking(Booking booking) throws SQLException {
+    public ArrayList<Forgotten> itemsForBooking(Booking booking) throws SQLException {
         ArrayList<Forgotten> ret = new ArrayList<Forgotten>();
 
         forBookingStmt.setInt(1, booking.getID());
@@ -31,10 +30,17 @@ public class ForgottenModel {
                     resultSet.getInt("Booking"),
                     resultSet.getString("Ting"),
                     resultSet.getBoolean("Levert"),
-                    resultSet.getString("Kommentar"),
-                    booking.getDate(),
-                    booking.getName(),
-                    booking.getEmail()));
+                    resultSet.getString("Kommentar")));
+        }
+
+        return ret;
+    }
+
+    public ArrayList<Forgotten> itemsForBookings(Iterable<Booking> bookings) throws SQLException {
+        ArrayList<Forgotten> ret = new ArrayList<>();
+
+        for (Booking booking : bookings) {
+            ret.addAll(itemsForBooking(booking));
         }
 
         return ret;

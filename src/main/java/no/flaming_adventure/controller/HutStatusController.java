@@ -10,11 +10,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
+import javafx.util.Callback;
 import no.flaming_adventure.App;
 import no.flaming_adventure.model.*;
 import no.flaming_adventure.shared.*;
 
 import java.sql.SQLException;
+import java.util.Map;
 
 public class HutStatusController {
     protected App app;
@@ -25,7 +27,8 @@ public class HutStatusController {
     protected DestroyedModel destroyedModel;
     protected EquipmentModel equipmentModel;
 
-    protected ObservableList<Booking> bookings;
+    protected Map<Integer, Booking> bookingMap;
+
     protected ObservableList<Forgotten> forgottenItems;
     protected ObservableList<Destroyed> destroyedItems;
     protected ObservableList<Equipment> equipmentItems;
@@ -79,7 +82,6 @@ public class HutStatusController {
         this.destroyedModel = destroyedModel;
         this.equipmentModel = equipmentModel;
 
-        this.bookings = FXCollections.observableArrayList();
         this.forgottenItems = FXCollections.observableArrayList();
         this.destroyedItems = FXCollections.observableArrayList();
         this.equipmentItems = FXCollections.observableArrayList();
@@ -115,9 +117,28 @@ public class HutStatusController {
     protected void initializeForgottenTable() {
         forgottenItemColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("item"));
         forgottenCommentColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("comment"));
-        forgottenNameColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("name"));
-        forgottenEmailColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("email"));
-        forgottenDateColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("date"));
+
+        forgottenNameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Forgotten, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Forgotten, String> forgottenStringCellDataFeatures) {
+                Integer bookingID = forgottenStringCellDataFeatures.getValue().getBookingID();
+                return bookingMap.get(bookingID).nameProperty();
+            }
+        });
+        forgottenEmailColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Forgotten, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Forgotten, String> forgottenStringCellDataFeatures) {
+                Integer bookingID = forgottenStringCellDataFeatures.getValue().getBookingID();
+                return bookingMap.get(bookingID).emailProperty();
+            }
+        });
+        forgottenDateColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Forgotten, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Forgotten, String> forgottenStringCellDataFeatures) {
+                Integer bookingID = forgottenStringCellDataFeatures.getValue().getBookingID();
+                return bookingMap.get(bookingID).dateProperty();
+            }
+        });
         forgottenTableView.setItems(forgottenItems);
     }
 
@@ -140,14 +161,10 @@ public class HutStatusController {
 
         // Retrieve data from the database.
         try {
-            bookings.setAll(bookingModel.bookingsForHut(newHut));
+            bookingMap = bookingModel.bookingMapForHut(newHut);
             equipmentItems.setAll(equipmentModel.itemsForHut(newHut));
-            forgottenItems.clear();
-            destroyedItems.clear();
-            for (Booking booking : bookings) {
-                forgottenItems.addAll(forgottenModel.itemsForBooking(booking));
-                destroyedItems.addAll(destroyedModel.itemsForBooking(booking));
-            }
+            destroyedItems.setAll(destroyedModel.itemsForBookings(bookingMap.values()));
+            forgottenItems.setAll(forgottenModel.itemsForBookings(bookingMap.values()));
         } catch (SQLException e) {
             app.showError("SQLException: " + e);
         }
