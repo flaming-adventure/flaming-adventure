@@ -16,13 +16,14 @@ import java.sql.SQLException;
 
 public class LoginController {
     public static final String DB_DRIVER = "com.mysql.jdbc.Driver";
+
     protected final App app;
     @FXML
-    protected TextField databaseURL;
+    protected TextField URLField;
     @FXML
-    protected TextField databaseUser;
+    protected TextField usernameField;
     @FXML
-    protected PasswordField databasePass;
+    protected PasswordField passwordField;
     @FXML
     protected Text errorText;
     @FXML
@@ -34,6 +35,9 @@ public class LoginController {
 
     @FXML
     protected void initialize() {
+        URLField.setText(app.preferences.get(App.DATABASE_URL, ""));
+        usernameField.setText(app.preferences.get(App.USERNAME, ""));
+        passwordField.setText(app.preferences.get(App.PASSWORD, ""));
         logInButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -43,13 +47,20 @@ public class LoginController {
     }
 
     public void logIn() {
+        String URL = URLField.getText();
+        String username = usernameField.getText();
+        String password = passwordField.getText();
+
         try {
             // XXX: Done here to make for easier exception handling/error
             // signaling.
             Class.forName(DB_DRIVER);
 
-            Connection connection = DriverManager.getConnection(databaseURL.getText(), databaseUser.getText(), databasePass.getText());
+            Connection connection = DriverManager.getConnection(URL, username, password);
             app.connectionHook(connection);
+            app.preferences.put(App.DATABASE_URL, URL);
+            app.preferences.put(App.USERNAME, username);
+            app.preferences.put(App.PASSWORD, password);
         } catch (ClassNotFoundException e) {
             errorText.setText("Unable to find database driver");
             errorText.setVisible(true);

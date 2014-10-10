@@ -13,12 +13,19 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.prefs.Preferences;
 
 /**
  * Main application class, contains the application entry point as well as being instantiated by JavaFX on launch.
  * Handles loading of models, views and controller as well as switching between views.
  */
 public class App extends Application {
+    public static final String DATABASE_URL = "databaseURL";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+
+    public Preferences preferences = Preferences.userNodeForPackage(App.class);
+
     protected final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     protected Stage stage;
     protected HutModel hutModel;

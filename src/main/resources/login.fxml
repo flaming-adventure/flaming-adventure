@@ -14,17 +14,17 @@
                 <Font size="24.0"/>
             </font>
         </Text>
-        <TextField fx:id="databaseURL" promptText="Database URL">
+        <TextField fx:id="URLField" promptText="Database URL">
             <font>
                 <Font size="14.0"/>
             </font>
         </TextField>
-        <TextField fx:id="databaseUser" promptText="Username">
+        <TextField fx:id="usernameField" promptText="Username">
             <font>
                 <Font size="14.0"/>
             </font>
         </TextField>
-        <PasswordField fx:id="databasePass" promptText="Password">
+        <PasswordField fx:id="passwordField" promptText="Password">
             <font>
                 <Font size="14.0"/>
             </font>
