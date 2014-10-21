@@ -1,16 +1,9 @@
 package no.flaming_adventure.controller;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
-import no.flaming_adventure.App;
 import no.flaming_adventure.model.BookingModel;
 import no.flaming_adventure.model.HutModel;
 import no.flaming_adventure.shared.Hut;
@@ -26,56 +19,34 @@ import java.util.Date;
  * Controller for booking window.
  */
 public class BookingController {
-    protected final App app;
     protected final BookingModel bookingModel;
     protected final HutModel hutModel;
-    @FXML
-    protected ChoiceBox<Hut> hutChoiceBox;
-    @FXML
-    protected DatePicker datePicker;
-    @FXML
-    protected Text capacityText;
-    @FXML
-    protected TextField nameTextField;
-    @FXML
-    protected TextField emailTextField;
-    @FXML
-    protected ChoiceBox<Integer> countChoiceBox;
-    @FXML
-    protected Button commitButton;
-    @FXML
-    protected Button abortButton;
+    protected final ChoiceBox<Hut> hutChoiceBox;
+    protected final DatePicker datePicker;
+    protected final Text capacityText;
+    protected final TextField nameTextField;
+    protected final TextField emailTextField;
+    protected final ChoiceBox<Integer> countChoiceBox;
+    protected final Button commitButton;
 
-    public BookingController(App app, HutModel hutModel, BookingModel bookingModel) {
-        this.app = app;
-        this.hutModel = hutModel;
+    public BookingController(BookingModel bookingModel, HutModel hutModel, ChoiceBox<Hut> hutChoiceBox,
+                             DatePicker datePicker, Text capacityText, TextField nameTextField,
+                             TextField emailTextField, ChoiceBox<Integer> countChoiceBox, Button commitButton) {
         this.bookingModel = bookingModel;
-    }
+        this.hutModel = hutModel;
+        this.hutChoiceBox = hutChoiceBox;
+        this.datePicker = datePicker;
+        this.capacityText = capacityText;
+        this.nameTextField = nameTextField;
+        this.emailTextField = emailTextField;
+        this.countChoiceBox = countChoiceBox;
+        this.commitButton = commitButton;
 
-    /**
-     * Initialize the controller.
-     * <p/>
-     * This function is automatically called when the contents of the FXML document has been completely loaded.
-     */
-    @FXML
-    protected void initialize() {
         initializeDatePicker();
         initializeHutChoiceBox();
         updateCapacity(hutChoiceBox.getValue());
 
-        abortButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                abortAction();
-            }
-        });
-
-        commitButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                commitAction();
-            }
-        });
+        commitButton.setOnAction(event -> commitAction());
     }
 
     /**
@@ -89,7 +60,8 @@ public class BookingController {
         try {
             hutChoiceBox.getItems().setAll(hutModel.huts());
         } catch (SQLException e) {
-            app.showError("SQL Exception: " + e);
+            System.err.println(e);
+            System.exit(1);
         }
 
         hutChoiceBox.setConverter(Hut.stringConverter);
@@ -98,12 +70,8 @@ public class BookingController {
         //  point, so we should avoid having updateCapacity called.
         hutChoiceBox.getSelectionModel().selectFirst();
 
-        hutChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Hut>() {
-            @Override
-            public void changed(ObservableValue<? extends Hut> observable, Hut oldHut, Hut newHut) {
-                updateCapacity(newHut);
-            }
-        });
+        hutChoiceBox.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldHut, newHut) -> updateCapacity(newHut));
     }
 
     /**
@@ -132,16 +100,12 @@ public class BookingController {
         };
         datePicker.setDayCellFactory(dayCellFactory);
 
+
         // XXX: The controller is not necessarily fully initialized at this
         //  point, so we should avoid having updateCapacity called.
         datePicker.setValue(LocalDate.now());
 
-        datePicker.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                updateCapacity(hutChoiceBox.getValue());
-            }
-        });
+        datePicker.setOnAction(event -> updateCapacity(hutChoiceBox.getValue()));
     }
 
     /**
@@ -168,7 +132,8 @@ public class BookingController {
         try {
             occupancy = bookingModel.occupancy(hut.getID(), date);
         } catch (SQLException e) {
-            app.showError("SQL Exception: " + e);
+            System.err.println(e);
+            System.exit(1);
         }
 
         Integer actualCapacity = totalCapacity - occupancy;
@@ -223,24 +188,5 @@ public class BookingController {
      * Validate the current form data and commit it to the database as a booking if it is valid.
      */
     protected void commitAction() {
-    }
-
-    /**
-     * Return to the app window.
-     */
-    protected void abortAction() {
-        reset();
-        app.showMenu();
-    }
-
-    /**
-     * Reset the window to its original state.
-     */
-    protected void reset() {
-        hutChoiceBox.getSelectionModel().selectFirst();
-        datePicker.setValue(LocalDate.now());
-        nameTextField.setText("");
-        emailTextField.setText("");
-        countChoiceBox.setValue(1);
     }
 }
