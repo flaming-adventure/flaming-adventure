@@ -114,20 +114,16 @@
                   <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                </padding>
                <children>
-                      <TitledPane collapsible="false" text="Gjenglemt" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <content>
-                              <TableView fx:id="forgottenTableView" GridPane.columnIndex="1">
-                                  <columns>
-                              <TableColumn fx:id="forgottenHutColumn" prefWidth="150.0" text="Koie" />
-                                      <TableColumn fx:id="forgottenItemColumn" editable="false" prefWidth="150.0" text="Ting" />
-                                      <TableColumn fx:id="forgottenCommentColumn" editable="false" prefWidth="400.0" text="Kommentar" />
-                                      <TableColumn fx:id="forgottenNameColumn" editable="false" prefWidth="150.0" text="Navn" />
-                                      <TableColumn fx:id="forgottenEmailColumn" editable="false" prefWidth="200.0" text="E-Post" />
-                                      <TableColumn fx:id="forgottenDateColumn" editable="false" prefWidth="75.0" text="Dato" />
-                                  </columns>
-                              </TableView>
-                          </content>
-                      </TitledPane>
+                        <TableView fx:id="forgottenTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <columns>
+                        <TableColumn fx:id="forgottenHutColumn" prefWidth="150.0" text="Koie" />
+                                <TableColumn fx:id="forgottenItemColumn" editable="false" prefWidth="150.0" text="Ting" />
+                                <TableColumn fx:id="forgottenCommentColumn" editable="false" prefWidth="400.0" text="Kommentar" />
+                                <TableColumn fx:id="forgottenNameColumn" editable="false" prefWidth="150.0" text="Navn" />
+                                <TableColumn fx:id="forgottenEmailColumn" editable="false" prefWidth="200.0" text="E-Post" />
+                                <TableColumn fx:id="forgottenDateColumn" editable="false" prefWidth="75.0" text="Dato" />
+                            </columns>
+                        </TableView>
                </children></AnchorPane>
       </content>
     </Tab>
@@ -138,18 +134,14 @@
                   <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                </padding>
                <children>
-                      <TitledPane collapsible="false" text="Utstyr" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <content>
-                              <TableView fx:id="equipmentTableView" GridPane.rowIndex="1">
-                                  <columns>
-                              <TableColumn fx:id="equipmentHutColumn" prefWidth="150.0" text="Koie" />
-                                      <TableColumn fx:id="equipmentItemColumn" prefWidth="300.0" text="Ting" />
-                                      <TableColumn fx:id="equipmentCountColumn" prefWidth="75.0" text="Antall" />
-                                      <TableColumn fx:id="equipmentDateColumn" prefWidth="75.0" text="Innkjøpt" />
-                                  </columns>
-                              </TableView>
-                          </content>
-                      </TitledPane>
+                        <TableView fx:id="equipmentTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <columns>
+                        <TableColumn fx:id="equipmentHutColumn" prefWidth="150.0" text="Koie" />
+                                <TableColumn fx:id="equipmentItemColumn" prefWidth="300.0" text="Ting" />
+                                <TableColumn fx:id="equipmentCountColumn" prefWidth="75.0" text="Antall" />
+                                <TableColumn fx:id="equipmentDateColumn" prefWidth="75.0" text="Innkjøpt" />
+                            </columns>
+                        </TableView>
                </children>
             </AnchorPane>
         </content>
@@ -161,15 +153,11 @@
                   <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                </padding>
                <children>
-                      <TitledPane collapsible="false" text="Ødelagt" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <content>
-                              <TableView fx:id="destroyedTableView" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                  <columns>
-                                      <TableColumn fx:id="destroyedItemColumn" prefWidth="300.0" text="Ting" />
-                                  </columns>
-                              </TableView>
-                          </content>
-                      </TitledPane>
+                        <TableView fx:id="destroyedTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <columns>
+                                <TableColumn fx:id="destroyedItemColumn" prefWidth="300.0" text="Ting" />
+                            </columns>
+                        </TableView>
                </children>
             </AnchorPane>
         </content>
