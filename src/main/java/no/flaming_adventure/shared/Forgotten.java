@@ -22,11 +22,11 @@ public class Forgotten {
 
     public static Forgotten fromResultSet(ResultSet resultSet) throws SQLException {
         return new Forgotten(
-                resultSet.getInt("ID"),
-                resultSet.getInt("Booking"),
-                resultSet.getString("Ting"),
-                resultSet.getBoolean("Levert"),
-                resultSet.getString("Kommentar"));
+                resultSet.getInt("id"),
+                resultSet.getInt("reservation_id"),
+                resultSet.getString("item"),
+                resultSet.getBoolean("delivered"),
+                resultSet.getString("comment"));
     }
 
     public int getID() {

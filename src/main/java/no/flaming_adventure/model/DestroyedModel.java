@@ -13,7 +13,7 @@ public class DestroyedModel {
     protected PreparedStatement forBookingStmt;
 
     public DestroyedModel(Connection connection) throws SQLException {
-        forBookingStmt = connection.prepareStatement("SELECT * FROM Odelagt WHERE Booking=?;");
+        forBookingStmt = connection.prepareStatement("SELECT * FROM out_of_order WHERE reservation_id=?;");
     }
 
     public ArrayList<Destroyed> itemsForBooking(Booking booking) throws SQLException {
@@ -24,10 +24,10 @@ public class DestroyedModel {
         ResultSet resultSet = forBookingStmt.executeQuery();
         while (resultSet.next()) {
             ret.add(new Destroyed(
-                            resultSet.getInt("ID"),
-                            resultSet.getInt("Booking"),
-                            resultSet.getString("Ting"),
-                            resultSet.getBoolean("Fikset"))
+                            resultSet.getInt("id"),
+                            resultSet.getInt("reservation_id"),
+                            resultSet.getString("item"),
+                            resultSet.getBoolean("fixed"))
             );
         }
 

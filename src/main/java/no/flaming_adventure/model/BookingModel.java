@@ -20,10 +20,10 @@ public class BookingModel {
     public BookingModel(Connection connection, SimpleDateFormat dateFormat) throws SQLException {
         this.dateFormat = dateFormat;
 
-        stmt1 = connection.prepareStatement("SELECT * FROM Booking;");
-        forHutStmt = connection.prepareStatement("SELECT * FROM Booking WHERE Koie=?;");
-        forHutDateStmt = connection.prepareStatement("SELECT * FROM Booking WHERE Koie=? AND Dato=?;");
-        insertStmt = connection.prepareStatement("INSERT INTO Booking (Koie, Dato, Navn, Epost, Antall, Kommentar)" +
+        stmt1 = connection.prepareStatement("SELECT * FROM reservations;");
+        forHutStmt = connection.prepareStatement("SELECT * FROM reservations WHERE hut_id=?;");
+        forHutDateStmt = connection.prepareStatement("SELECT * FROM reservations WHERE hut_id=? AND date=?;");
+        insertStmt = connection.prepareStatement("INSERT INTO reservations (hut_id, date, name, email, count, comment)" +
                 "VALUES (?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
     }
 
@@ -91,7 +91,7 @@ public class BookingModel {
 
         Integer ret = 0;
         while (resultSet.next()) {
-            ret += resultSet.getInt("Antall");
+            ret += resultSet.getInt("count");
         }
 
         return ret;

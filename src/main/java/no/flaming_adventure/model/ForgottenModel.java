@@ -16,8 +16,8 @@ public class ForgottenModel {
     protected SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyy");
 
     public ForgottenModel(Connection connection) throws SQLException {
-        forBookingStmt = connection.prepareStatement("SELECT * FROM Glemt WHERE Booking=?;");
-        stmt1 = connection.prepareStatement("SELECT * FROM Glemt;");
+        forBookingStmt = connection.prepareStatement("SELECT * FROM forgotten_items WHERE reservations_id=?;");
+        stmt1 = connection.prepareStatement("SELECT * FROM forgotten_items;");
     }
 
     public ArrayList<Forgotten> forgotten() throws SQLException {

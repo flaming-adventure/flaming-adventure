@@ -14,7 +14,7 @@ public class HutModel {
     protected PreparedStatement stmt1;
 
     public HutModel(Connection connection) throws SQLException {
-        stmt1 = connection.prepareStatement("SELECT * FROM Koie;");
+        stmt1 = connection.prepareStatement("SELECT * FROM huts;");
     }
 
     public Collection<Hut> huts() throws SQLException {
@@ -22,7 +22,7 @@ public class HutModel {
 
         ResultSet resultSet = stmt1.executeQuery();
         while (resultSet.next()) {
-            ret.add(new Hut(resultSet.getInt("ID"), resultSet.getString("Navn"), resultSet.getInt("Kapasitet"), resultSet.getInt("Ved")));
+            ret.add(Hut.fromResultSet(resultSet));
         }
 
         return ret;

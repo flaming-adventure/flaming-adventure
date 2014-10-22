@@ -27,13 +27,13 @@ public class Booking {
 
     public static Booking fromResultSet(ResultSet resultSet) throws SQLException {
         return new Booking(
-                resultSet.getInt("ID"),
-                resultSet.getInt("Koie"),
-                resultSet.getDate("Dato"),
-                resultSet.getString("Navn"),
-                resultSet.getString("Epost"),
-                resultSet.getInt("Antall"),
-                resultSet.getString("Kommentar")
+                resultSet.getInt("id"),
+                resultSet.getInt("hut_id"),
+                resultSet.getDate("date"),
+                resultSet.getString("name"),
+                resultSet.getString("email"),
+                resultSet.getInt("count"),
+                resultSet.getString("comment")
         );
     }
 

@@ -1,59 +1,60 @@
-CREATE TABLE Booking
+CREATE TABLE huts
 (
-    ID INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    Koie INT NOT NULL,
-    Dato DATE NOT NULL,
-    Navn VARCHAR(50) NOT NULL,
-    Epost VARCHAR(50) NOT NULL,
-    Antall INT DEFAULT 1 NOT NULL,
-    Kommentar LONGTEXT,
-    FOREIGN KEY (Koie) REFERENCES Koie (ID)
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  name VARCHAR(20) NOT NULL,
+  capacity INT NOT NULL,
+  firewood INT NOT NULL
 );
-CREATE TABLE Ekstrautstyr
+CREATE TABLE reservations
 (
-    ID INT PRIMARY KEY NOT NULL,
-    Koie INT NOT NULL,
-    Navn VARCHAR(20) NOT NULL,
-    Innkjopt DATE,
-    Antall INT DEFAULT 1 NOT NULL,
-    FOREIGN KEY (Koie) REFERENCES Koie (ID)
+    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    hut_id INT NOT NULL,
+    date DATE NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    count INT DEFAULT 1 NOT NULL,
+    comment LONGTEXT,
+    FOREIGN KEY (hut_id) REFERENCES huts (id)
 );
-CREATE TABLE Glemt
+CREATE TABLE equipment
 (
-    ID INT PRIMARY KEY NOT NULL,
-    Booking INT NOT NULL,
-    Ting VARCHAR(20) NOT NULL,
-    Levert TINYINT DEFAULT 0 NOT NULL,
-    Kommentar LONGTEXT,
-    FOREIGN KEY (Booking) REFERENCES Booking (ID)
+    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    hut_id INT NOT NULL,
+    name VARCHAR(20) NOT NULL,
+    purchase_date DATE,
+    count INT DEFAULT 1 NOT NULL,
+    FOREIGN KEY (hut_id) REFERENCES huts (id)
 );
-CREATE TABLE Koie
+CREATE TABLE forgotten_items
 (
-    ID INT PRIMARY KEY NOT NULL,
-    Navn VARCHAR(20) NOT NULL,
-    Kapasitet INT NOT NULL,
-    Ved INT NOT NULL
+    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    reservation_id INT NOT NULL,
+    item VARCHAR(20) NOT NULL,
+    delivered TINYINT DEFAULT 0 NOT NULL,
+    comment LONGTEXT,
+    FOREIGN KEY (reservation_id) REFERENCES reservations (id)
 );
-CREATE TABLE Odelagt
+
+CREATE TABLE out_of_order
 (
-    ID INT PRIMARY KEY NOT NULL,
-    Booking INT NOT NULL,
-    Ting VARCHAR(20) NOT NULL,
-    Fikset TINYINT DEFAULT 0 NOT NULL,
-    FOREIGN KEY (Booking) REFERENCES Booking (ID)
+    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    reservation_id INT NOT NULL,
+    item VARCHAR(20) NOT NULL,
+    fixed TINYINT DEFAULT 0 NOT NULL,
+    FOREIGN KEY (reservation_id) REFERENCES reservations (id)
 );
-CREATE TABLE Rapport
+CREATE TABLE reports
 (
-    ID INT PRIMARY KEY NOT NULL,
-    Booking INT NOT NULL,
-    Kommentar LONGTEXT,
-    FOREIGN KEY (Booking) REFERENCES Booking (ID)
+    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    reservation_id INT NOT NULL,
+    comment LONGTEXT,
+    FOREIGN KEY (reservation_id) REFERENCES reservations (id)
 );
-CREATE TABLE Ved
+CREATE TABLE firewood_log
 (
-    ID INT PRIMARY KEY NOT NULL,
-    Koie INT NOT NULL,
-    Mengde INT NOT NULL,
-    Dato DATE NOT NULL,
-    FOREIGN KEY (Koie) REFERENCES Koie (ID)
+    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    hut_id INT NOT NULL,
+    amount INT NOT NULL,
+    date DATE NOT NULL,
+    FOREIGN KEY (hut_id) REFERENCES huts (id)
 );

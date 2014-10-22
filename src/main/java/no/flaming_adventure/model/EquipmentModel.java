@@ -19,8 +19,8 @@ public class EquipmentModel {
     public EquipmentModel(Connection connection, SimpleDateFormat dateFormat) throws SQLException {
         this.dateFormat = dateFormat;
 
-        stmt1 = connection.prepareStatement("SELECT * FROM Ekstrautstyr;");
-        forHutStmt = connection.prepareStatement("SELECT * FROM Ekstrautstyr WHERE Koie=?;");
+        stmt1 = connection.prepareStatement("SELECT * FROM equipment;");
+        forHutStmt = connection.prepareStatement("SELECT * FROM equipment WHERE hut_id=?;");
     }
 
     public ArrayList<Equipment> items() throws SQLException {

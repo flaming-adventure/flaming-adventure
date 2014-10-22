@@ -26,11 +26,11 @@ public class Equipment {
 
     public static Equipment fromResultSet(ResultSet resultSet, SimpleDateFormat dateFormat) throws SQLException {
         return new Equipment(
-                resultSet.getInt("ID"),
-                resultSet.getInt("Koie"),
-                resultSet.getString("Navn"),
-                dateFormat.format(resultSet.getDate("Innkjopt")),
-                resultSet.getInt("Antall"));
+                resultSet.getInt("id"),
+                resultSet.getInt("hut_id"),
+                resultSet.getString("name"),
+                dateFormat.format(resultSet.getDate("purchase_date")),
+                resultSet.getInt("count"));
     }
 
     public String getItem() {

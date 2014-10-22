@@ -43,8 +43,11 @@ public class Hut {
     }
 
     public static Hut fromResultSet(ResultSet resultSet) throws SQLException {
-        return new Hut(resultSet.getInt("ID"), resultSet.getString("Navn"), resultSet.getInt("Kapasitet"),
-                resultSet.getInt("Ved"));
+        return new Hut(
+                resultSet.getInt("id"),
+                resultSet.getString("name"),
+                resultSet.getInt("capacity"),
+                resultSet.getInt("firewood"));
     }
 
     public int getID() {
