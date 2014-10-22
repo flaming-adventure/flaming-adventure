@@ -1,12 +1,12 @@
 package no.flaming_adventure.model;
 
-import no.flaming_adventure.shared.Booking;
+import no.flaming_adventure.shared.Reservation;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
-public class BookingModel {
+public class ReservationModel {
     public final SimpleDateFormat dateFormat;
 
     protected PreparedStatement stmt1;
@@ -14,7 +14,7 @@ public class BookingModel {
     protected PreparedStatement forHutDateStmt;
     protected PreparedStatement insertStmt;
 
-    public BookingModel(Connection connection, SimpleDateFormat dateFormat) throws SQLException {
+    public ReservationModel(Connection connection, SimpleDateFormat dateFormat) throws SQLException {
         this.dateFormat = dateFormat;
 
         stmt1 = connection.prepareStatement("SELECT * FROM reservations;");
@@ -24,14 +24,14 @@ public class BookingModel {
                 "VALUES (?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
     }
 
-    public Integer insert(Booking booking)
+    public Integer insert(Reservation reservation)
             throws SQLException {
-        insertStmt.setInt(1, booking.getHutID());
-        insertStmt.setDate(2, new java.sql.Date(booking.getDate().getTime()));
-        insertStmt.setString(3, booking.getName());
-        insertStmt.setString(4, booking.getEmail());
-        insertStmt.setInt(5, booking.getCount());
-        insertStmt.setString(6, booking.getComment());
+        insertStmt.setInt(1, reservation.getHutID());
+        insertStmt.setDate(2, new java.sql.Date(reservation.getDate().getTime()));
+        insertStmt.setString(3, reservation.getName());
+        insertStmt.setString(4, reservation.getEmail());
+        insertStmt.setInt(5, reservation.getCount());
+        insertStmt.setString(6, reservation.getComment());
 
         insertStmt.executeUpdate();
 
@@ -40,13 +40,13 @@ public class BookingModel {
         return resultSet.getInt(1);
     }
 
-    public HashMap<Integer, Booking> bookingMap() throws SQLException {
-        HashMap<Integer, Booking> ret = new HashMap<>();
+    public HashMap<Integer, Reservation> reservationMap() throws SQLException {
+        HashMap<Integer, Reservation> ret = new HashMap<>();
 
         ResultSet resultSet = stmt1.executeQuery();
         while (resultSet.next()) {
-            Booking booking = Booking.fromResultSet(resultSet);
-            ret.put(booking.getID(), booking);
+            Reservation reservation = Reservation.fromResultSet(resultSet);
+            ret.put(reservation.getID(), reservation);
         }
 
         return ret;

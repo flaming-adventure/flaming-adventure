@@ -1,7 +1,6 @@
 package no.flaming_adventure.model;
 
 import no.flaming_adventure.shared.Equipment;
-import no.flaming_adventure.shared.Hut;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,19 +26,6 @@ public class EquipmentModel {
         ArrayList<Equipment> ret = new ArrayList<>();
 
         ResultSet resultSet = stmt1.executeQuery();
-        while (resultSet.next()) {
-            ret.add(Equipment.fromResultSet(resultSet, dateFormat));
-        }
-
-        return ret;
-    }
-
-    public ArrayList<Equipment> itemsForHut(Hut hut) throws SQLException {
-        ArrayList<Equipment> ret = new ArrayList<>();
-
-        forHutStmt.setInt(1, hut.getID());
-
-        ResultSet resultSet = forHutStmt.executeQuery();
         while (resultSet.next()) {
             ret.add(Equipment.fromResultSet(resultSet, dateFormat));
         }

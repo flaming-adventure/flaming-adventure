@@ -5,8 +5,8 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
-import no.flaming_adventure.shared.Booking;
 import no.flaming_adventure.shared.Hut;
+import no.flaming_adventure.shared.Reservation;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -15,9 +15,9 @@ import java.time.ZoneId;
 import java.util.Date;
 
 /**
- * Controller for booking window.
+ * Controller for reservation form.
  */
-public class BookingController {
+public class ReservationFormController {
     protected static final String capacityTextFormat = "%d av totalt %d plasser ledige.";
 
     protected final SimpleDateFormat dateFormat;
@@ -31,15 +31,15 @@ public class BookingController {
     protected final Button commitButton;
 
     protected final ObservableList<Hut> huts;
-    protected final ObservableList<Booking> bookings;
+    protected final ObservableList<Reservation> reservations;
 
-    public BookingController(SimpleDateFormat dateFormat, ObservableList<Hut> huts, ObservableList<Booking> bookings,
-                             ChoiceBox<Hut> hutChoiceBox, DatePicker datePicker, Text capacityText,
-                             TextField nameTextField, TextField emailTextField, ChoiceBox<Integer> countChoiceBox,
-                             TextArea commentTextArea, Button commitButton) {
+    public ReservationFormController(SimpleDateFormat dateFormat, ObservableList<Hut> huts, ObservableList<Reservation> reservations,
+                                     ChoiceBox<Hut> hutChoiceBox, DatePicker datePicker, Text capacityText,
+                                     TextField nameTextField, TextField emailTextField, ChoiceBox<Integer> countChoiceBox,
+                                     TextArea commentTextArea, Button commitButton) {
         this.dateFormat = dateFormat;
         this.huts = huts;
-        this.bookings = bookings;
+        this.reservations = reservations;
         this.hutChoiceBox = hutChoiceBox;
         this.datePicker = datePicker;
         this.capacityText = capacityText;
@@ -156,9 +156,9 @@ public class BookingController {
         Integer totalCapacity = hut.getCapacity();
         Integer occupancy = 0;
         Integer hutID = hut.getID();
-        for (Booking booking : bookings) {
-            if (booking.getHutID() == hutID && booking.getDate().equals(date)) {
-                occupancy += booking.getCount();
+        for (Reservation reservation : reservations) {
+            if (reservation.getHutID() == hutID && reservation.getDate().equals(date)) {
+                occupancy += reservation.getCount();
             }
         }
 
@@ -213,7 +213,7 @@ public class BookingController {
     }
 
     /**
-     * Validate the current form data and commit it to the database as a booking if it is valid.
+     * Validate the current form data and commit it to the database as a reservation if it is valid.
      */
     protected void commitAction() {
         Hut hut = hutChoiceBox.getValue();
@@ -225,7 +225,7 @@ public class BookingController {
 
         Instant instant = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
 
-        bookings.add(new Booking(-1, hut.getID(), Date.from(instant), name, email, count, comment));
+        reservations.add(new Reservation(-1, hut.getID(), Date.from(instant), name, email, count, comment));
 
         datePicker.setValue(localDate.plusDays(1));
     }

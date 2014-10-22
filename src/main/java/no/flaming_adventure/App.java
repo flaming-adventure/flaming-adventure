@@ -27,7 +27,7 @@ public class App extends Application {
 
     protected Stage stage;
     protected HutModel hutModel;
-    protected BookingModel bookingModel;
+    protected ReservationModel reservationModel;
     protected ForgottenModel forgottenModel;
     protected DestroyedModel destroyedModel;
     protected EquipmentModel equipmentModel;
@@ -96,12 +96,12 @@ public class App extends Application {
      */
     public void connectionHook(Connection connection) throws SQLException {
         hutModel = new HutModel(connection);
-        bookingModel = new BookingModel(connection, dateFormat);
+        reservationModel = new ReservationModel(connection, dateFormat);
         forgottenModel = new ForgottenModel(connection);
         destroyedModel = new DestroyedModel(connection);
         equipmentModel = new EquipmentModel(connection, dateFormat);
 
-        mainScene = loadScene("main.fxml", new MainController(dateFormat, hutModel, bookingModel, forgottenModel,
+        mainScene = loadScene("main.fxml", new MainController(dateFormat, hutModel, reservationModel, forgottenModel,
                 equipmentModel));
         stage.setScene(mainScene);
     }

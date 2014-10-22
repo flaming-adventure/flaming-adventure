@@ -6,9 +6,9 @@ import javafx.collections.ObservableMap;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import no.flaming_adventure.shared.Booking;
 import no.flaming_adventure.shared.Forgotten;
 import no.flaming_adventure.shared.Hut;
+import no.flaming_adventure.shared.Reservation;
 
 import java.text.SimpleDateFormat;
 
@@ -25,10 +25,10 @@ public class ForgottenController {
     protected final ObservableList<Forgotten> forgottenItems;
 
     protected final ObservableMap<Integer, Hut> hutMap;
-    protected final ObservableMap<Integer, Booking> bookingMap;
+    protected final ObservableMap<Integer, Reservation> reservationMap;
 
     public ForgottenController(SimpleDateFormat dateFormat, ObservableMap<Integer, Hut> hutMap,
-                               ObservableMap<Integer, Booking> bookingMap,
+                               ObservableMap<Integer, Reservation> reservationMap,
                                ObservableList<Forgotten> forgottenItems, TableView<Forgotten> forgottenTableView,
                                TableColumn<Forgotten, String> forgottenHutColumn,
                                TableColumn<Forgotten, String> forgottenItemColumn,
@@ -38,7 +38,7 @@ public class ForgottenController {
                                TableColumn<Forgotten, String> forgottenDateColumn) {
         this.dateFormat = dateFormat;
         this.hutMap = hutMap;
-        this.bookingMap = bookingMap;
+        this.reservationMap = reservationMap;
         this.forgottenItems = forgottenItems;
         this.forgottenTableView = forgottenTableView;
         this.forgottenHutColumn = forgottenHutColumn;
@@ -49,18 +49,18 @@ public class ForgottenController {
         this.forgottenDateColumn = forgottenDateColumn;
 
         forgottenHutColumn.setCellValueFactory(
-                param -> hutMap.get(bookingMap.get(param.getValue().getID()).getID()).nameProperty()
+                param -> hutMap.get(reservationMap.get(param.getValue().getID()).getID()).nameProperty()
         );
         forgottenItemColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
         forgottenCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
         forgottenNameColumn.setCellValueFactory(
-                param -> bookingMap.get(param.getValue().getID()).nameProperty()
+                param -> reservationMap.get(param.getValue().getID()).nameProperty()
         );
         forgottenEmailColumn.setCellValueFactory(
-                param -> bookingMap.get(param.getValue().getID()).emailProperty()
+                param -> reservationMap.get(param.getValue().getID()).emailProperty()
         );
         forgottenDateColumn.setCellValueFactory(
-                param -> new SimpleStringProperty(dateFormat.format(bookingMap.get(param.getValue().getID()).getDate()))
+                param -> new SimpleStringProperty(dateFormat.format(reservationMap.get(param.getValue().getID()).getDate()))
         );
 
         forgottenTableView.setItems(forgottenItems);

@@ -7,14 +7,14 @@ import java.sql.SQLException;
 
 public class Forgotten {
     protected IntegerProperty ID;
-    protected IntegerProperty bookingID;
+    protected IntegerProperty reservationID;
     protected StringProperty item;
     protected BooleanProperty delivered;
     protected StringProperty comment;
 
-    public Forgotten(Integer ID, Integer bookingID, String item, Boolean delivered, String comment) {
+    public Forgotten(Integer ID, Integer reservationID, String item, Boolean delivered, String comment) {
         this.ID = new SimpleIntegerProperty(ID);
-        this.bookingID = new SimpleIntegerProperty(bookingID);
+        this.reservationID = new SimpleIntegerProperty(reservationID);
         this.item = new SimpleStringProperty(item);
         this.delivered = new SimpleBooleanProperty(delivered);
         this.comment = new SimpleStringProperty(comment);
@@ -37,12 +37,12 @@ public class Forgotten {
         return ID;
     }
 
-    public int getBookingID() {
-        return bookingID.get();
+    public int getReservationID() {
+        return reservationID.get();
     }
 
-    public IntegerProperty bookingIDProperty() {
-        return bookingID;
+    public IntegerProperty reservationIDProperty() {
+        return reservationID;
     }
 
     public String getItem() {

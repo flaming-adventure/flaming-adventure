@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
-public class Booking {
+public class Reservation {
     protected final IntegerProperty ID;
     protected final IntegerProperty hutID;
     protected final Property<Date> date;
@@ -15,7 +15,7 @@ public class Booking {
     protected final IntegerProperty count;
     protected final StringProperty comment;
 
-    public Booking(Integer ID, Integer hutID, Date date, String name, String email, Integer count, String comment) {
+    public Reservation(Integer ID, Integer hutID, Date date, String name, String email, Integer count, String comment) {
         this.ID = new SimpleIntegerProperty(ID);
         this.hutID = new SimpleIntegerProperty(hutID);
         this.date = new SimpleObjectProperty<>(date);
@@ -25,8 +25,8 @@ public class Booking {
         this.comment = new SimpleStringProperty(comment);
     }
 
-    public static Booking fromResultSet(ResultSet resultSet) throws SQLException {
-        return new Booking(
+    public static Reservation fromResultSet(ResultSet resultSet) throws SQLException {
+        return new Reservation(
                 resultSet.getInt("id"),
                 resultSet.getInt("hut_id"),
                 resultSet.getDate("date"),

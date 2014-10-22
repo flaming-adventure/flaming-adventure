@@ -6,34 +6,34 @@ import javafx.collections.ObservableMap;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import no.flaming_adventure.shared.Booking;
 import no.flaming_adventure.shared.Hut;
+import no.flaming_adventure.shared.Reservation;
 
 import java.text.SimpleDateFormat;
 
-public class BookingTableController {
+public class ReservationTableController {
     protected final SimpleDateFormat dateFormat;
 
-    protected final TableView<Booking> tableView;
-    protected final TableColumn<Booking, String> hutColumn;
-    protected final TableColumn<Booking, String> dateColumn;
-    protected final TableColumn<Booking, String> nameColumn;
-    protected final TableColumn<Booking, String> emailColumn;
-    protected final TableColumn<Booking, Integer> countColumn;
-    protected final TableColumn<Booking, String> commentColumn;
+    protected final TableView<Reservation> tableView;
+    protected final TableColumn<Reservation, String> hutColumn;
+    protected final TableColumn<Reservation, String> dateColumn;
+    protected final TableColumn<Reservation, String> nameColumn;
+    protected final TableColumn<Reservation, String> emailColumn;
+    protected final TableColumn<Reservation, Integer> countColumn;
+    protected final TableColumn<Reservation, String> commentColumn;
 
-    protected final ObservableList<Booking> bookings;
+    protected final ObservableList<Reservation> reservations;
     protected final ObservableMap<Integer, Hut> hutMap;
 
-    public BookingTableController(SimpleDateFormat dateFormat, ObservableMap<Integer, Hut> hutMap,
-                                  ObservableList<Booking> bookings, TableView<Booking> tableView,
-                                  TableColumn<Booking, String> hutColumn, TableColumn<Booking, String> dateColumn,
-                                  TableColumn<Booking, String> nameColumn, TableColumn<Booking, String> emailColumn,
-                                  TableColumn<Booking, Integer> countColumn,
-                                  TableColumn<Booking, String> commentColumn) {
+    public ReservationTableController(SimpleDateFormat dateFormat, ObservableMap<Integer, Hut> hutMap,
+                                      ObservableList<Reservation> reservations, TableView<Reservation> tableView,
+                                      TableColumn<Reservation, String> hutColumn, TableColumn<Reservation, String> dateColumn,
+                                      TableColumn<Reservation, String> nameColumn, TableColumn<Reservation, String> emailColumn,
+                                      TableColumn<Reservation, Integer> countColumn,
+                                      TableColumn<Reservation, String> commentColumn) {
         this.dateFormat = dateFormat;
         this.hutMap = hutMap;
-        this.bookings = bookings;
+        this.reservations = reservations;
         this.tableView = tableView;
         this.hutColumn = hutColumn;
         this.dateColumn = dateColumn;
@@ -53,6 +53,6 @@ public class BookingTableController {
         countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
         commentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
 
-        tableView.setItems(bookings);
+        tableView.setItems(reservations);
     }
 }
