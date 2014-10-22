@@ -17,7 +17,7 @@ public class DestroyedModel {
     }
 
     public ArrayList<Destroyed> itemsForBooking(Booking booking) throws SQLException {
-        ArrayList<Destroyed> ret = new ArrayList<Destroyed>();
+        ArrayList<Destroyed> ret = new ArrayList<>();
 
         forBookingStmt.setInt(1, booking.getID());
 

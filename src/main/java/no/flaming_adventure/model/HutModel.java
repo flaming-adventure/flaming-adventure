@@ -18,7 +18,7 @@ public class HutModel {
     }
 
     public Collection<Hut> huts() throws SQLException {
-        ArrayList<Hut> ret = new ArrayList<Hut>();
+        ArrayList<Hut> ret = new ArrayList<>();
 
         ResultSet resultSet = stmt1.executeQuery();
         while (resultSet.next()) {

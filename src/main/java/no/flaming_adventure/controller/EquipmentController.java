@@ -52,9 +52,9 @@ public class EquipmentController {
         equipmentHutColumn.setCellValueFactory(
                 param -> hutMap.get(param.getValue().getHutID()).nameProperty()
         );
-        equipmentItemColumn.setCellValueFactory(new PropertyValueFactory<Equipment, String>("item"));
-        equipmentCountColumn.setCellValueFactory(new PropertyValueFactory<Equipment, Integer>("count"));
-        equipmentDateColumn.setCellValueFactory(new PropertyValueFactory<Equipment, String>("date"));
+        equipmentItemColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
+        equipmentCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+        equipmentDateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 
         equipmentTableView.setItems(equipmentObservableList);
     }

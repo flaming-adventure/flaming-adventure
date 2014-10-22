@@ -35,7 +35,7 @@ public class EquipmentModel {
     }
 
     public ArrayList<Equipment> itemsForHut(Hut hut) throws SQLException {
-        ArrayList<Equipment> ret = new ArrayList<Equipment>();
+        ArrayList<Equipment> ret = new ArrayList<>();
 
         forHutStmt.setInt(1, hut.getID());
 

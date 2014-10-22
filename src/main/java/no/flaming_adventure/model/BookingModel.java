@@ -1,12 +1,9 @@
 package no.flaming_adventure.model;
 
 import no.flaming_adventure.shared.Booking;
-import no.flaming_adventure.shared.Hut;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 public class BookingModel {
@@ -43,19 +40,6 @@ public class BookingModel {
         return resultSet.getInt(1);
     }
 
-    public ArrayList<Booking> bookingsForHut(Hut hut) throws SQLException {
-        ArrayList<Booking> ret = new ArrayList<Booking>();
-
-        forHutStmt.setInt(1, hut.getID());
-
-        ResultSet resultSet = forHutStmt.executeQuery();
-        while (resultSet.next()) {
-            ret.add(Booking.fromResultSet(resultSet));
-        }
-
-        return ret;
-    }
-
     public HashMap<Integer, Booking> bookingMap() throws SQLException {
         HashMap<Integer, Booking> ret = new HashMap<>();
 
@@ -63,35 +47,6 @@ public class BookingModel {
         while (resultSet.next()) {
             Booking booking = Booking.fromResultSet(resultSet);
             ret.put(booking.getID(), booking);
-        }
-
-        return ret;
-    }
-
-    public HashMap<Integer, Booking> bookingMapForHut(Hut hut) throws SQLException {
-        HashMap<Integer, Booking> ret = new HashMap<>();
-
-        forHutStmt.setInt(1, hut.getID());
-
-        ResultSet resultSet = forHutStmt.executeQuery();
-        while (resultSet.next()) {
-            Booking booking = Booking.fromResultSet(resultSet);
-            ret.put(booking.getID(), booking);
-        }
-
-        return ret;
-    }
-
-    public Integer occupancy(Integer hutID, Date date) throws SQLException {
-        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-        forHutDateStmt.setInt(1, hutID);
-        forHutDateStmt.setDate(2, sqlDate);
-
-        ResultSet resultSet = forHutDateStmt.executeQuery();
-
-        Integer ret = 0;
-        while (resultSet.next()) {
-            ret += resultSet.getInt("count");
         }
 
         return ret;

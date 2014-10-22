@@ -32,7 +32,7 @@ public class ForgottenModel {
     }
 
     public ArrayList<Forgotten> itemsForBooking(Booking booking) throws SQLException {
-        ArrayList<Forgotten> ret = new ArrayList<Forgotten>();
+        ArrayList<Forgotten> ret = new ArrayList<>();
 
         forBookingStmt.setInt(1, booking.getID());
 

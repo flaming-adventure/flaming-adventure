@@ -48,10 +48,10 @@ public class BookingTableController {
         dateColumn.setCellValueFactory(
                 param -> new SimpleStringProperty(dateFormat.format(param.getValue().getDate()))
         );
-        nameColumn.setCellValueFactory(new PropertyValueFactory<Booking, String>("name"));
-        emailColumn.setCellValueFactory(new PropertyValueFactory<Booking, String>("email"));
-        countColumn.setCellValueFactory(new PropertyValueFactory<Booking, Integer>("count"));
-        commentColumn.setCellValueFactory(new PropertyValueFactory<Booking, String>("comment"));
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+        commentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
 
         tableView.setItems(bookings);
     }

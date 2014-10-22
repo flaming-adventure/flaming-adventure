@@ -51,8 +51,8 @@ public class ForgottenController {
         forgottenHutColumn.setCellValueFactory(
                 param -> hutMap.get(bookingMap.get(param.getValue().getID()).getID()).nameProperty()
         );
-        forgottenItemColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("item"));
-        forgottenCommentColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("comment"));
+        forgottenItemColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
+        forgottenCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
         forgottenNameColumn.setCellValueFactory(
                 param -> bookingMap.get(param.getValue().getID()).nameProperty()
         );
