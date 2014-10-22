@@ -1,38 +1,35 @@
 package no.flaming_adventure.shared;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Booking {
     protected final IntegerProperty ID;
     protected final IntegerProperty hutID;
-    protected final StringProperty date;
+    protected final Property<Date> date;
     protected final StringProperty name;
     protected final StringProperty email;
     protected final IntegerProperty count;
     protected final StringProperty comment;
 
-    public Booking(Integer ID, Integer hutID, String date, String name, String email, Integer count, String comment) {
+    public Booking(Integer ID, Integer hutID, Date date, String name, String email, Integer count, String comment) {
         this.ID = new SimpleIntegerProperty(ID);
         this.hutID = new SimpleIntegerProperty(hutID);
-        this.date = new SimpleStringProperty(date);
+        this.date = new SimpleObjectProperty<>(date);
         this.name = new SimpleStringProperty(name);
         this.email = new SimpleStringProperty(email);
         this.count = new SimpleIntegerProperty(count);
         this.comment = new SimpleStringProperty(comment);
     }
 
-    public static Booking fromResultSet(ResultSet resultSet, SimpleDateFormat dateFormat) throws SQLException {
+    public static Booking fromResultSet(ResultSet resultSet) throws SQLException {
         return new Booking(
                 resultSet.getInt("ID"),
                 resultSet.getInt("Koie"),
-                dateFormat.format(resultSet.getDate("Dato")),
+                resultSet.getDate("Dato"),
                 resultSet.getString("Navn"),
                 resultSet.getString("Epost"),
                 resultSet.getInt("Antall"),
@@ -56,11 +53,9 @@ public class Booking {
         return hutID;
     }
 
-    public String getDate() {
-        return date.get();
-    }
+    public Date getDate() { return date.getValue(); }
 
-    public StringProperty dateProperty() {
+    public Property<Date> dateProperty() {
         return date;
     }
 

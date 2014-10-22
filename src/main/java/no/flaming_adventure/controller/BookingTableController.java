@@ -1,21 +1,18 @@
 package no.flaming_adventure.controller;
 
-import javafx.collections.FXCollections;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import no.flaming_adventure.model.BookingModel;
-import no.flaming_adventure.model.HutModel;
 import no.flaming_adventure.shared.Booking;
 import no.flaming_adventure.shared.Hut;
 
-import java.sql.SQLException;
-import java.util.Map;
+import java.text.SimpleDateFormat;
 
 public class BookingTableController {
-    protected final HutModel hutModel;
-    protected final BookingModel bookingModel;
+    protected final SimpleDateFormat dateFormat;
 
     protected final TableView<Booking> tableView;
     protected final TableColumn<Booking, String> hutColumn;
@@ -25,17 +22,18 @@ public class BookingTableController {
     protected final TableColumn<Booking, Integer> countColumn;
     protected final TableColumn<Booking, String> commentColumn;
 
-    protected ObservableList<Booking> bookingObservableList = FXCollections.observableArrayList();
+    protected final ObservableList<Booking> bookings;
+    protected final ObservableMap<Integer, Hut> hutMap;
 
-    protected Map<Integer, Hut> hutMap;
-
-    public BookingTableController(HutModel hutModel, BookingModel bookingModel, TableView<Booking> tableView,
+    public BookingTableController(SimpleDateFormat dateFormat, ObservableMap<Integer, Hut> hutMap,
+                                  ObservableList<Booking> bookings, TableView<Booking> tableView,
                                   TableColumn<Booking, String> hutColumn, TableColumn<Booking, String> dateColumn,
                                   TableColumn<Booking, String> nameColumn, TableColumn<Booking, String> emailColumn,
                                   TableColumn<Booking, Integer> countColumn,
                                   TableColumn<Booking, String> commentColumn) {
-        this.hutModel = hutModel;
-        this.bookingModel = bookingModel;
+        this.dateFormat = dateFormat;
+        this.hutMap = hutMap;
+        this.bookings = bookings;
         this.tableView = tableView;
         this.hutColumn = hutColumn;
         this.dateColumn = dateColumn;
@@ -44,23 +42,17 @@ public class BookingTableController {
         this.countColumn = countColumn;
         this.commentColumn = commentColumn;
 
-        try {
-            hutMap = hutModel.hutMap();
-            bookingObservableList.setAll(bookingModel.bookingMap().values());
-        } catch (SQLException e) {
-            System.err.println(e);
-            System.exit(1);
-        }
-
         hutColumn.setCellValueFactory(
                 param -> hutMap.get(param.getValue().getHutID()).nameProperty()
         );
-        dateColumn.setCellValueFactory(new PropertyValueFactory<Booking, String>("date"));
+        dateColumn.setCellValueFactory(
+                param -> new SimpleStringProperty(dateFormat.format(param.getValue().getDate()))
+        );
         nameColumn.setCellValueFactory(new PropertyValueFactory<Booking, String>("name"));
         emailColumn.setCellValueFactory(new PropertyValueFactory<Booking, String>("email"));
         countColumn.setCellValueFactory(new PropertyValueFactory<Booking, Integer>("count"));
         commentColumn.setCellValueFactory(new PropertyValueFactory<Booking, String>("comment"));
 
-        tableView.setItems(bookingObservableList);
+        tableView.setItems(bookings);
     }
 }

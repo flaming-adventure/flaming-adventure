@@ -1,5 +1,9 @@
 package no.flaming_adventure.controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
@@ -12,7 +16,13 @@ import no.flaming_adventure.shared.Equipment;
 import no.flaming_adventure.shared.Forgotten;
 import no.flaming_adventure.shared.Hut;
 
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+
 public class MainController {
+    protected final SimpleDateFormat dateFormat;
+
     protected final HutModel hutModel;
     protected final BookingModel bookingModel;
     protected final ForgottenModel forgottenModel;
@@ -53,24 +63,64 @@ public class MainController {
     @FXML protected TableColumn<Equipment, Integer> equipmentCountColumn;
     @FXML protected TableColumn<Equipment, String> equipmentDateColumn;
 
-    public MainController(HutModel hutModel, BookingModel bookingModel, ForgottenModel forgottenModel,
-                          EquipmentModel equipmentModel) {
+    protected ObservableMap<Integer, Hut> hutMap;
+    protected ObservableMap<Integer, Booking> bookingMap;
+    protected ObservableList<Hut> huts;
+    protected ObservableList<Booking> bookings;
+    protected ObservableList<Forgotten> forgottenItems;
+
+    public MainController(SimpleDateFormat dateFormat, HutModel hutModel, BookingModel bookingModel,
+                          ForgottenModel forgottenModel, EquipmentModel equipmentModel) {
+        this.dateFormat = dateFormat;
         this.hutModel = hutModel;
         this.bookingModel = bookingModel;
         this.forgottenModel = forgottenModel;
         this.equipmentModel = equipmentModel;
+
+        try {
+            hutMap = FXCollections.observableMap(hutModel.hutMap());
+            bookingMap = FXCollections.observableMap(bookingModel.bookingMap());
+            forgottenItems = FXCollections.observableArrayList(forgottenModel.forgotten());
+        } catch (SQLException e) {
+            System.err.println(e);
+            System.exit(1);
+        }
+
+        huts = FXCollections.observableArrayList(hutMap.values());
+        bookings = FXCollections.observableArrayList(bookingMap.values());
+
+        bookings.addListener((ListChangeListener<Booking>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    List<? extends Booking> added = c.getAddedSubList();
+                    added.stream().filter(booking -> booking.getID() == -1).forEach(booking -> {
+                        try {
+                            booking.IDProperty().setValue(bookingModel.insert(booking));
+                        } catch (SQLException e) {
+                            System.err.println(e);
+                            System.exit(1);
+                        }
+                        bookingMap.put(booking.getID(), booking);
+                    });
+                }
+            }
+        });
     }
 
     @FXML protected void initialize() {
-        bookingController = new BookingController(bookingModel, hutModel, bookingHutChoiceBox, bookingDatePicker,
+        bookingController = new BookingController(dateFormat, huts, bookings, bookingHutChoiceBox, bookingDatePicker,
                 bookingCapacityText, bookingNameTextField, bookingEmailTextField, bookingCountChoiceBox,
                 bookingCommentTextArea, bookingCommitButton);
-        forgottenController = new ForgottenController(hutModel, forgottenModel, bookingModel, forgottenTableView,
-                forgottenHutColumn, forgottenItemColumn, forgottenCommentColumn, forgottenNameColumn,
-                forgottenEmailColumn, forgottenDateColumn);
+
+        bookingTableController = new BookingTableController(dateFormat, hutMap, bookings, bookingTableView,
+                bookingHutColumn, bookingDateColumn, bookingNameColumn, bookingEmailColumn, bookingCountColumn,
+                bookingCommentColumn);
+
+        forgottenController = new ForgottenController(dateFormat, hutMap, bookingMap, forgottenItems,
+                forgottenTableView, forgottenHutColumn, forgottenItemColumn, forgottenCommentColumn,
+                forgottenNameColumn, forgottenEmailColumn, forgottenDateColumn);
+
         equipmentController = new EquipmentController(hutModel, equipmentModel, equipmentTableView, equipmentHutColumn,
                 equipmentItemColumn, equipmentCountColumn, equipmentDateColumn);
-        bookingTableController = new BookingTableController(hutModel, bookingModel, bookingTableView, bookingHutColumn,
-                bookingDateColumn, bookingNameColumn, bookingEmailColumn, bookingCountColumn, bookingCommentColumn);
     }
 }

@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class BookingModel {
-    protected final SimpleDateFormat dateFormat;
+    public final SimpleDateFormat dateFormat;
 
     protected PreparedStatement stmt1;
     protected PreparedStatement forHutStmt;
@@ -27,16 +27,20 @@ public class BookingModel {
                 "VALUES (?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
     }
 
-    public void insert(Integer hut, java.sql.Date date, String name, String email, Integer count, String comment)
+    public Integer insert(Booking booking)
             throws SQLException {
-        insertStmt.setInt(1, hut);
-        insertStmt.setDate(2, date);
-        insertStmt.setString(3, name);
-        insertStmt.setString(4, email);
-        insertStmt.setInt(5, count);
-        insertStmt.setString(6, comment);
+        insertStmt.setInt(1, booking.getHutID());
+        insertStmt.setDate(2, new java.sql.Date(booking.getDate().getTime()));
+        insertStmt.setString(3, booking.getName());
+        insertStmt.setString(4, booking.getEmail());
+        insertStmt.setInt(5, booking.getCount());
+        insertStmt.setString(6, booking.getComment());
 
         insertStmt.executeUpdate();
+
+        ResultSet resultSet = insertStmt.getGeneratedKeys();
+        resultSet.next();
+        return resultSet.getInt(1);
     }
 
     public ArrayList<Booking> bookingsForHut(Hut hut) throws SQLException {
@@ -46,7 +50,7 @@ public class BookingModel {
 
         ResultSet resultSet = forHutStmt.executeQuery();
         while (resultSet.next()) {
-            ret.add(Booking.fromResultSet(resultSet, dateFormat));
+            ret.add(Booking.fromResultSet(resultSet));
         }
 
         return ret;
@@ -57,7 +61,7 @@ public class BookingModel {
 
         ResultSet resultSet = stmt1.executeQuery();
         while (resultSet.next()) {
-            Booking booking = Booking.fromResultSet(resultSet, dateFormat);
+            Booking booking = Booking.fromResultSet(resultSet);
             ret.put(booking.getID(), booking);
         }
 
@@ -71,7 +75,7 @@ public class BookingModel {
 
         ResultSet resultSet = forHutStmt.executeQuery();
         while (resultSet.next()) {
-            Booking booking = Booking.fromResultSet(resultSet, dateFormat);
+            Booking booking = Booking.fromResultSet(resultSet);
             ret.put(booking.getID(), booking);
         }
 

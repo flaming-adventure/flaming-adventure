@@ -4,14 +4,12 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
-import no.flaming_adventure.model.BookingModel;
-import no.flaming_adventure.model.HutModel;
+import no.flaming_adventure.shared.Booking;
 import no.flaming_adventure.shared.Hut;
 
-import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
@@ -19,8 +17,7 @@ import java.util.Date;
  * Controller for booking window.
  */
 public class BookingController {
-    protected final BookingModel bookingModel;
-    protected final HutModel hutModel;
+    protected final SimpleDateFormat dateFormat;
     protected final ChoiceBox<Hut> hutChoiceBox;
     protected final DatePicker datePicker;
     protected final Text capacityText;
@@ -30,12 +27,16 @@ public class BookingController {
     protected final TextArea commentTextArea;
     protected final Button commitButton;
 
-    public BookingController(BookingModel bookingModel, HutModel hutModel, ChoiceBox<Hut> hutChoiceBox,
-                             DatePicker datePicker, Text capacityText, TextField nameTextField,
-                             TextField emailTextField, ChoiceBox<Integer> countChoiceBox, TextArea commentTextArea,
-                             Button commitButton) {
-        this.bookingModel = bookingModel;
-        this.hutModel = hutModel;
+    protected final ObservableList<Hut> huts;
+    protected final ObservableList<Booking> bookings;
+
+    public BookingController(SimpleDateFormat dateFormat, ObservableList<Hut> huts, ObservableList<Booking> bookings,
+                             ChoiceBox<Hut> hutChoiceBox, DatePicker datePicker, Text capacityText,
+                             TextField nameTextField, TextField emailTextField, ChoiceBox<Integer> countChoiceBox,
+                             TextArea commentTextArea, Button commitButton) {
+        this.dateFormat = dateFormat;
+        this.huts = huts;
+        this.bookings = bookings;
         this.hutChoiceBox = hutChoiceBox;
         this.datePicker = datePicker;
         this.capacityText = capacityText;
@@ -60,12 +61,7 @@ public class BookingController {
      * added.
      */
     protected void initializeHutChoiceBox() {
-        try {
-            hutChoiceBox.getItems().setAll(hutModel.huts());
-        } catch (SQLException e) {
-            System.err.println(e);
-            System.exit(1);
-        }
+        hutChoiceBox.setItems(huts);
 
         hutChoiceBox.setConverter(Hut.stringConverter);
 
@@ -125,18 +121,18 @@ public class BookingController {
     protected void updateCapacity(Hut hut) {
         // Convert the LocalDate from the datePicker to a java.util.Date
         // object.
-        LocalDateTime ldt = datePicker.getValue().atStartOfDay();
-        Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
+        LocalDate ldt = datePicker.getValue();
+        Instant instant = ldt.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
         Date date = Date.from(instant);
 
         Integer totalCapacity = hut.getCapacity();
 
         Integer occupancy = 0;
-        try {
-            occupancy = bookingModel.occupancy(hut.getID(), date);
-        } catch (SQLException e) {
-            System.err.println(e);
-            System.exit(1);
+        Integer hutID = hut.getID();
+        for (Booking booking : bookings) {
+            if (booking.getHutID() == hutID && booking.getDate().equals(date)) {
+                occupancy += booking.getCount();
+            }
         }
 
         Integer actualCapacity = totalCapacity - occupancy;
@@ -198,14 +194,9 @@ public class BookingController {
         Integer count = countChoiceBox.getValue();
         String comment = commentTextArea.getText();
 
-        java.sql.Date date = java.sql.Date.valueOf(localDate);
+        Instant instant = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
 
-        try {
-            bookingModel.insert(hut.getID(), date, name, email, count, comment);
-        } catch (SQLException e) {
-            System.err.println(e);
-            System.exit(1);
-        }
+        bookings.add(new Booking(-1, hut.getID(), Date.from(instant), name, email, count, comment));
 
         datePicker.setValue(localDate.plusDays(1));
     }
