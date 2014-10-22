@@ -188,5 +188,21 @@ public class BookingController {
      * Validate the current form data and commit it to the database as a booking if it is valid.
      */
     protected void commitAction() {
+        Hut hut = hutChoiceBox.getValue();
+        LocalDate localDate = datePicker.getValue();
+        String name = nameTextField.getText();
+        String email = emailTextField.getText();
+        Integer count = countChoiceBox.getValue();
+
+        java.sql.Date date = java.sql.Date.valueOf(localDate);
+
+        try {
+            bookingModel.insert(hut.getID(), date, name, email, count, "");
+        } catch (SQLException e) {
+            System.err.println(e);
+            System.exit(1);
+        }
+
+        datePicker.setValue(localDate.plusDays(1));
     }
 }

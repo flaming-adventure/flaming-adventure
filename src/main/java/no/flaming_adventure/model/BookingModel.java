@@ -3,10 +3,7 @@ package no.flaming_adventure.model;
 import no.flaming_adventure.shared.Booking;
 import no.flaming_adventure.shared.Hut;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +15,7 @@ public class BookingModel {
     protected PreparedStatement stmt1;
     protected PreparedStatement forHutStmt;
     protected PreparedStatement forHutDateStmt;
+    protected PreparedStatement insertStmt;
 
     public BookingModel(Connection connection, SimpleDateFormat dateFormat) throws SQLException {
         this.dateFormat = dateFormat;
@@ -25,6 +23,20 @@ public class BookingModel {
         stmt1 = connection.prepareStatement("SELECT * FROM Booking;");
         forHutStmt = connection.prepareStatement("SELECT * FROM Booking WHERE Koie=?;");
         forHutDateStmt = connection.prepareStatement("SELECT * FROM Booking WHERE Koie=? AND Dato=?;");
+        insertStmt = connection.prepareStatement("INSERT INTO Booking (Koie, Dato, Navn, Epost, Antall, Kommentar)" +
+                "VALUES (?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
+    }
+
+    public void insert(Integer hut, java.sql.Date date, String name, String email, Integer count, String comment)
+            throws SQLException {
+        insertStmt.setInt(1, hut);
+        insertStmt.setDate(2, date);
+        insertStmt.setString(3, name);
+        insertStmt.setString(4, email);
+        insertStmt.setInt(5, count);
+        insertStmt.setString(6, comment);
+
+        insertStmt.executeUpdate();
     }
 
     public ArrayList<Booking> bookingsForHut(Hut hut) throws SQLException {
