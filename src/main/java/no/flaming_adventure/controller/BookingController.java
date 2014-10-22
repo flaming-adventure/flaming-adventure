@@ -27,11 +27,13 @@ public class BookingController {
     protected final TextField nameTextField;
     protected final TextField emailTextField;
     protected final ChoiceBox<Integer> countChoiceBox;
+    protected final TextArea commentTextArea;
     protected final Button commitButton;
 
     public BookingController(BookingModel bookingModel, HutModel hutModel, ChoiceBox<Hut> hutChoiceBox,
                              DatePicker datePicker, Text capacityText, TextField nameTextField,
-                             TextField emailTextField, ChoiceBox<Integer> countChoiceBox, Button commitButton) {
+                             TextField emailTextField, ChoiceBox<Integer> countChoiceBox, TextArea commentTextArea,
+                             Button commitButton) {
         this.bookingModel = bookingModel;
         this.hutModel = hutModel;
         this.hutChoiceBox = hutChoiceBox;
@@ -40,6 +42,7 @@ public class BookingController {
         this.nameTextField = nameTextField;
         this.emailTextField = emailTextField;
         this.countChoiceBox = countChoiceBox;
+        this.commentTextArea = commentTextArea;
         this.commitButton = commitButton;
 
         initializeDatePicker();
@@ -193,11 +196,12 @@ public class BookingController {
         String name = nameTextField.getText();
         String email = emailTextField.getText();
         Integer count = countChoiceBox.getValue();
+        String comment = commentTextArea.getText();
 
         java.sql.Date date = java.sql.Date.valueOf(localDate);
 
         try {
-            bookingModel.insert(hut.getID(), date, name, email, count, "");
+            bookingModel.insert(hut.getID(), date, name, email, count, comment);
         } catch (SQLException e) {
             System.err.println(e);
             System.exit(1);

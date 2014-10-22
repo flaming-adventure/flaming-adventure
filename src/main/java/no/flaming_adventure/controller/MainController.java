@@ -24,6 +24,7 @@ public class MainController {
     @FXML protected TextField bookingNameTextField;
     @FXML protected TextField bookingEmailTextField;
     @FXML protected ChoiceBox<Integer> bookingCountChoiceBox;
+    @FXML protected TextArea bookingCommentTextArea;
     @FXML protected Button bookingCommitButton;
 
     protected ForgottenController forgottenController;
@@ -53,7 +54,7 @@ public class MainController {
     @FXML protected void initialize() {
         bookingController = new BookingController(bookingModel, hutModel, bookingHutChoiceBox, bookingDatePicker,
                 bookingCapacityText, bookingNameTextField, bookingEmailTextField, bookingCountChoiceBox,
-                bookingCommitButton);
+                bookingCommentTextArea, bookingCommitButton);
         forgottenController = new ForgottenController(hutModel, forgottenModel, bookingModel, forgottenTableView,
                 forgottenHutColumn, forgottenItemColumn, forgottenCommentColumn, forgottenNameColumn,
                 forgottenEmailColumn, forgottenDateColumn);
