@@ -7,6 +7,7 @@ import no.flaming_adventure.model.BookingModel;
 import no.flaming_adventure.model.EquipmentModel;
 import no.flaming_adventure.model.ForgottenModel;
 import no.flaming_adventure.model.HutModel;
+import no.flaming_adventure.shared.Booking;
 import no.flaming_adventure.shared.Equipment;
 import no.flaming_adventure.shared.Forgotten;
 import no.flaming_adventure.shared.Hut;
@@ -26,6 +27,15 @@ public class MainController {
     @FXML protected ChoiceBox<Integer> bookingCountChoiceBox;
     @FXML protected TextArea bookingCommentTextArea;
     @FXML protected Button bookingCommitButton;
+
+    protected BookingTableController bookingTableController;
+    @FXML protected TableView<Booking> bookingTableView;
+    @FXML protected TableColumn<Booking, String> bookingHutColumn;
+    @FXML protected TableColumn<Booking, String> bookingDateColumn;
+    @FXML protected TableColumn<Booking, String> bookingNameColumn;
+    @FXML protected TableColumn<Booking, String> bookingEmailColumn;
+    @FXML protected TableColumn<Booking, Integer> bookingCountColumn;
+    @FXML protected TableColumn<Booking, String> bookingCommentColumn;
 
     protected ForgottenController forgottenController;
     @FXML protected TableView<Forgotten> forgottenTableView;
@@ -60,5 +70,7 @@ public class MainController {
                 forgottenEmailColumn, forgottenDateColumn);
         equipmentController = new EquipmentController(hutModel, equipmentModel, equipmentTableView, equipmentHutColumn,
                 equipmentItemColumn, equipmentCountColumn, equipmentDateColumn);
+        bookingTableController = new BookingTableController(hutModel, bookingModel, bookingTableView, bookingHutColumn,
+                bookingDateColumn, bookingNameColumn, bookingEmailColumn, bookingCountColumn, bookingCommentColumn);
     }
 }
