@@ -18,6 +18,8 @@ import java.util.Date;
  * Controller for booking window.
  */
 public class BookingController {
+    protected static final String capacityTextFormat = "\"%d av totalt %d plasser ledige.\"";
+
     protected final SimpleDateFormat dateFormat;
     protected final ChoiceBox<Hut> hutChoiceBox;
     protected final DatePicker datePicker;
@@ -162,7 +164,7 @@ public class BookingController {
 
         Integer actualCapacity = totalCapacity - occupancy;
 
-        capacityText.setText(String.format("%d av totalt %d plasser ledige.", actualCapacity, totalCapacity));
+        capacityText.setText(String.format(capacityTextFormat, actualCapacity, totalCapacity));
 
         ObservableList<Integer> countChoiceBoxItems = countChoiceBox.getItems();
         Integer oldCapacityChoice = countChoiceBox.getValue();
