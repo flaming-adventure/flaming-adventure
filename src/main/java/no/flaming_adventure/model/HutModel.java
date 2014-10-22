@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class HutModel {
     protected PreparedStatement stmt1;
@@ -22,6 +23,18 @@ public class HutModel {
         ResultSet resultSet = stmt1.executeQuery();
         while (resultSet.next()) {
             ret.add(new Hut(resultSet.getInt("ID"), resultSet.getString("Navn"), resultSet.getInt("Kapasitet"), resultSet.getInt("Ved")));
+        }
+
+        return ret;
+    }
+
+    public HashMap<Integer, Hut> hutMap() throws SQLException {
+        HashMap<Integer, Hut> ret = new HashMap<>();
+
+        ResultSet resultSet = stmt1.executeQuery();
+        while (resultSet.next()) {
+            Hut hut = Hut.fromResultSet(resultSet);
+            ret.put(hut.getID(), hut);
         }
 
         return ret;

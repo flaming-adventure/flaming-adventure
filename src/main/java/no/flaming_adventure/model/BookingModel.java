@@ -15,12 +15,14 @@ import java.util.HashMap;
 public class BookingModel {
     protected final SimpleDateFormat dateFormat;
 
+    protected PreparedStatement stmt1;
     protected PreparedStatement forHutStmt;
     protected PreparedStatement forHutDateStmt;
 
     public BookingModel(Connection connection, SimpleDateFormat dateFormat) throws SQLException {
         this.dateFormat = dateFormat;
 
+        stmt1 = connection.prepareStatement("SELECT * FROM Booking;");
         forHutStmt = connection.prepareStatement("SELECT * FROM Booking WHERE Koie=?;");
         forHutDateStmt = connection.prepareStatement("SELECT * FROM Booking WHERE Koie=? AND Dato=?;");
     }
@@ -33,6 +35,18 @@ public class BookingModel {
         ResultSet resultSet = forHutStmt.executeQuery();
         while (resultSet.next()) {
             ret.add(Booking.fromResultSet(resultSet, dateFormat));
+        }
+
+        return ret;
+    }
+
+    public HashMap<Integer, Booking> bookingMap() throws SQLException {
+        HashMap<Integer, Booking> ret = new HashMap<>();
+
+        ResultSet resultSet = stmt1.executeQuery();
+        while (resultSet.next()) {
+            Booking booking = Booking.fromResultSet(resultSet, dateFormat);
+            ret.put(booking.getID(), booking);
         }
 
         return ret;

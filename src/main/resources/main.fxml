@@ -118,6 +118,7 @@
                           <content>
                               <TableView fx:id="forgottenTableView" GridPane.columnIndex="1">
                                   <columns>
+                              <TableColumn fx:id="forgottenHutColumn" prefWidth="150.0" text="Koie" />
                                       <TableColumn fx:id="forgottenItemColumn" editable="false" prefWidth="150.0" text="Ting" />
                                       <TableColumn fx:id="forgottenCommentColumn" editable="false" prefWidth="400.0" text="Kommentar" />
                                       <TableColumn fx:id="forgottenNameColumn" editable="false" prefWidth="150.0" text="Navn" />

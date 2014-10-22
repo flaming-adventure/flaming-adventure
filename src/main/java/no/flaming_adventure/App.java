@@ -101,7 +101,7 @@ public class App extends Application {
         destroyedModel = new DestroyedModel(connection);
         equipmentModel = new EquipmentModel(connection, dateFormat);
 
-        mainScene = loadScene("main.fxml", new MainController(hutModel, bookingModel));
+        mainScene = loadScene("main.fxml", new MainController(hutModel, bookingModel, forgottenModel));
         stage.setScene(mainScene);
     }
 }

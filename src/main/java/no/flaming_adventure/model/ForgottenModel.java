@@ -11,11 +11,24 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class ForgottenModel {
+    protected PreparedStatement stmt1;
     protected PreparedStatement forBookingStmt;
     protected SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyy");
 
     public ForgottenModel(Connection connection) throws SQLException {
         forBookingStmt = connection.prepareStatement("SELECT * FROM Glemt WHERE Booking=?;");
+        stmt1 = connection.prepareStatement("SELECT * FROM Glemt;");
+    }
+
+    public ArrayList<Forgotten> forgotten() throws SQLException {
+        ArrayList<Forgotten> ret = new ArrayList<>();
+
+        ResultSet resultSet = stmt1.executeQuery();
+        while (resultSet.next()) {
+            ret.add(Forgotten.fromResultSet(resultSet));
+        }
+
+        return ret;
     }
 
     public ArrayList<Forgotten> itemsForBooking(Booking booking) throws SQLException {
@@ -25,12 +38,7 @@ public class ForgottenModel {
 
         ResultSet resultSet = forBookingStmt.executeQuery();
         while (resultSet.next()) {
-            ret.add(new Forgotten(
-                    resultSet.getInt("ID"),
-                    resultSet.getInt("Booking"),
-                    resultSet.getString("Ting"),
-                    resultSet.getBoolean("Levert"),
-                    resultSet.getString("Kommentar")));
+            ret.add(Forgotten.fromResultSet(resultSet));
         }
 
         return ret;

@@ -2,6 +2,9 @@ package no.flaming_adventure.shared;
 
 import javafx.beans.property.*;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class Forgotten {
     protected IntegerProperty ID;
     protected IntegerProperty bookingID;
@@ -15,6 +18,15 @@ public class Forgotten {
         this.item = new SimpleStringProperty(item);
         this.delivered = new SimpleBooleanProperty(delivered);
         this.comment = new SimpleStringProperty(comment);
+    }
+
+    public static Forgotten fromResultSet(ResultSet resultSet) throws SQLException {
+        return new Forgotten(
+                resultSet.getInt("ID"),
+                resultSet.getInt("Booking"),
+                resultSet.getString("Ting"),
+                resultSet.getBoolean("Levert"),
+                resultSet.getString("Kommentar"));
     }
 
     public int getID() {
