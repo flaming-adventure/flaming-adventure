@@ -111,6 +111,27 @@
                </padding></AnchorPane>
       </content>
     </Tab>
+      <Tab text="Reservasjoner">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0">
+               <children>
+                  <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <columns>
+                      <TableColumn editable="false" prefWidth="150.0" text="Koie" />
+                      <TableColumn editable="false" prefWidth="75.0" text="Dato" />
+                        <TableColumn editable="false" prefWidth="200.0" text="Navn" />
+                        <TableColumn editable="false" prefWidth="200.0" text="E-Post" />
+                        <TableColumn prefWidth="75.0" text="Antall" />
+                        <TableColumn prefWidth="400.0" text="Kommentar" />
+                    </columns>
+                  </TableView>
+               </children>
+               <padding>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </padding>
+            </AnchorPane>
+        </content>
+      </Tab>
       <Tab text="Ved">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
@@ -125,7 +146,7 @@
                <children>
                         <TableView fx:id="forgottenTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <columns>
-                        <TableColumn fx:id="forgottenHutColumn" prefWidth="150.0" text="Koie" />
+                        <TableColumn fx:id="forgottenHutColumn" editable="false" prefWidth="150.0" text="Koie" />
                                 <TableColumn fx:id="forgottenItemColumn" editable="false" prefWidth="150.0" text="Ting" />
                                 <TableColumn fx:id="forgottenCommentColumn" editable="false" prefWidth="400.0" text="Kommentar" />
                                 <TableColumn fx:id="forgottenNameColumn" editable="false" prefWidth="150.0" text="Navn" />
