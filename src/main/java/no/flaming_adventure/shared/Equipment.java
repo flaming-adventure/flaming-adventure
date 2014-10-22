@@ -5,6 +5,10 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+
 public class Equipment {
     protected final IntegerProperty ID;
     protected final IntegerProperty hutID;
@@ -18,6 +22,15 @@ public class Equipment {
         this.item = new SimpleStringProperty(item);
         this.date = new SimpleStringProperty(date);
         this.count = new SimpleIntegerProperty(count);
+    }
+
+    public static Equipment fromResultSet(ResultSet resultSet, SimpleDateFormat dateFormat) throws SQLException {
+        return new Equipment(
+                resultSet.getInt("ID"),
+                resultSet.getInt("Koie"),
+                resultSet.getString("Navn"),
+                dateFormat.format(resultSet.getDate("Innkjopt")),
+                resultSet.getInt("Antall"));
     }
 
     public String getItem() {

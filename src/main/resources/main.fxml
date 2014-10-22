@@ -142,7 +142,8 @@
                           <content>
                               <TableView fx:id="equipmentTableView" GridPane.rowIndex="1">
                                   <columns>
-                                      <TableColumn fx:id="equipmentItemColumn" prefWidth="150.0" text="Ting" />
+                              <TableColumn fx:id="equipmentHutColumn" prefWidth="150.0" text="Koie" />
+                                      <TableColumn fx:id="equipmentItemColumn" prefWidth="300.0" text="Ting" />
                                       <TableColumn fx:id="equipmentCountColumn" prefWidth="75.0" text="Antall" />
                                       <TableColumn fx:id="equipmentDateColumn" prefWidth="75.0" text="Innkjøpt" />
                                   </columns>

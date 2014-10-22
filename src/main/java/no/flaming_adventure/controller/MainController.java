@@ -4,8 +4,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import no.flaming_adventure.model.BookingModel;
+import no.flaming_adventure.model.EquipmentModel;
 import no.flaming_adventure.model.ForgottenModel;
 import no.flaming_adventure.model.HutModel;
+import no.flaming_adventure.shared.Equipment;
 import no.flaming_adventure.shared.Forgotten;
 import no.flaming_adventure.shared.Hut;
 
@@ -13,6 +15,7 @@ public class MainController {
     protected final HutModel hutModel;
     protected final BookingModel bookingModel;
     protected final ForgottenModel forgottenModel;
+    protected final EquipmentModel equipmentModel;
 
     protected BookingController bookingController;
     @FXML protected ChoiceBox<Hut> bookingHutChoiceBox;
@@ -32,10 +35,19 @@ public class MainController {
     @FXML protected TableColumn<Forgotten, String> forgottenEmailColumn;
     @FXML protected TableColumn<Forgotten, String> forgottenDateColumn;
 
-    public MainController(HutModel hutModel, BookingModel bookingModel, ForgottenModel forgottenModel) {
+    protected EquipmentController equipmentController;
+    @FXML protected TableView<Equipment> equipmentTableView;
+    @FXML protected TableColumn<Equipment, String> equipmentHutColumn;
+    @FXML protected TableColumn<Equipment, String> equipmentItemColumn;
+    @FXML protected TableColumn<Equipment, Integer> equipmentCountColumn;
+    @FXML protected TableColumn<Equipment, String> equipmentDateColumn;
+
+    public MainController(HutModel hutModel, BookingModel bookingModel, ForgottenModel forgottenModel,
+                          EquipmentModel equipmentModel) {
         this.hutModel = hutModel;
         this.bookingModel = bookingModel;
         this.forgottenModel = forgottenModel;
+        this.equipmentModel = equipmentModel;
     }
 
     @FXML protected void initialize() {
@@ -45,5 +57,7 @@ public class MainController {
         forgottenController = new ForgottenController(hutModel, forgottenModel, bookingModel, forgottenTableView,
                 forgottenHutColumn, forgottenItemColumn, forgottenCommentColumn, forgottenNameColumn,
                 forgottenEmailColumn, forgottenDateColumn);
+        equipmentController = new EquipmentController(hutModel, equipmentModel, equipmentTableView, equipmentHutColumn,
+                equipmentItemColumn, equipmentCountColumn, equipmentDateColumn);
     }
 }
