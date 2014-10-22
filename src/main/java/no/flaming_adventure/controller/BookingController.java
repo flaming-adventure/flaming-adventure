@@ -1,5 +1,6 @@
 package no.flaming_adventure.controller;
 
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
@@ -54,21 +55,43 @@ public class BookingController {
     }
 
     /**
-     * Query the database for the names of all huts and add them to hutChoiceBox. The first hut in the list is chosen as
-     * the current hut.
+     * Initialize the hut choice box.
      * <p/>
-     * In addition an event handler that calls updateCapacity with the new hut every time a new selection is made is
-     * added.
+     * The @i huts list is set as the item property for the choice box. If at least one hut exists it is selected.
+     * If no huts exist all input is disabled until at least one hut is added. The first hut added is also selected.
+     * <p/>
+     * Additionally an event handler that updates the displayed capacity and the count selection box upon choosing a new
+     * hut is added to the choice box.
      */
     protected void initializeHutChoiceBox() {
         hutChoiceBox.setItems(huts);
-
         hutChoiceBox.setConverter(Hut.stringConverter);
 
-        // XXX: The controller is not necessarily fully initialized at this
-        //  point, so we should avoid having updateCapacity called.
-        hutChoiceBox.getSelectionModel().selectFirst();
+        // If we have no huts we should disable the form entirely until at least one hut is added.
+        if (huts.isEmpty()) {
+            hutChoiceBox.setDisable(true);
+            datePicker.setDisable(true);
+            disableInput();
 
+            // One-time listener selecting a hut and enabling input when at least one hut is added.
+            huts.addListener(new ListChangeListener<Hut>() {
+                @Override
+                public void onChanged(Change<? extends Hut> c) {
+                    if (c.wasAdded()) {
+                        hutChoiceBox.getSelectionModel().selectFirst();
+                        hutChoiceBox.setDisable(false);
+                        datePicker.setDisable(false);
+                        enableInput();
+                        huts.removeListener(this);
+                    }
+                }
+            });
+        // If we have at least one hut we'll simply select the first one.
+        } else {
+            hutChoiceBox.getSelectionModel().selectFirst();
+        }
+
+        // Whenever we select a hut we should update the displayed capacity and the count selection box.
         hutChoiceBox.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldHut, newHut) -> updateCapacity(newHut));
     }
@@ -100,8 +123,8 @@ public class BookingController {
         datePicker.setDayCellFactory(dayCellFactory);
 
 
-        // XXX: The controller is not necessarily fully initialized at this
-        //  point, so we should avoid having updateCapacity called.
+        // XXX: The date picker's value should be set before its event handler so that we don't inadvertently call
+        // updateCapacity with an empty hut list.
         datePicker.setValue(LocalDate.now());
 
         datePicker.setOnAction(event -> updateCapacity(hutChoiceBox.getValue()));
@@ -119,6 +142,9 @@ public class BookingController {
      * @param hut Hut from which capacity is to be retrieved.
      */
     protected void updateCapacity(Hut hut) {
+        // XXX: Currently redundant, but the mistake is easy to make.
+        if (hut == null) { return; }
+
         // Convert the LocalDate from the datePicker to a java.util.Date
         // object.
         LocalDate ldt = datePicker.getValue();
@@ -126,7 +152,6 @@ public class BookingController {
         Date date = Date.from(instant);
 
         Integer totalCapacity = hut.getCapacity();
-
         Integer occupancy = 0;
         Integer hutID = hut.getID();
         for (Booking booking : bookings) {
@@ -169,6 +194,7 @@ public class BookingController {
         nameTextField.setDisable(true);
         emailTextField.setDisable(true);
         countChoiceBox.setDisable(true);
+        commentTextArea.setDisable(true);
         commitButton.setDisable(true);
     }
 
@@ -180,6 +206,7 @@ public class BookingController {
         nameTextField.setDisable(false);
         emailTextField.setDisable(false);
         countChoiceBox.setDisable(false);
+        commentTextArea.setDisable(false);
         commitButton.setDisable(false);
     }
 
