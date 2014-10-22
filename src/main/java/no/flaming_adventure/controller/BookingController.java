@@ -18,7 +18,7 @@ import java.util.Date;
  * Controller for booking window.
  */
 public class BookingController {
-    protected static final String capacityTextFormat = "\"%d av totalt %d plasser ledige.\"";
+    protected static final String capacityTextFormat = "%d av totalt %d plasser ledige.";
 
     protected final SimpleDateFormat dateFormat;
     protected final ChoiceBox<Hut> hutChoiceBox;
