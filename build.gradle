@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'eclipse'
 
 mainClassName = 'no.flaming_adventure.App'
 version = '0.0.0'
