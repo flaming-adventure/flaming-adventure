@@ -1,11 +1,13 @@
 package no.flaming_adventure.controller;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import no.flaming_adventure.model.EquipmentModel;
 import no.flaming_adventure.model.ForgottenModel;
@@ -38,7 +40,6 @@ public class MainController {
     @FXML protected TextArea reservationCommentTextArea;
     @FXML protected Button reservationCommitButton;
 
-    protected ReservationTableController reservationTableController;
     @FXML protected TableView<Reservation> reservationTableView;
     @FXML protected TableColumn<Reservation, String> reservationHutColumn;
     @FXML protected TableColumn<Reservation, String> reservationDateColumn;
@@ -47,7 +48,6 @@ public class MainController {
     @FXML protected TableColumn<Reservation, Integer> reservationCountColumn;
     @FXML protected TableColumn<Reservation, String> reservationCommentColumn;
 
-    protected ForgottenController forgottenController;
     @FXML protected TableView<Forgotten> forgottenTableView;
     @FXML protected TableColumn<Forgotten, String> forgottenHutColumn;
     @FXML protected TableColumn<Forgotten, String> forgottenItemColumn;
@@ -56,7 +56,6 @@ public class MainController {
     @FXML protected TableColumn<Forgotten, String> forgottenEmailColumn;
     @FXML protected TableColumn<Forgotten, String> forgottenDateColumn;
 
-    protected EquipmentController equipmentController;
     @FXML protected TableView<Equipment> equipmentTableView;
     @FXML protected TableColumn<Equipment, String> equipmentHutColumn;
     @FXML protected TableColumn<Equipment, String> equipmentItemColumn;
@@ -67,6 +66,7 @@ public class MainController {
     protected ObservableMap<Integer, Reservation> reservationMap;
     protected ObservableList<Hut> huts;
     protected ObservableList<Reservation> reservations;
+    protected ObservableList<Equipment> equipmentList;
     protected ObservableList<Forgotten> forgottenItems;
 
     public MainController(SimpleDateFormat dateFormat, HutModel hutModel, ReservationModel reservationModel,
@@ -80,6 +80,7 @@ public class MainController {
         try {
             hutMap = FXCollections.observableMap(hutModel.hutMap());
             reservationMap = FXCollections.observableMap(reservationModel.reservationMap());
+            equipmentList = FXCollections.observableArrayList(equipmentModel.items());
             forgottenItems = FXCollections.observableArrayList(forgottenModel.forgotten());
         } catch (SQLException e) {
             System.err.println(e);
@@ -108,19 +109,64 @@ public class MainController {
     }
 
     @FXML protected void initialize() {
-        reservationFormController = new ReservationFormController(dateFormat, huts, reservations, reservationHutChoiceBox,
-                reservationDatePicker, reservationCapacityText, reservationNameTextField, reservationEmailTextField,
-                reservationCountChoiceBox, reservationCommentTextArea, reservationCommitButton);
+        // TODO: Only initialize items when tab is first opened.
+        initializeReservationForm();
+        initializeReservationTable();
+        initializeEquipmentTable();
+        initializeForgottenTable();
+    }
 
-        reservationTableController = new ReservationTableController(dateFormat, hutMap, reservations, reservationTableView,
-                reservationHutColumn, reservationDateColumn, reservationNameColumn, reservationEmailColumn, reservationCountColumn,
-                reservationCommentColumn);
+    protected void initializeReservationForm() {
+        reservationFormController = new ReservationFormController(dateFormat, huts, reservations,
+                reservationHutChoiceBox, reservationDatePicker, reservationCapacityText, reservationNameTextField,
+                reservationEmailTextField, reservationCountChoiceBox, reservationCommentTextArea,
+                reservationCommitButton);
+    }
 
-        forgottenController = new ForgottenController(dateFormat, hutMap, reservationMap, forgottenItems,
-                forgottenTableView, forgottenHutColumn, forgottenItemColumn, forgottenCommentColumn,
-                forgottenNameColumn, forgottenEmailColumn, forgottenDateColumn);
+    protected void initializeReservationTable() {
+        reservationHutColumn.setCellValueFactory(
+                param -> hutMap.get(param.getValue().getHutID()).nameProperty()
+        );
+        reservationDateColumn.setCellValueFactory(
+                param -> new SimpleStringProperty(dateFormat.format(param.getValue().getDate()))
+        );
+        reservationNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        reservationEmailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        reservationCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+        reservationCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
 
-        equipmentController = new EquipmentController(hutModel, equipmentModel, equipmentTableView, equipmentHutColumn,
-                equipmentItemColumn, equipmentCountColumn, equipmentDateColumn);
+        reservationTableView.setItems(reservations);
+    }
+
+    protected void initializeEquipmentTable() {
+
+        equipmentHutColumn.setCellValueFactory(
+                param -> hutMap.get(param.getValue().getHutID()).nameProperty()
+        );
+        equipmentItemColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
+        equipmentCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+        equipmentDateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+
+        equipmentTableView.setItems(equipmentList);
+    }
+
+    protected void initializeForgottenTable() {
+        forgottenHutColumn.setCellValueFactory(
+                param -> hutMap.get(reservationMap.get(param.getValue().getID()).getID()).nameProperty()
+        );
+        forgottenItemColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("item"));
+        forgottenCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
+        forgottenNameColumn.setCellValueFactory(
+                param -> reservationMap.get(param.getValue().getID()).nameProperty()
+        );
+        forgottenEmailColumn.setCellValueFactory(
+                param -> reservationMap.get(param.getValue().getID()).emailProperty()
+        );
+        forgottenDateColumn.setCellValueFactory(
+                param -> new SimpleStringProperty(
+                        dateFormat.format(reservationMap.get(param.getValue().getID()).getDate()))
+        );
+
+        forgottenTableView.setItems(forgottenItems);
     }
 }
