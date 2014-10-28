@@ -1,13 +1,16 @@
 package no.flaming_adventure.controller;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.shared.Hut;
 import no.flaming_adventure.shared.Reservation;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,6 +23,8 @@ import java.util.Date;
 public class ReservationFormController {
     protected static final String capacityTextFormat = "%d av totalt %d plasser ledige.";
 
+    private final DataModel dataModel;
+
     protected final SimpleDateFormat dateFormat;
     protected final ChoiceBox<Hut> hutChoiceBox;
     protected final DatePicker datePicker;
@@ -30,16 +35,26 @@ public class ReservationFormController {
     protected final TextArea commentTextArea;
     protected final Button commitButton;
 
-    protected final ObservableList<Hut> huts;
-    protected final ObservableList<Reservation> reservations;
+    // TODO: Make final.
+    private ObservableList<Hut> huts;
 
-    public ReservationFormController(SimpleDateFormat dateFormat, ObservableList<Hut> huts, ObservableList<Reservation> reservations,
+    // TODO: Replace with a list of reservations for the current hut from the data model.
+    private ObservableList<Reservation> reservations;
+
+    public ReservationFormController(SimpleDateFormat dateFormat, DataModel dataModel,
                                      ChoiceBox<Hut> hutChoiceBox, DatePicker datePicker, Text capacityText,
                                      TextField nameTextField, TextField emailTextField, ChoiceBox<Integer> countChoiceBox,
                                      TextArea commentTextArea, Button commitButton) {
         this.dateFormat = dateFormat;
-        this.huts = huts;
-        this.reservations = reservations;
+        this.dataModel = dataModel;
+        try {
+            this.huts = dataModel.getHutList();
+            this.reservations = dataModel.getReservationList();
+        } catch (SQLException e) {
+            this.huts = FXCollections.observableArrayList();
+            this.reservations = FXCollections.observableArrayList();
+            // TODO: Handle exception.
+        }
         this.hutChoiceBox = hutChoiceBox;
         this.datePicker = datePicker;
         this.capacityText = capacityText;
@@ -225,7 +240,11 @@ public class ReservationFormController {
 
         Instant instant = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
 
-        reservations.add(new Reservation(-1, hut.getID(), Date.from(instant), name, email, count, comment));
+        try {
+            dataModel.insertReservation(new Reservation(hut, -1, hut.getID(), Date.from(instant), name, email, count, comment));
+        } catch (SQLException e) {
+            // TODO: Handle exception.
+        }
 
         datePicker.setValue(localDate.plusDays(1));
     }

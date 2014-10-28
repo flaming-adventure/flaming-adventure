@@ -1,18 +1,11 @@
 package no.flaming_adventure.controller;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
-import no.flaming_adventure.model.EquipmentModel;
-import no.flaming_adventure.model.ForgottenModel;
-import no.flaming_adventure.model.HutModel;
-import no.flaming_adventure.model.ReservationModel;
+import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.shared.Equipment;
 import no.flaming_adventure.shared.Forgotten;
 import no.flaming_adventure.shared.Hut;
@@ -20,15 +13,11 @@ import no.flaming_adventure.shared.Reservation;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 public class MainController {
     protected final SimpleDateFormat dateFormat;
 
-    protected final HutModel hutModel;
-    protected final ReservationModel reservationModel;
-    protected final ForgottenModel forgottenModel;
-    protected final EquipmentModel equipmentModel;
+    private final DataModel dataModel;
 
     protected ReservationFormController reservationFormController;
     @FXML protected ChoiceBox<Hut> reservationHutChoiceBox;
@@ -62,50 +51,9 @@ public class MainController {
     @FXML protected TableColumn<Equipment, Integer> equipmentCountColumn;
     @FXML protected TableColumn<Equipment, String> equipmentDateColumn;
 
-    protected ObservableMap<Integer, Hut> hutMap;
-    protected ObservableMap<Integer, Reservation> reservationMap;
-    protected ObservableList<Hut> huts;
-    protected ObservableList<Reservation> reservations;
-    protected ObservableList<Equipment> equipmentList;
-    protected ObservableList<Forgotten> forgottenItems;
-
-    public MainController(SimpleDateFormat dateFormat, HutModel hutModel, ReservationModel reservationModel,
-                          ForgottenModel forgottenModel, EquipmentModel equipmentModel) {
+    public MainController(SimpleDateFormat dateFormat, DataModel dataModel) {
         this.dateFormat = dateFormat;
-        this.hutModel = hutModel;
-        this.reservationModel = reservationModel;
-        this.forgottenModel = forgottenModel;
-        this.equipmentModel = equipmentModel;
-
-        try {
-            hutMap = FXCollections.observableMap(hutModel.hutMap());
-            reservationMap = FXCollections.observableMap(reservationModel.reservationMap());
-            equipmentList = FXCollections.observableArrayList(equipmentModel.items());
-            forgottenItems = FXCollections.observableArrayList(forgottenModel.forgotten());
-        } catch (SQLException e) {
-            System.err.println(e);
-            System.exit(1);
-        }
-
-        huts = FXCollections.observableArrayList(hutMap.values());
-        reservations = FXCollections.observableArrayList(reservationMap.values());
-
-        reservations.addListener((ListChangeListener<Reservation>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    List<? extends Reservation> added = c.getAddedSubList();
-                    added.stream().filter(reservation -> reservation.getID() == -1).forEach(reservation -> {
-                        try {
-                            reservation.IDProperty().setValue(reservationModel.insert(reservation));
-                        } catch (SQLException e) {
-                            System.err.println(e);
-                            System.exit(1);
-                        }
-                        reservationMap.put(reservation.getID(), reservation);
-                    });
-                }
-            }
-        });
+        this.dataModel  = dataModel;
     }
 
     @FXML protected void initialize() {
@@ -117,7 +65,7 @@ public class MainController {
     }
 
     protected void initializeReservationForm() {
-        reservationFormController = new ReservationFormController(dateFormat, huts, reservations,
+        reservationFormController = new ReservationFormController(dateFormat, dataModel,
                 reservationHutChoiceBox, reservationDatePicker, reservationCapacityText, reservationNameTextField,
                 reservationEmailTextField, reservationCountChoiceBox, reservationCommentTextArea,
                 reservationCommitButton);
@@ -125,7 +73,7 @@ public class MainController {
 
     protected void initializeReservationTable() {
         reservationHutColumn.setCellValueFactory(
-                param -> hutMap.get(param.getValue().getHutID()).nameProperty()
+                param -> param.getValue().getHut().nameProperty()
         );
         reservationDateColumn.setCellValueFactory(
                 param -> new SimpleStringProperty(dateFormat.format(param.getValue().getDate()))
@@ -135,38 +83,51 @@ public class MainController {
         reservationCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
         reservationCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
 
-        reservationTableView.setItems(reservations);
+        try {
+            reservationTableView.setItems(dataModel.getReservationList());
+        } catch (SQLException e) {
+            // TODO: Handle exception.
+        }
     }
 
     protected void initializeEquipmentTable() {
 
         equipmentHutColumn.setCellValueFactory(
-                param -> hutMap.get(param.getValue().getHutID()).nameProperty()
+                param -> param.getValue().getHut().nameProperty()
         );
         equipmentItemColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
         equipmentCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
         equipmentDateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 
-        equipmentTableView.setItems(equipmentList);
+        try {
+            equipmentTableView.setItems(dataModel.getEquipmentList());
+        } catch (SQLException e) {
+            // TODO: Handle exception.
+        }
     }
 
     protected void initializeForgottenTable() {
         forgottenHutColumn.setCellValueFactory(
-                param -> hutMap.get(reservationMap.get(param.getValue().getID()).getID()).nameProperty()
+                param -> param.getValue().getReservation().getHut().nameProperty()
         );
         forgottenItemColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("item"));
         forgottenCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
         forgottenNameColumn.setCellValueFactory(
-                param -> reservationMap.get(param.getValue().getID()).nameProperty()
+                param -> param.getValue().getReservation().nameProperty()
         );
         forgottenEmailColumn.setCellValueFactory(
-                param -> reservationMap.get(param.getValue().getID()).emailProperty()
+                param -> param.getValue().getReservation().emailProperty()
         );
         forgottenDateColumn.setCellValueFactory(
+                // TODO: Date handling.
                 param -> new SimpleStringProperty(
-                        dateFormat.format(reservationMap.get(param.getValue().getID()).getDate()))
+                        dateFormat.format(param.getValue().getReservation().getDate()))
         );
 
-        forgottenTableView.setItems(forgottenItems);
+        try {
+            forgottenTableView.setItems(dataModel.getForgottenList());
+        } catch (SQLException e) {
+            // TODO: Handle exception.
+        }
     }
 }

@@ -2,20 +2,26 @@ package no.flaming_adventure.shared;
 
 import javafx.beans.property.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
 
 public class Reservation {
+    public Hut getHut() {
+        return hut;
+    }
+
+    private final Hut hut;
+
     protected final IntegerProperty ID;
     protected final IntegerProperty hutID;
-    protected final Property<Date> date;
-    protected final StringProperty name;
-    protected final StringProperty email;
+    protected final Property<Date>  date;
+    protected final StringProperty  name;
+    protected final StringProperty  email;
     protected final IntegerProperty count;
-    protected final StringProperty comment;
+    protected final StringProperty  comment;
 
-    public Reservation(Integer ID, Integer hutID, Date date, String name, String email, Integer count, String comment) {
+    public Reservation(Hut hut, Integer ID, Integer hutID, Date date, String name, String email, Integer count,
+                       String comment) {
+        this.hut = hut;
         this.ID = new SimpleIntegerProperty(ID);
         this.hutID = new SimpleIntegerProperty(hutID);
         this.date = new SimpleObjectProperty<>(date);
@@ -25,16 +31,8 @@ public class Reservation {
         this.comment = new SimpleStringProperty(comment);
     }
 
-    public static Reservation fromResultSet(ResultSet resultSet) throws SQLException {
-        return new Reservation(
-                resultSet.getInt("id"),
-                resultSet.getInt("hut_id"),
-                resultSet.getDate("date"),
-                resultSet.getString("name"),
-                resultSet.getString("email"),
-                resultSet.getInt("count"),
-                resultSet.getString("comment")
-        );
+    public void setID(int ID) {
+        this.ID.set(ID);
     }
 
     public int getID() {

@@ -10,26 +10,34 @@ import no.flaming_adventure.App;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 public class LoginController {
-    public static final String DB_DRIVER = "com.mysql.jdbc.Driver";
+    private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
 
-    protected final App app;
+    private final Logger logger;
+    private final App app;
 
-    @FXML protected TextField URLField;
-    @FXML protected TextField usernameField;
-    @FXML protected PasswordField passwordField;
-    @FXML protected Text errorText;
-    @FXML protected Button logInButton;
+    @FXML private TextField URLField;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private Text errorText;
+    @FXML private Button logInButton;
 
-    public LoginController(App app) {
+    public LoginController(Logger logger, App app) {
+        this.logger = logger;
         this.app = app;
     }
 
     @FXML protected void initialize() {
+        logger.info("Initializing login interface...");
+
         URLField.setText(app.preferences.get(App.DATABASE_URL, ""));
+        if (! URLField.getText().isEmpty()) { logger.info("Database URL was set from configuration."); }
         usernameField.setText(app.preferences.get(App.USERNAME, ""));
+        if (! usernameField.getText().isEmpty()) { logger.info("Username was set from configuration."); }
         passwordField.setText(app.preferences.get(App.PASSWORD, ""));
+        if (! passwordField.getText().isEmpty()) { logger.info("Password was set from configuration."); }
         logInButton.setOnAction(event -> logIn());
     }
 
@@ -38,22 +46,30 @@ public class LoginController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
+        logger.info("Attempting to log in to " + URL + " as " + username + "...");
+
         try {
             // XXX: Done here to make for easier exception handling/error
             // signaling.
+            logger.info("Loading database driver...");
             Class.forName(DB_DRIVER);
 
+            logger.info("Connecting to database...");
             Connection connection = DriverManager.getConnection(URL, username, password);
 
+            logger.info("Storing user credentials...");
             app.preferences.put(App.DATABASE_URL, URL);
             app.preferences.put(App.USERNAME, username);
             app.preferences.put(App.PASSWORD, password);
 
+            logger.info("Calling application connection hook...");
             app.connectionHook(connection);
         } catch (ClassNotFoundException e) {
+            logger.warning("Unable to find database driver.");
             errorText.setText("Unable to find database driver");
             errorText.setVisible(true);
         } catch (SQLException e) {
+            logger.warning("SQLException: " + e + ".");
             int error = e.getErrorCode();
             if (error == 0) {
                 errorText.setText("Cannot connect to server");

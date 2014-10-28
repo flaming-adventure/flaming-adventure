@@ -6,9 +6,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.util.StringConverter;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 public class Hut {
     public static final StringConverter<Hut> stringConverter = new StringConverter<Hut>() {
         @Override
@@ -40,14 +37,6 @@ public class Hut {
         this.name = new SimpleStringProperty(name);
         this.capacity = new SimpleIntegerProperty(capacity);
         this.firewood = new SimpleIntegerProperty(firewood);
-    }
-
-    public static Hut fromResultSet(ResultSet resultSet) throws SQLException {
-        return new Hut(
-                resultSet.getInt("id"),
-                resultSet.getString("name"),
-                resultSet.getInt("capacity"),
-                resultSet.getInt("firewood"));
     }
 
     public int getID() {

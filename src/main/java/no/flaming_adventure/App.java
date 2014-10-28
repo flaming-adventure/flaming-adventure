@@ -7,13 +7,15 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import no.flaming_adventure.controller.LoginController;
 import no.flaming_adventure.controller.MainController;
-import no.flaming_adventure.model.*;
+import no.flaming_adventure.model.DataModel;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 public class App extends Application {
@@ -25,12 +27,9 @@ public class App extends Application {
 
     protected final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
+    private static final Logger logger = Logger.getAnonymousLogger();
+
     protected Stage stage;
-    protected HutModel hutModel;
-    protected ReservationModel reservationModel;
-    protected ForgottenModel forgottenModel;
-    protected DestroyedModel destroyedModel;
-    protected EquipmentModel equipmentModel;
 
     protected Scene loginScene;
     protected Scene mainScene;
@@ -41,6 +40,8 @@ public class App extends Application {
      * @param args Commandline arguments.
      */
     public static void main(String[] args) {
+        logger.setLevel(Level.ALL);
+        logger.info("Launching...");
         launch(args);
     }
 
@@ -52,6 +53,8 @@ public class App extends Application {
      * @return A JavaFX scene object.
      */
     public static Scene loadScene(String filename, Object controller) {
+        logger.info("Loading scene: \"" + filename + "\"...");
+
         URL resource = App.class.getClassLoader().getResource(filename);
         FXMLLoader loader = new FXMLLoader(resource);
 
@@ -61,15 +64,15 @@ public class App extends Application {
         try {
             root = loader.load();
         } catch (IOException e) {
-            // XXX: We don't really know what GUI capabilities we have at
-            //  this point, so fall back to printing an error message and
-            //  exiting.
+            // XXX: We don't necessarily have any GUI capabilities at this point, so we fall back to logging the error
+            //  and exiting.
             //
-            // Note that this exception really shouldn't occur in production.
-            System.err.println("Failed to load resource: " + filename + e);
+            // Note that this exception is extremely unlikely to occur in production.
+            logger.severe("Failed to load scene: \"" + filename + "\"");
             System.exit(1);
         }
 
+        logger.fine("\"" + filename + "\" loaded successfully.");
         return new Scene(root);
     }
 
@@ -82,7 +85,7 @@ public class App extends Application {
     public void start(Stage stage) {
         this.stage = stage;
 
-        loginScene = loadScene("login.fxml", new LoginController(this));
+        loginScene = loadScene("login.fxml", new LoginController(logger, this));
 
         stage.setTitle("Flaming Adventure");
 
@@ -95,14 +98,7 @@ public class App extends Application {
      * @throws SQLException
      */
     public void connectionHook(Connection connection) throws SQLException {
-        hutModel = new HutModel(connection);
-        reservationModel = new ReservationModel(connection, dateFormat);
-        forgottenModel = new ForgottenModel(connection);
-        destroyedModel = new DestroyedModel(connection);
-        equipmentModel = new EquipmentModel(connection, dateFormat);
-
-        mainScene = loadScene("main.fxml", new MainController(dateFormat, hutModel, reservationModel, forgottenModel,
-                equipmentModel));
+        mainScene = loadScene("main.fxml", new MainController(dateFormat, new DataModel(logger, connection)));
         stage.setScene(mainScene);
     }
 }
