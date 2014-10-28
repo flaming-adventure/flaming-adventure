@@ -50,6 +50,9 @@ public class DataModel {
     private static final String sqlInsertDestroyed      =
             "INSERT INTO out_of_order (reservation_id, item, fixed) VALUES (?, ?, ?);";
 
+    private static final String sqlInsertForgotten      =
+            "INSERT INTO forgotten_items (reservation_id, item, delivered, comment) VALUES (?, ?, ?, ?);";
+
     private final SQLFunction<ResultSet, Hut> hutFromResultSet = resultSet -> new Hut(
             resultSet.getInt("id"),
             resultSet.getString("name"),
@@ -126,6 +129,7 @@ public class DataModel {
 
     private final PreparedStatement reservationInsertStmt;
     private final PreparedStatement destroyedInsertStmt;
+    private final PreparedStatement forgottenInsertStmt;
 
     private ObservableList<Hut>         hutList;
     private ObservableList<Reservation> reservationList;
@@ -147,6 +151,7 @@ public class DataModel {
 
         reservationInsertStmt   = connection.prepareStatement(sqlInsertReservation, Statement.RETURN_GENERATED_KEYS);
         destroyedInsertStmt     = connection.prepareStatement(sqlInsertDestroyed,   Statement.RETURN_GENERATED_KEYS);
+        forgottenInsertStmt     = connection.prepareStatement(sqlInsertForgotten,   Statement.RETURN_GENERATED_KEYS);
     }
 
     public ObservableList<Hut> getHutList() throws SQLException {
@@ -238,6 +243,32 @@ public class DataModel {
             forgottenList = forceList(forgottenStmt, forgottenFromResultSet);
         }
         return forgottenList;
+    }
+
+    public void insertForgotten(Forgotten forgotten) throws SQLException {
+        // TODO: Validate forgotten.
+
+        logger.info("Adding forgotten item to database...");
+
+        forgottenInsertStmt.setInt(1, forgotten.getReservationID());
+        forgottenInsertStmt.setString(2, forgotten.getItem());
+        forgottenInsertStmt.setBoolean(3, forgotten.getDelivered());
+        forgottenInsertStmt.setString(4, forgotten.getComment());
+
+        forgottenInsertStmt.executeUpdate();
+
+        ResultSet resultSet = forgottenInsertStmt.getGeneratedKeys();
+
+        if (resultSet.next()) {
+            logger.fine("Database returned primary key for forgotten item.");
+
+            forgotten.setID(resultSet.getInt(1));
+        } else {
+            logger.warning("Database failed to return primary key for forgotten item.");
+        }
+
+        logger.info("Adding new forgotten item to list.");
+        getForgottenList().add(forgotten);
     }
 
     public ObservableList<Destroyed> getDestroyedList() throws SQLException {

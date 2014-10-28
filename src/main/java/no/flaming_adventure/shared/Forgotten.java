@@ -24,6 +24,10 @@ public class Forgotten {
         this.comment = new SimpleStringProperty(comment);
     }
 
+    public void setID(int ID) {
+        this.ID.set(ID);
+    }
+
     public int getID() {
         return ID.get();
     }

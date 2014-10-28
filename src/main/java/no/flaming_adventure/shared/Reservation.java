@@ -1,10 +1,23 @@
 package no.flaming_adventure.shared;
 
 import javafx.beans.property.*;
+import javafx.util.StringConverter;
 
 import java.util.Date;
 
 public class Reservation {
+    public static final StringConverter<Reservation> nameEmailConverter = new StringConverter<Reservation>() {
+        @Override
+        public String toString(Reservation object) {
+            return object.getName() + " (" + object.getEmail() + ")";
+        }
+
+        @Override
+        public Reservation fromString(String string) {
+            return null;
+        }
+    };
+
     public Hut getHut() {
         return hut;
     }
