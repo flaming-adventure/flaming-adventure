@@ -3,12 +3,23 @@ package no.flaming_adventure.shared;
 import javafx.beans.property.*;
 
 public class Destroyed {
+    private final Reservation reservation;
+
+    public Reservation getReservation() {
+        return reservation;
+    }
+
+    public void setID(int ID) {
+        this.ID.set(ID);
+    }
+
     protected final IntegerProperty ID;
     protected final IntegerProperty reservationID;
     protected final StringProperty item;
     protected final BooleanProperty fixed;
 
-    public Destroyed(Integer ID, Integer reservationID, String item, Boolean fixed) {
+    public Destroyed(Reservation reservation, Integer ID, Integer reservationID, String item, Boolean fixed) {
+        this.reservation = reservation;
         this.ID = new SimpleIntegerProperty(ID);
         this.reservationID = new SimpleIntegerProperty(reservationID);
         this.item = new SimpleStringProperty(item);

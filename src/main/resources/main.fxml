@@ -196,8 +196,9 @@
                            <children>
                               <ComboBox fx:id="destroyedHutComboBox" prefWidth="150.0" />
                               <DatePicker fx:id="destroyedDatePicker" />
-                              <ChoiceBox fx:id="destroyedReservationChoiceBox" prefWidth="150.0" />
-                              <TextField fx:id="destroyedTextField" />
+                              <ChoiceBox fx:id="destroyedReservationChoiceBox" prefWidth="300.0" />
+                              <TextField fx:id="destroyedTextField" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="destroyedCommitButton" mnemonicParsing="false" text="Lagre" />
                            </children>
                         </HBox>
                      </children>

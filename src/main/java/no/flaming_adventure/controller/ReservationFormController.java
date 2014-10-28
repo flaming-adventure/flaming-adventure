@@ -231,6 +231,7 @@ public class ReservationFormController {
      * Validate the current form data and commit it to the database as a reservation if it is valid.
      */
     protected void commitAction() {
+        // TODO: Disable input during commit.
         Hut hut = hutChoiceBox.getValue();
         LocalDate localDate = datePicker.getValue();
         String name = nameTextField.getText();

@@ -47,6 +47,9 @@ public class DataModel {
     private static final String sqlInsertReservation    =
             "INSERT INTO reservations (hut_id, date, name, email, count, comment) VALUES (?, ?, ?, ?, ?, ?);";
 
+    private static final String sqlInsertDestroyed      =
+            "INSERT INTO out_of_order (reservation_id, item, fixed) VALUES (?, ?, ?);";
+
     private final SQLFunction<ResultSet, Hut> hutFromResultSet = resultSet -> new Hut(
             resultSet.getInt("id"),
             resultSet.getString("name"),
@@ -98,12 +101,18 @@ public class DataModel {
         );
     };
 
-    private final SQLFunction<ResultSet, Destroyed> destroyedFromResultSet = resultSet -> new Destroyed(
-            resultSet.getInt("id"),
-            resultSet.getInt("reservation_id"),
-            resultSet.getString("item"),
-            resultSet.getBoolean("fixed")
-    );
+    private final SQLFunction<ResultSet, Destroyed> destroyedFromResultSet = resultSet -> {
+        Integer reservationID = resultSet.getInt("reservation_id");
+        // TODO: Don't unwrap optional.
+        Reservation reservation = getReservationFromID(reservationID).get();
+        return new Destroyed(
+                reservation,
+                resultSet.getInt("id"),
+                reservationID,
+                resultSet.getString("item"),
+                resultSet.getBoolean("fixed")
+        );
+    };
 
     /* End of SQL query section. */
 
@@ -116,6 +125,7 @@ public class DataModel {
     private final PreparedStatement destroyedStmt;
 
     private final PreparedStatement reservationInsertStmt;
+    private final PreparedStatement destroyedInsertStmt;
 
     private ObservableList<Hut>         hutList;
     private ObservableList<Reservation> reservationList;
@@ -136,6 +146,7 @@ public class DataModel {
         destroyedStmt   = connection.prepareStatement(sqlDestroyedList);
 
         reservationInsertStmt   = connection.prepareStatement(sqlInsertReservation, Statement.RETURN_GENERATED_KEYS);
+        destroyedInsertStmt     = connection.prepareStatement(sqlInsertDestroyed,   Statement.RETURN_GENERATED_KEYS);
     }
 
     public ObservableList<Hut> getHutList() throws SQLException {
@@ -234,6 +245,36 @@ public class DataModel {
             destroyedList = forceList(destroyedStmt, destroyedFromResultSet);
         }
         return destroyedList;
+    }
+
+    public void insertDestroyed(Destroyed destroyed) throws SQLException {
+        // TODO: Validate destroyed.
+
+        logger.info("Adding destroyed item to database...");
+
+        destroyedInsertStmt.setInt(1, destroyed.getReservationID());
+        destroyedInsertStmt.setString(2, destroyed.getItem());
+        destroyedInsertStmt.setBoolean(3, destroyed.getFixed());
+
+        destroyedInsertStmt.executeUpdate();
+
+        ResultSet resultSet = destroyedInsertStmt.getGeneratedKeys();
+
+        if (resultSet.next()) {
+            logger.fine("Database returned primary key for destroyed item.");
+
+            destroyed.setID(resultSet.getInt(1));
+        } else {
+            logger.warning("Database failed to return primary key for destroyed item.");
+        }
+
+        // XXX: Ensure that the destroyed list is forced.
+        getDestroyedList();
+
+        // TODO: Move logging of list additions to conditional listeners on the lists themselves.
+        logger.info("Adding new destroyed item to list.");
+
+        destroyedList.add(destroyed);
     }
 
     private static <E> ObservableList<E> forceList(PreparedStatement stmt, SQLFunction<ResultSet, E> fn)
