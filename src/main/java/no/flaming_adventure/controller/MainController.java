@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 
 public class MainController {
-    protected final SimpleDateFormat dateFormat;
+    private final SimpleDateFormat dateFormat;
 
     private final DataModel dataModel;
 
@@ -50,16 +50,16 @@ public class MainController {
     @FXML protected TableColumn<Equipment, Integer> equipmentCountColumn;
     @FXML protected TableColumn<Equipment, String> equipmentDateColumn;
 
-    @FXML private TableView<Destroyed> destroyedTableView;
-    @FXML private TableColumn<Destroyed, String> destroyedHutColumn;
-    @FXML private TableColumn<Destroyed, String> destroyedDateColumn;
-    @FXML private TableColumn<Destroyed, String> destroyedItemColumn;
+    @FXML protected TableView<Destroyed> destroyedTableView;
+    @FXML protected TableColumn<Destroyed, String> destroyedHutColumn;
+    @FXML protected TableColumn<Destroyed, String> destroyedDateColumn;
+    @FXML protected TableColumn<Destroyed, String> destroyedItemColumn;
 
-    @FXML private ComboBox<Hut> destroyedHutComboBox;
-    @FXML private DatePicker destroyedDatePicker;
-    @FXML private ChoiceBox<Reservation> destroyedReservationChoiceBox;
-    @FXML private TextField destroyedTextField;
-    @FXML private Button destroyedCommitButton;
+    @FXML protected ComboBox<Hut> destroyedHutComboBox;
+    @FXML protected DatePicker destroyedDatePicker;
+    @FXML protected ChoiceBox<Reservation> destroyedReservationChoiceBox;
+    @FXML protected TextField destroyedTextField;
+    @FXML protected Button destroyedCommitButton;
 
     public MainController(SimpleDateFormat dateFormat, DataModel dataModel) {
         this.dateFormat = dateFormat;
