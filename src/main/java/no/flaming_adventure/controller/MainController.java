@@ -15,6 +15,9 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 
+/**
+ * Controller for the main view.
+ */
 public class MainController {
     private final SimpleDateFormat dateFormat;
 

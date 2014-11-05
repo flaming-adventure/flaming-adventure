@@ -12,12 +12,25 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
+/**
+ * Controller for the login view.
+ *
+ * The login view is responsible for creating a connection to the database and calling the application's
+ * connection hook with that connection.
+ */
 public class LoginController {
+    /**
+     * Database driver to use.
+     *
+     * Note that we could possibly allow more dynamic loading of database drivers, but it's not within the current
+     * scope of the application.
+     */
     private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
 
     private final Logger logger;
     private final App app;
 
+    /* Fields assigned by JavaFX at some point in time before initialize() is called. */
     @FXML private TextField URLField;
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
@@ -29,7 +42,14 @@ public class LoginController {
         this.app = app;
     }
 
-    @FXML protected void initialize() {
+    /**
+     * Initialization function called when JavaFX is ready to initialize the controller.
+     *
+     * Sets the URL, username and password fields to data from the configuration if such data is available.
+     *
+     * TODO: make credential persistence optional.
+     */
+    @FXML private void initialize() {
         logger.info("Initializing login interface...");
 
         URLField.setText(app.preferences.get(App.DATABASE_URL, ""));
@@ -38,10 +58,16 @@ public class LoginController {
         if (! usernameField.getText().isEmpty()) { logger.info("Username was set from configuration."); }
         passwordField.setText(app.preferences.get(App.PASSWORD, ""));
         if (! passwordField.getText().isEmpty()) { logger.info("Password was set from configuration."); }
+
         logInButton.setOnAction(event -> logIn());
     }
 
-    public void logIn() {
+    /**
+     * Attempt to log in to the database with the entered credentials.
+     *
+     * TODO: add database driver prefix if none is given.
+     */
+    private void logIn() {
         String URL = URLField.getText();
         String username = usernameField.getText();
         String password = passwordField.getText();

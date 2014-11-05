@@ -94,6 +94,11 @@ public class App extends Application {
     }
 
     /**
+     * Function to be called when a database connection is established.
+     *
+     * Responsible for starting up the meat of the application. No functions in this class should be called after
+     * connectionHook().
+     *
      * @param connection A connection to the database (server).
      * @throws SQLException
      */

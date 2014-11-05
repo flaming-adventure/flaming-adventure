@@ -17,6 +17,12 @@ import java.util.logging.Logger;
  * - Add missing functionality.
  */
 
+/**
+ * The data model for the application.
+ *
+ * An object of this class wraps around an SQL connection and is responsible for all communications with the database
+ * during a single user session.
+ */
 public class DataModel {
     /* SQL queries
      * ===========
@@ -53,6 +59,9 @@ public class DataModel {
     private static final String sqlInsertForgotten      =
             "INSERT INTO forgotten_items (reservation_id, item, delivered, comment) VALUES (?, ?, ?, ?);";
 
+    /**
+     * Create a hut object from a resultSet containing the required fields (see source).
+     */
     private final SQLFunction<ResultSet, Hut> hutFromResultSet = resultSet -> new Hut(
             resultSet.getInt("id"),
             resultSet.getString("name"),
@@ -60,6 +69,9 @@ public class DataModel {
             resultSet.getInt("firewood")
     );
 
+    /**
+     * Create a reservation object from a resultSet containing the required fields (see source).
+     */
     public final SQLFunction<ResultSet, Reservation> reservationFromResultSet = resultSet -> {
         Integer hutID = resultSet.getInt("hut_id");
         // TODO: Don't unwrap optional.
@@ -76,6 +88,9 @@ public class DataModel {
         );
     };
 
+    /**
+     * Create an equipment item object from a resultSet containing the required fields (see source).
+     */
     private final SQLFunction<ResultSet, Equipment> equipmentFromResultSet = resultSet -> {
         Integer hutID = resultSet.getInt("hut_id");
         // TODO: Don't unwrap optional.
@@ -90,6 +105,9 @@ public class DataModel {
         );
     };
 
+    /**
+     * Create a forgotten item object from a resultSet containing the required fields (see source).
+     */
     private final SQLFunction<ResultSet, Forgotten> forgottenFromResultSet = resultSet -> {
         Integer reservationID = resultSet.getInt("reservation_id");
         // TODO: Don't unwrap optional.
@@ -104,6 +122,9 @@ public class DataModel {
         );
     };
 
+    /**
+     * Create a destroyed item object from a resultSet containing the required fields (see source).
+     */
     private final SQLFunction<ResultSet, Destroyed> destroyedFromResultSet = resultSet -> {
         Integer reservationID = resultSet.getInt("reservation_id");
         // TODO: Don't unwrap optional.
@@ -131,12 +152,30 @@ public class DataModel {
     private final PreparedStatement destroyedInsertStmt;
     private final PreparedStatement forgottenInsertStmt;
 
+    /* We maintain all data from all tables in the database as ObservableList<> objects.
+     *
+     * This allows very simple/fast code outside of the DataModel. It does however cause overhead relative to the size
+     * of the database, first in the retrieval of the data, subsequently in memory usage. As long as the database
+     * remains small this should be fine, but if this code ever goes into an actual production scenario this situation
+     * should be changed.
+     *
+     * Note that the lists are constructed when they are first requested. While this form of construction is nice
+     * in some theoretical sense it's not really relevant to the application at this point and it does create issues
+     * with users having to deal with SQLExceptions everywhere. (TODO: initialize lists on DataModel construction.)
+     */
     private ObservableList<Hut>         hutList;
     private ObservableList<Reservation> reservationList;
     private ObservableList<Equipment>   equipmentList;
     private ObservableList<Forgotten>   forgottenList;
     private ObservableList<Destroyed>   destroyedList;
 
+    /**
+     * Wrap the given connection in a data model object.
+     *
+     * @param logger        Logger object to be used for all logging by the data model
+     * @param connection    Connection to the SQL database.
+     * @throws SQLException
+     */
     public DataModel(Logger logger, Connection connection) throws SQLException {
         this.logger = logger;
 
@@ -152,8 +191,18 @@ public class DataModel {
         reservationInsertStmt   = connection.prepareStatement(sqlInsertReservation, Statement.RETURN_GENERATED_KEYS);
         destroyedInsertStmt     = connection.prepareStatement(sqlInsertDestroyed,   Statement.RETURN_GENERATED_KEYS);
         forgottenInsertStmt     = connection.prepareStatement(sqlInsertForgotten,   Statement.RETURN_GENERATED_KEYS);
+
+        logger.fine("Data model successfully initialized.");
     }
 
+    /**
+     * Return the list of huts.
+     *
+     * Note: this function retrieves the list from the database when first called.
+     *
+     * @return
+     * @throws SQLException
+     */
     public ObservableList<Hut> getHutList() throws SQLException {
         if (hutList == null) {
             logger.info("Querying SQL server for hut list...");
@@ -162,6 +211,14 @@ public class DataModel {
         return hutList;
     }
 
+    /**
+     * Return the hut object corresponding to the given database ID if it exists.
+     *
+     * TODO: Change access specifier to private and deprecate.
+     *
+     * @param ID
+     * @return
+     */
     public Optional<Hut> getHutFromID(Integer ID) {
         // TODO: Improve search algorithm.
         try {
@@ -172,6 +229,14 @@ public class DataModel {
         return Optional.empty();
     }
 
+    /**
+     * Return the list of reservations.
+     *
+     * Note: this function retrieves the list from the database when first called.
+     *
+     * @return
+     * @throws SQLException
+     */
     public ObservableList<Reservation> getReservationList() throws SQLException {
         if (reservationList == null) {
             logger.info("Querying SQL server for reservation list...");
@@ -180,10 +245,27 @@ public class DataModel {
         return reservationList;
     }
 
+    /**
+     * Return the list of reservations for the given hut.
+     *
+     * Note: this function calls getReservationList() and may retrieve every reservation from the database.
+     *
+     * @param hut
+     * @return
+     * @throws SQLException
+     */
     public ObservableList<Reservation> getReservationListForHut(Hut hut) throws SQLException {
         return getReservationList().filtered(reservation -> reservation.getHutID() == hut.getID());
     }
 
+    /**
+     * Return the reservation object corresponding to the given database ID if it exists.
+     *
+     * TODO: Change access specifier to private and deprecate.
+     *
+     * @param ID
+     * @return
+     */
     public Optional<Reservation> getReservationFromID(Integer ID) {
         try {
             for (Reservation reservation : getReservationList()) {
@@ -193,6 +275,12 @@ public class DataModel {
         return Optional.empty();
     }
 
+    /**
+     * Insert a reservation object into the database, setting the ID of the object to the database ID used.
+     *
+     * @param reservation
+     * @throws SQLException
+     */
     public void insertReservation(Reservation reservation) throws SQLException {
         // TODO: Validate reservation.
 
@@ -227,6 +315,14 @@ public class DataModel {
         reservationList.add(reservation);
     }
 
+    /**
+     * Return the list of equipment.
+     *
+     * Note: this function retrieves the list from the database when first called.
+     *
+     * @return
+     * @throws SQLException
+     */
     public ObservableList<Equipment> getEquipmentList() throws SQLException {
         if (equipmentList == null) {
             equipmentList = forceList(equipmentStmt, equipmentFromResultSet);
@@ -234,10 +330,27 @@ public class DataModel {
         return equipmentList;
     }
 
+    /**
+     * Return the list of equipment for the given hut.
+     *
+     * Note: this function calls getEquipmentList() and may retrieve every reservation from the database.
+     *
+     * @param hut
+     * @return
+     * @throws SQLException
+     */
     public ObservableList<Equipment> getEquipmentListForHut(Hut hut) throws SQLException {
         return getEquipmentList().filtered(item -> item.getHutID() == hut.getID());
     }
 
+    /**
+     * Return the list of forgotten items.
+     *
+     * Note: this function retrieves the list from the database when first called.
+     *
+     * @return
+     * @throws SQLException
+     */
     public ObservableList<Forgotten> getForgottenList() throws SQLException {
         if (forgottenList == null) {
             forgottenList = forceList(forgottenStmt, forgottenFromResultSet);
@@ -245,6 +358,12 @@ public class DataModel {
         return forgottenList;
     }
 
+    /**
+     * Insert a forgotten item into the database, setting the ID of the object to the database ID used.
+     *
+     * @param forgotten
+     * @throws SQLException
+     */
     public void insertForgotten(Forgotten forgotten) throws SQLException {
         // TODO: Validate forgotten.
 
@@ -271,6 +390,14 @@ public class DataModel {
         getForgottenList().add(forgotten);
     }
 
+    /**
+     * Return the list of destroyed (or out of order) items.
+     *
+     * Note: this function retrieves the list from the database when first called.
+     *
+     * @return
+     * @throws SQLException
+     */
     public ObservableList<Destroyed> getDestroyedList() throws SQLException {
         if (destroyedList == null) {
             destroyedList = forceList(destroyedStmt, destroyedFromResultSet);
@@ -278,6 +405,12 @@ public class DataModel {
         return destroyedList;
     }
 
+    /**
+     * Insert a destroyed item into the database, setting the ID of the object to the database ID used.
+     *
+     * @param destroyed
+     * @throws SQLException
+     */
     public void insertDestroyed(Destroyed destroyed) throws SQLException {
         // TODO: Validate destroyed.
 
@@ -308,6 +441,17 @@ public class DataModel {
         destroyedList.add(destroyed);
     }
 
+    /**
+     * Retrieve a list of records from the database and create an ObservableList<> of objects.
+     *
+     * TODO: deprecate.
+     *
+     * @param stmt  Prepared statement to retrieve the records from the database.
+     * @param fn    A function taking a resultSet and returning a list element.
+     * @param <E>   The type of elements in the final list.
+     * @return
+     * @throws SQLException
+     */
     private static <E> ObservableList<E> forceList(PreparedStatement stmt, SQLFunction<ResultSet, E> fn)
             throws SQLException {
         ObservableList<E> list = FXCollections.observableArrayList();
