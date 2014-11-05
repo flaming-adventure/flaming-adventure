@@ -9,14 +9,6 @@ import java.sql.*;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-/* Todo
- * ----
- *
- * - Complete logging.
- * - Cache weak references to filtered lists.
- * - Add missing functionality.
- */
-
 /**
  * The data model for the application.
  *
@@ -33,16 +25,6 @@ public class DataModel {
      *
      * In addition this comment will be used as a temporary location for documentation and discussion relevant to
      * the database itself.
-     *
-     * Todo
-     * ----
-     *
-     * - Move the dependencies on reservations to dependencies on huts and add fields where it makes sense.
-     *   For example for forgotten items it makes sense for there to be items that have been forgotten at or near
-     *   a hut without a reservation ever having been made at that date.
-     * - Make a consistent choice on the destroyed/out of order naming dilemma.
-     * - Remove norwegian database tables.
-     * - Create a database test data generator.
      */
     private static final String sqlHutList          = "SELECT * FROM huts;";
     private static final String sqlReservationList  = "SELECT * FROM reservations;";
@@ -168,10 +150,10 @@ public class DataModel {
         logger.fine("Data model successfully initialized.");
     }
 
+    /* --- end of SQL section. --- */
+
     /**
      * Return the list of huts.
-     *
-     * @return
      */
     public ObservableList<Hut> getHutList() {
         return hutList;
@@ -181,9 +163,6 @@ public class DataModel {
      * Return the hut object corresponding to the given database ID if it exists.
      *
      * TODO: Change access specifier to private and deprecate.
-     *
-     * @param ID
-     * @return
      */
     public Optional<Hut> getHutFromID(Integer ID) {
         // TODO: Improve search algorithm.
@@ -195,8 +174,6 @@ public class DataModel {
 
     /**
      * Return the list of reservations.
-     *
-     * @return
      */
     public ObservableList<Reservation> getReservationList() {
         return reservationList;
@@ -204,9 +181,6 @@ public class DataModel {
 
     /**
      * Return the list of reservations for the given hut.
-     *
-     * @param hut
-     * @return
      */
     public ObservableList<Reservation> getReservationListForHut(Hut hut) {
         return getReservationList().filtered(reservation -> reservation.getHutID() == hut.getID());
@@ -216,9 +190,6 @@ public class DataModel {
      * Return the reservation object corresponding to the given database ID if it exists.
      *
      * TODO: Change access specifier to private and deprecate.
-     *
-     * @param ID
-     * @return
      */
     public Optional<Reservation> getReservationFromID(Integer ID) {
         for (Reservation reservation : getReservationList()) {
@@ -230,7 +201,6 @@ public class DataModel {
     /**
      * Insert a reservation object into the database, setting the ID of the object to the database ID used.
      *
-     * @param reservation
      * @throws SQLException
      */
     public void insertReservation(Reservation reservation) throws SQLException {
@@ -266,8 +236,6 @@ public class DataModel {
 
     /**
      * Return the list of equipment.
-     *
-     * @return
      */
     public ObservableList<Equipment> getEquipmentList() {
         return equipmentList;
@@ -275,9 +243,6 @@ public class DataModel {
 
     /**
      * Return the list of equipment for the given hut.
-     *
-     * @param hut
-     * @return
      */
     public ObservableList<Equipment> getEquipmentListForHut(Hut hut) {
         return getEquipmentList().filtered(item -> item.getHutID() == hut.getID());
@@ -285,8 +250,6 @@ public class DataModel {
 
     /**
      * Return the list of forgotten items.
-     *
-     * @return
      */
     public ObservableList<Forgotten> getForgottenList() {
         return forgottenList;
@@ -295,7 +258,6 @@ public class DataModel {
     /**
      * Insert a forgotten item into the database, setting the ID of the object to the database ID used.
      *
-     * @param forgotten
      * @throws SQLException
      */
     public void insertForgotten(Forgotten forgotten) throws SQLException {
@@ -326,8 +288,6 @@ public class DataModel {
 
     /**
      * Return the list of destroyed (or out of order) items.
-     *
-     * @return
      */
     public ObservableList<Destroyed> getDestroyedList() {
         return destroyedList;
@@ -336,7 +296,6 @@ public class DataModel {
     /**
      * Insert a destroyed item into the database, setting the ID of the object to the database ID used.
      *
-     * @param destroyed
      * @throws SQLException
      */
     public void insertDestroyed(Destroyed destroyed) throws SQLException {
@@ -374,7 +333,6 @@ public class DataModel {
      * @param stmt  Prepared statement to retrieve the records from the database.
      * @param fn    A function taking a resultSet and returning a list element.
      * @param <E>   The type of elements in the final list.
-     * @return
      * @throws SQLException
      */
     private static <E> ObservableList<E> forceList(PreparedStatement stmt, SQLFunction<ResultSet, E> fn)
