@@ -59,94 +59,7 @@ public class DataModel {
     private static final String sqlInsertForgotten      =
             "INSERT INTO forgotten_items (reservation_id, item, delivered, comment) VALUES (?, ?, ?, ?);";
 
-    /**
-     * Create a hut object from a resultSet containing the required fields (see source).
-     */
-    private final SQLFunction<ResultSet, Hut> hutFromResultSet = resultSet -> new Hut(
-            resultSet.getInt("id"),
-            resultSet.getString("name"),
-            resultSet.getInt("capacity"),
-            resultSet.getInt("firewood")
-    );
-
-    /**
-     * Create a reservation object from a resultSet containing the required fields (see source).
-     */
-    public final SQLFunction<ResultSet, Reservation> reservationFromResultSet = resultSet -> {
-        Integer hutID = resultSet.getInt("hut_id");
-        // TODO: Don't unwrap optional.
-        Hut hut = getHutFromID(hutID).get();
-        return new Reservation(
-                hut,
-                resultSet.getInt("id"),
-                hutID,
-                resultSet.getDate("date"),
-                resultSet.getString("name"),
-                resultSet.getString("email"),
-                resultSet.getInt("count"),
-                resultSet.getString("comment")
-        );
-    };
-
-    /**
-     * Create an equipment item object from a resultSet containing the required fields (see source).
-     */
-    private final SQLFunction<ResultSet, Equipment> equipmentFromResultSet = resultSet -> {
-        Integer hutID = resultSet.getInt("hut_id");
-        // TODO: Don't unwrap optional.
-        Hut hut = getHutFromID(hutID).get();
-        return new Equipment(
-                hut,
-                resultSet.getInt("id"),
-                hutID,
-                resultSet.getString("name"),
-                resultSet.getDate("purchase_date"),
-                resultSet.getInt("count")
-        );
-    };
-
-    /**
-     * Create a forgotten item object from a resultSet containing the required fields (see source).
-     */
-    private final SQLFunction<ResultSet, Forgotten> forgottenFromResultSet = resultSet -> {
-        Integer reservationID = resultSet.getInt("reservation_id");
-        // TODO: Don't unwrap optional.
-        Reservation reservation = getReservationFromID(reservationID).get();
-        return new Forgotten(
-                reservation,
-                resultSet.getInt("id"),
-                reservationID,
-                resultSet.getString("item"),
-                resultSet.getBoolean("delivered"),
-                resultSet.getString("comment")
-        );
-    };
-
-    /**
-     * Create a destroyed item object from a resultSet containing the required fields (see source).
-     */
-    private final SQLFunction<ResultSet, Destroyed> destroyedFromResultSet = resultSet -> {
-        Integer reservationID = resultSet.getInt("reservation_id");
-        // TODO: Don't unwrap optional.
-        Reservation reservation = getReservationFromID(reservationID).get();
-        return new Destroyed(
-                reservation,
-                resultSet.getInt("id"),
-                reservationID,
-                resultSet.getString("item"),
-                resultSet.getBoolean("fixed")
-        );
-    };
-
-    /* End of SQL query section. */
-
     private final Logger logger;
-
-    private final PreparedStatement hutStmt;
-    private final PreparedStatement reservationStmt;
-    private final PreparedStatement equipmentStmt;
-    private final PreparedStatement forgottenStmt;
-    private final PreparedStatement destroyedStmt;
 
     private final PreparedStatement reservationInsertStmt;
     private final PreparedStatement destroyedInsertStmt;
@@ -158,16 +71,12 @@ public class DataModel {
      * of the database, first in the retrieval of the data, subsequently in memory usage. As long as the database
      * remains small this should be fine, but if this code ever goes into an actual production scenario this situation
      * should be changed.
-     *
-     * Note that the lists are constructed when they are first requested. While this form of construction is nice
-     * in some theoretical sense it's not really relevant to the application at this point and it does create issues
-     * with users having to deal with SQLExceptions everywhere. (TODO: initialize lists on DataModel construction.)
      */
-    private ObservableList<Hut>         hutList;
-    private ObservableList<Reservation> reservationList;
-    private ObservableList<Equipment>   equipmentList;
-    private ObservableList<Forgotten>   forgottenList;
-    private ObservableList<Destroyed>   destroyedList;
+    private final ObservableList<Hut>           hutList;
+    private final ObservableList<Reservation>   reservationList;
+    private final ObservableList<Equipment>     equipmentList;
+    private final ObservableList<Forgotten>     forgottenList;
+    private final ObservableList<Destroyed>     destroyedList;
 
     /**
      * Wrap the given connection in a data model object.
@@ -182,15 +91,79 @@ public class DataModel {
         logger.fine("Initializing data model...");
         logger.finest("Preparing data model statements...");
 
-        hutStmt         = connection.prepareStatement(sqlHutList);
-        reservationStmt = connection.prepareStatement(sqlReservationList);
-        equipmentStmt   = connection.prepareStatement(sqlEquipmentList);
-        forgottenStmt   = connection.prepareStatement(sqlForgottenList);
-        destroyedStmt   = connection.prepareStatement(sqlDestroyedList);
+        PreparedStatement hutStmt           = connection.prepareStatement(sqlHutList);
+        PreparedStatement reservationStmt   = connection.prepareStatement(sqlReservationList);
+        PreparedStatement equipmentStmt     = connection.prepareStatement(sqlEquipmentList);
+        PreparedStatement forgottenStmt     = connection.prepareStatement(sqlForgottenList);
+        PreparedStatement destroyedStmt     = connection.prepareStatement(sqlDestroyedList);
 
         reservationInsertStmt   = connection.prepareStatement(sqlInsertReservation, Statement.RETURN_GENERATED_KEYS);
         destroyedInsertStmt     = connection.prepareStatement(sqlInsertDestroyed,   Statement.RETURN_GENERATED_KEYS);
         forgottenInsertStmt     = connection.prepareStatement(sqlInsertForgotten,   Statement.RETURN_GENERATED_KEYS);
+
+        hutList = forceList(hutStmt, resultSet -> new Hut(
+                resultSet.getInt("id"),
+                resultSet.getString("name"),
+                resultSet.getInt("capacity"),
+                resultSet.getInt("firewood")
+        ));
+
+        reservationList = forceList(reservationStmt, resultSet -> {
+            Integer hutID = resultSet.getInt("hut_id");
+            // TODO: Don't unwrap optional.
+            Hut hut = getHutFromID(hutID).get();
+            return new Reservation(
+                    hut,
+                    resultSet.getInt("id"),
+                    hutID,
+                    resultSet.getDate("date"),
+                    resultSet.getString("name"),
+                    resultSet.getString("email"),
+                    resultSet.getInt("count"),
+                    resultSet.getString("comment")
+            );
+        });
+
+        equipmentList = forceList(equipmentStmt, resultSet -> {
+            Integer hutID = resultSet.getInt("hut_id");
+            // TODO: Don't unwrap optional.
+            Hut hut = getHutFromID(hutID).get();
+            return new Equipment(
+                    hut,
+                    resultSet.getInt("id"),
+                    hutID,
+                    resultSet.getString("name"),
+                    resultSet.getDate("purchase_date"),
+                    resultSet.getInt("count")
+            );
+        });
+
+        forgottenList = forceList(forgottenStmt, resultSet -> {
+            Integer reservationID = resultSet.getInt("reservation_id");
+            // TODO: Don't unwrap optional.
+            Reservation reservation = getReservationFromID(reservationID).get();
+            return new Forgotten(
+                    reservation,
+                    resultSet.getInt("id"),
+                    reservationID,
+                    resultSet.getString("item"),
+                    resultSet.getBoolean("delivered"),
+                    resultSet.getString("comment")
+            );
+        });
+
+        destroyedList   = forceList(destroyedStmt, resultSet -> {
+            Integer reservationID = resultSet.getInt("reservation_id");
+            // TODO: Don't unwrap optional.
+            Reservation reservation = getReservationFromID(reservationID).get();
+            return new Destroyed(
+                    reservation,
+                    resultSet.getInt("id"),
+                    reservationID,
+                    resultSet.getString("item"),
+                    resultSet.getBoolean("fixed")
+            );
+        });
 
         logger.fine("Data model successfully initialized.");
     }
@@ -198,16 +171,9 @@ public class DataModel {
     /**
      * Return the list of huts.
      *
-     * Note: this function retrieves the list from the database when first called.
-     *
      * @return
-     * @throws SQLException
      */
-    public ObservableList<Hut> getHutList() throws SQLException {
-        if (hutList == null) {
-            logger.info("Querying SQL server for hut list...");
-            hutList = forceList(hutStmt, hutFromResultSet);
-        }
+    public ObservableList<Hut> getHutList() {
         return hutList;
     }
 
@@ -221,40 +187,28 @@ public class DataModel {
      */
     public Optional<Hut> getHutFromID(Integer ID) {
         // TODO: Improve search algorithm.
-        try {
-            for (Hut hut : getHutList()) {
-                if (hut.getID() == ID) { return Optional.of(hut); }
-            }
-        } catch (SQLException e) { }
+        for (Hut hut : getHutList()) {
+            if (hut.getID() == ID) { return Optional.of(hut); }
+        }
         return Optional.empty();
     }
 
     /**
      * Return the list of reservations.
      *
-     * Note: this function retrieves the list from the database when first called.
-     *
      * @return
-     * @throws SQLException
      */
-    public ObservableList<Reservation> getReservationList() throws SQLException {
-        if (reservationList == null) {
-            logger.info("Querying SQL server for reservation list...");
-            reservationList = forceList(reservationStmt, reservationFromResultSet);
-        }
+    public ObservableList<Reservation> getReservationList() {
         return reservationList;
     }
 
     /**
      * Return the list of reservations for the given hut.
      *
-     * Note: this function calls getReservationList() and may retrieve every reservation from the database.
-     *
      * @param hut
      * @return
-     * @throws SQLException
      */
-    public ObservableList<Reservation> getReservationListForHut(Hut hut) throws SQLException {
+    public ObservableList<Reservation> getReservationListForHut(Hut hut) {
         return getReservationList().filtered(reservation -> reservation.getHutID() == hut.getID());
     }
 
@@ -267,11 +221,9 @@ public class DataModel {
      * @return
      */
     public Optional<Reservation> getReservationFromID(Integer ID) {
-        try {
-            for (Reservation reservation : getReservationList()) {
-                if (reservation.getID() == ID) { return Optional.of(reservation); }
-            }
-        } catch (SQLException e) { }
+        for (Reservation reservation : getReservationList()) {
+            if (reservation.getID() == ID) { return Optional.of(reservation); }
+        }
         return Optional.empty();
     }
 
@@ -307,9 +259,6 @@ public class DataModel {
             // TODO: Handle error.
         }
 
-        // XXX: Ensure that the reservation list is forced.
-        getReservationList();
-
         logger.info("Adding new reservation to reservation list.");
 
         reservationList.add(reservation);
@@ -318,43 +267,28 @@ public class DataModel {
     /**
      * Return the list of equipment.
      *
-     * Note: this function retrieves the list from the database when first called.
-     *
      * @return
-     * @throws SQLException
      */
-    public ObservableList<Equipment> getEquipmentList() throws SQLException {
-        if (equipmentList == null) {
-            equipmentList = forceList(equipmentStmt, equipmentFromResultSet);
-        }
+    public ObservableList<Equipment> getEquipmentList() {
         return equipmentList;
     }
 
     /**
      * Return the list of equipment for the given hut.
      *
-     * Note: this function calls getEquipmentList() and may retrieve every reservation from the database.
-     *
      * @param hut
      * @return
-     * @throws SQLException
      */
-    public ObservableList<Equipment> getEquipmentListForHut(Hut hut) throws SQLException {
+    public ObservableList<Equipment> getEquipmentListForHut(Hut hut) {
         return getEquipmentList().filtered(item -> item.getHutID() == hut.getID());
     }
 
     /**
      * Return the list of forgotten items.
      *
-     * Note: this function retrieves the list from the database when first called.
-     *
      * @return
-     * @throws SQLException
      */
-    public ObservableList<Forgotten> getForgottenList() throws SQLException {
-        if (forgottenList == null) {
-            forgottenList = forceList(forgottenStmt, forgottenFromResultSet);
-        }
+    public ObservableList<Forgotten> getForgottenList() {
         return forgottenList;
     }
 
@@ -393,15 +327,9 @@ public class DataModel {
     /**
      * Return the list of destroyed (or out of order) items.
      *
-     * Note: this function retrieves the list from the database when first called.
-     *
      * @return
-     * @throws SQLException
      */
-    public ObservableList<Destroyed> getDestroyedList() throws SQLException {
-        if (destroyedList == null) {
-            destroyedList = forceList(destroyedStmt, destroyedFromResultSet);
-        }
+    public ObservableList<Destroyed> getDestroyedList() {
         return destroyedList;
     }
 
@@ -431,9 +359,6 @@ public class DataModel {
         } else {
             logger.warning("Database failed to return primary key for destroyed item.");
         }
-
-        // XXX: Ensure that the destroyed list is forced.
-        getDestroyedList();
 
         // TODO: Move logging of list additions to conditional listeners on the lists themselves.
         logger.info("Adding new destroyed item to list.");

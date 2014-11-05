@@ -1,6 +1,5 @@
 package no.flaming_adventure.controller;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -47,14 +46,8 @@ public class ReservationFormController {
                                      TextArea commentTextArea, Button commitButton) {
         this.dateFormat = dateFormat;
         this.dataModel = dataModel;
-        try {
-            this.huts = dataModel.getHutList();
-            this.reservations = dataModel.getReservationList();
-        } catch (SQLException e) {
-            this.huts = FXCollections.observableArrayList();
-            this.reservations = FXCollections.observableArrayList();
-            // TODO: Handle exception.
-        }
+        this.huts = dataModel.getHutList();
+        this.reservations = dataModel.getReservationList();
         this.hutChoiceBox = hutChoiceBox;
         this.datePicker = datePicker;
         this.capacityText = capacityText;

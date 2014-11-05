@@ -108,11 +108,7 @@ public class MainController {
         reservationCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
         reservationCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
 
-        try {
-            reservationTableView.setItems(dataModel.getReservationList());
-        } catch (SQLException e) {
-            // TODO: Handle exception.
-        }
+        reservationTableView.setItems(dataModel.getReservationList());
     }
 
     protected void initializeEquipmentTable() {
@@ -124,11 +120,7 @@ public class MainController {
         equipmentCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
         equipmentDateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 
-        try {
-            equipmentTableView.setItems(dataModel.getEquipmentList());
-        } catch (SQLException e) {
-            // TODO: Handle exception.
-        }
+        equipmentTableView.setItems(dataModel.getEquipmentList());
     }
 
     protected void initializeForgottenTable() {
@@ -149,20 +141,12 @@ public class MainController {
                         dateFormat.format(param.getValue().getReservation().getDate()))
         );
 
-        try {
-            forgottenTableView.setItems(dataModel.getForgottenList());
-        } catch (SQLException e) {
-            // TODO: Handle exception.
-        }
+        forgottenTableView.setItems(dataModel.getForgottenList());
     }
 
     private void initializeForgottenForm() {
-        try {
-            initializeComboBox(forgottenHutComboBox, dataModel.getHutList(),
-                    (observable, oldHut, newHut) -> updateForgottenForm(newHut), Hut.stringConverter);
-        } catch (SQLException e) {
-            // TODO: This exception cannot occur at this point, create an abstraction.
-        }
+        initializeComboBox(forgottenHutComboBox, dataModel.getHutList(),
+                (observable, oldHut, newHut) -> updateForgottenForm(newHut), Hut.stringConverter);
 
         forgottenDatePicker.setValue(LocalDate.now());
         forgottenDatePicker.setOnAction(event -> updateForgottenForm());
@@ -179,11 +163,7 @@ public class MainController {
     }
 
     private void updateForgottenForm(Hut hut) {
-        try {
-            forgottenReservationChoiceBox.setItems(dataModel.getReservationListForHut(hut));
-        } catch (SQLException e) {
-            // TODO: This exception cannot occur at this point, create an abstraction.
-        }
+        forgottenReservationChoiceBox.setItems(dataModel.getReservationListForHut(hut));
 
         if (forgottenReservationChoiceBox.getItems().isEmpty()) {
             disableForgottenForm();
@@ -245,11 +225,7 @@ public class MainController {
         );
         destroyedItemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
 
-        try {
-            destroyedTableView.setItems(dataModel.getDestroyedList());
-        } catch (SQLException e) {
-            // TODO: Handle exception.
-        }
+        destroyedTableView.setItems(dataModel.getDestroyedList());
     }
 
     private static<E> void initializeComboBox(ComboBox<E> comboBox, ObservableList<E> list,
@@ -263,12 +239,8 @@ public class MainController {
     }
 
     private void initializeDestroyedForm() {
-        try {
-            initializeComboBox(destroyedHutComboBox, dataModel.getHutList(),
-                    (observable, oldHut, newHut) -> updateDestroyedForm(newHut), Hut.stringConverter);
-        } catch (SQLException e) {
-            // TODO: This exception cannot occur at this point, create an abstraction.
-        }
+        initializeComboBox(destroyedHutComboBox, dataModel.getHutList(),
+                (observable, oldHut, newHut) -> updateDestroyedForm(newHut), Hut.stringConverter);
 
         destroyedDatePicker.setValue(LocalDate.now());
         destroyedDatePicker.setOnAction(event -> updateDestroyedForm());
@@ -298,11 +270,7 @@ public class MainController {
     }
 
     private void updateDestroyedForm(Hut hut) {
-        try {
-            destroyedReservationChoiceBox.setItems(dataModel.getReservationListForHut(hut));
-        } catch (SQLException e) {
-            // TODO: This exception cannot occur at this point, create an abstraction.
-        }
+        destroyedReservationChoiceBox.setItems(dataModel.getReservationListForHut(hut));
 
         if (destroyedReservationChoiceBox.getItems().isEmpty()) {
             destroyedFormDisable();
