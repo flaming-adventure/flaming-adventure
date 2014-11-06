@@ -115,16 +115,27 @@
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0">
                <children>
-                  <TableView fx:id="reservationTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <columns>
-                      <TableColumn fx:id="reservationHutColumn" editable="false" prefWidth="150.0" text="Koie" />
-                      <TableColumn fx:id="reservationDateColumn" editable="false" prefWidth="75.0" text="Dato" />
-                        <TableColumn fx:id="reservationNameColumn" editable="false" prefWidth="200.0" text="Navn" />
-                        <TableColumn fx:id="reservationEmailColumn" editable="false" prefWidth="200.0" text="E-Post" />
-                        <TableColumn fx:id="reservationCountColumn" prefWidth="75.0" text="Antall" />
-                        <TableColumn fx:id="reservationCommentColumn" prefWidth="400.0" text="Kommentar" />
-                    </columns>
-                  </TableView>
+                  <VBox layoutX="8.0" layoutY="8.0" spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <HBox spacing="8.0">
+                           <children>
+                              <DatePicker fx:id="reservationFilterFromDate" />
+                              <DatePicker fx:id="reservationFilterToDate" />
+                           </children>
+                        </HBox>
+                        <Separator />
+                        <TableView fx:id="reservationTableView">
+                          <columns>
+                            <TableColumn fx:id="reservationHutColumn" editable="false" prefWidth="150.0" text="Koie" />
+                            <TableColumn fx:id="reservationDateColumn" editable="false" prefWidth="75.0" text="Dato" />
+                              <TableColumn fx:id="reservationNameColumn" editable="false" prefWidth="200.0" text="Navn" />
+                              <TableColumn fx:id="reservationEmailColumn" editable="false" prefWidth="200.0" text="E-Post" />
+                              <TableColumn fx:id="reservationCountColumn" prefWidth="75.0" text="Antall" />
+                              <TableColumn fx:id="reservationCommentColumn" prefWidth="400.0" text="Kommentar" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
                </children>
                <padding>
                   <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />

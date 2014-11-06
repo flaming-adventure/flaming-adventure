@@ -8,12 +8,14 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
+import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.shared.*;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Date;
 
 /**
  * Controller for the main view.
@@ -32,6 +34,9 @@ public class MainController {
     @FXML protected ChoiceBox<Integer> reservationCountChoiceBox;
     @FXML protected TextArea reservationCommentTextArea;
     @FXML protected Button reservationCommitButton;
+
+    @FXML private DatePicker reservationFilterFromDate;
+    @FXML private DatePicker reservationFilterToDate;
 
     @FXML protected TableView<Reservation> reservationTableView;
     @FXML protected TableColumn<Reservation, String> reservationHutColumn;
@@ -82,6 +87,7 @@ public class MainController {
         // TODO: Only initialize items when tab is first opened.
         initializeReservationForm();
         initializeReservationTable();
+        initializeReservationFilter();
         initializeEquipmentTable();
         initializeForgottenTable();
         initializeForgottenForm();
@@ -107,8 +113,27 @@ public class MainController {
         reservationEmailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         reservationCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
         reservationCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
+    }
 
-        reservationTableView.setItems(dataModel.getReservationList());
+    private void initializeReservationFilter() {
+        reservationFilterFromDate.setValue(LocalDate.now());
+        reservationFilterToDate.setValue(LocalDate.now().plusYears(1));
+
+        reservationFilterFromDate.setOnAction(event -> filterReservations());
+        reservationFilterToDate.setOnAction(event -> filterReservations());
+
+        filterReservations();
+    }
+
+    private void filterReservations() {
+        reservationTableView.setItems(dataModel.getReservationList().filtered(reservation -> {
+                    Date date = reservation.getDate();
+                    LocalDate fromLDate = reservationFilterFromDate.getValue();
+                    LocalDate toLDate = reservationFilterToDate.getValue();
+                    return date.after(Util.dateFromLocalDate(fromLDate))
+                            && date.before(Util.dateFromLocalDate(toLDate));
+                }
+        ));
     }
 
     protected void initializeEquipmentTable() {
