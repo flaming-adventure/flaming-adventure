@@ -6,7 +6,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
@@ -25,15 +24,7 @@ public class MainController {
 
     private final DataModel dataModel;
 
-    protected ReservationFormController reservationFormController;
-    @FXML protected ChoiceBox<Hut> reservationHutChoiceBox;
-    @FXML protected DatePicker reservationDatePicker;
-    @FXML protected Text reservationCapacityText;
-    @FXML protected TextField reservationNameTextField;
-    @FXML protected TextField reservationEmailTextField;
-    @FXML protected ChoiceBox<Integer> reservationCountChoiceBox;
-    @FXML protected TextArea reservationCommentTextArea;
-    @FXML protected Button reservationCommitButton;
+    @FXML protected ReservationFormController reservationFormController;
 
     @FXML private DatePicker reservationFilterFromDate;
     @FXML private DatePicker reservationFilterToDate;
@@ -85,7 +76,7 @@ public class MainController {
 
     @FXML protected void initialize() {
         // TODO: Only initialize items when tab is first opened.
-        initializeReservationForm();
+        reservationFormController.initializeData(dataModel);
         initializeReservationTable();
         initializeReservationFilter();
         initializeEquipmentTable();
@@ -93,13 +84,6 @@ public class MainController {
         initializeForgottenForm();
         initializeDestroyedTable();
         initializeDestroyedForm();
-    }
-
-    protected void initializeReservationForm() {
-        reservationFormController = new ReservationFormController(dataModel,
-                reservationHutChoiceBox, reservationDatePicker, reservationCapacityText, reservationNameTextField,
-                reservationEmailTextField, reservationCountChoiceBox, reservationCommentTextArea,
-                reservationCommitButton);
     }
 
     protected void initializeReservationTable() {
