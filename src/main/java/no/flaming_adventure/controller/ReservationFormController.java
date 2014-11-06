@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.shared.Hut;
 import no.flaming_adventure.shared.Reservation;
@@ -226,20 +227,16 @@ public class ReservationFormController {
     protected void commitAction() {
         // TODO: Disable input during commit.
         Hut hut = hutChoiceBox.getValue();
-        LocalDate localDate = datePicker.getValue();
+        Date date = Util.dateFromLocalDate(datePicker.getValue());
         String name = nameTextField.getText();
         String email = emailTextField.getText();
         Integer count = countChoiceBox.getValue();
         String comment = commentTextArea.getText();
 
-        Instant instant = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
-
         try {
-            dataModel.insertReservation(new Reservation(hut, -1, hut.getID(), Date.from(instant), name, email, count, comment));
+            dataModel.insertReservation(new Reservation(hut, -1, hut.getID(), date, name, email, count, comment));
         } catch (SQLException e) {
             // TODO: Handle exception.
         }
-
-        datePicker.setValue(localDate.plusDays(1));
     }
 }
