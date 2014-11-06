@@ -7,14 +7,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
-import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.shared.*;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Date;
 
 /**
  * Controller for the main view.
@@ -24,18 +22,8 @@ public class MainController {
 
     private final DataModel dataModel;
 
-    @FXML protected ReservationFormController reservationFormController;
-
-    @FXML private DatePicker reservationFilterFromDate;
-    @FXML private DatePicker reservationFilterToDate;
-
-    @FXML protected TableView<Reservation> reservationTableView;
-    @FXML protected TableColumn<Reservation, String> reservationHutColumn;
-    @FXML protected TableColumn<Reservation, String> reservationDateColumn;
-    @FXML protected TableColumn<Reservation, String> reservationNameColumn;
-    @FXML protected TableColumn<Reservation, String> reservationEmailColumn;
-    @FXML protected TableColumn<Reservation, Integer> reservationCountColumn;
-    @FXML protected TableColumn<Reservation, String> reservationCommentColumn;
+    @FXML private ReservationFormController     reservationFormController;
+    @FXML private ReservationTableController    reservationTableController;
 
     @FXML protected TableView<Forgotten> forgottenTableView;
     @FXML protected TableColumn<Forgotten, String> forgottenHutColumn;
@@ -77,47 +65,12 @@ public class MainController {
     @FXML protected void initialize() {
         // TODO: Only initialize items when tab is first opened.
         reservationFormController.initializeData(dataModel);
-        initializeReservationTable();
-        initializeReservationFilter();
+        reservationTableController.initializeData(dataModel);
         initializeEquipmentTable();
         initializeForgottenTable();
         initializeForgottenForm();
         initializeDestroyedTable();
         initializeDestroyedForm();
-    }
-
-    protected void initializeReservationTable() {
-        reservationHutColumn.setCellValueFactory(
-                param -> param.getValue().getHut().nameProperty()
-        );
-        reservationDateColumn.setCellValueFactory(
-                param -> new SimpleStringProperty(dateFormat.format(param.getValue().getDate()))
-        );
-        reservationNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        reservationEmailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
-        reservationCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
-        reservationCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
-    }
-
-    private void initializeReservationFilter() {
-        reservationFilterFromDate.setValue(LocalDate.now());
-        reservationFilterToDate.setValue(LocalDate.now().plusYears(1));
-
-        reservationFilterFromDate.setOnAction(event -> filterReservations());
-        reservationFilterToDate.setOnAction(event -> filterReservations());
-
-        filterReservations();
-    }
-
-    private void filterReservations() {
-        reservationTableView.setItems(dataModel.getReservationList().filtered(reservation -> {
-                    Date date = reservation.getDate();
-                    LocalDate fromLDate = reservationFilterFromDate.getValue();
-                    LocalDate toLDate = reservationFilterToDate.getValue();
-                    return date.after(Util.dateFromLocalDate(fromLDate))
-                            && date.before(Util.dateFromLocalDate(toLDate));
-                }
-        ));
     }
 
     protected void initializeEquipmentTable() {
