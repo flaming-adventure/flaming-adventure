@@ -96,7 +96,7 @@ public class MainController {
     }
 
     protected void initializeReservationForm() {
-        reservationFormController = new ReservationFormController(dateFormat, dataModel,
+        reservationFormController = new ReservationFormController(dataModel,
                 reservationHutChoiceBox, reservationDatePicker, reservationCapacityText, reservationNameTextField,
                 reservationEmailTextField, reservationCountChoiceBox, reservationCommentTextArea,
                 reservationCommitButton);

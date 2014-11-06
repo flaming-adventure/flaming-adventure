@@ -11,44 +11,34 @@ import no.flaming_adventure.shared.Hut;
 import no.flaming_adventure.shared.Reservation;
 
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 
 /**
  * Controller for reservation form.
  */
 public class ReservationFormController {
-    protected static final String capacityTextFormat = "%d av totalt %d plasser ledige.";
+    private static final String capacityTextFormat = "%d av totalt %d plasser ledige.";
 
     private final DataModel dataModel;
 
-    protected final SimpleDateFormat dateFormat;
-    protected final ChoiceBox<Hut> hutChoiceBox;
-    protected final DatePicker datePicker;
-    protected final Text capacityText;
-    protected final TextField nameTextField;
-    protected final TextField emailTextField;
-    protected final ChoiceBox<Integer> countChoiceBox;
-    protected final TextArea commentTextArea;
-    protected final Button commitButton;
+    private final ChoiceBox<Hut> hutChoiceBox;
+    private final DatePicker datePicker;
+    private final Text capacityText;
+    private final TextField nameTextField;
+    private final TextField emailTextField;
+    private final ChoiceBox<Integer> countChoiceBox;
+    private final TextArea commentTextArea;
+    private final Button commitButton;
 
-    // TODO: Make final.
-    private ObservableList<Hut> huts;
+    private final ObservableList<Hut> huts;
 
-    // TODO: Replace with a list of reservations for the current hut from the data model.
-    private ObservableList<Reservation> reservations;
-
-    public ReservationFormController(SimpleDateFormat dateFormat, DataModel dataModel,
+    public ReservationFormController(DataModel dataModel,
                                      ChoiceBox<Hut> hutChoiceBox, DatePicker datePicker, Text capacityText,
                                      TextField nameTextField, TextField emailTextField, ChoiceBox<Integer> countChoiceBox,
                                      TextArea commentTextArea, Button commitButton) {
-        this.dateFormat = dateFormat;
         this.dataModel = dataModel;
         this.huts = dataModel.getHutList();
-        this.reservations = dataModel.getReservationList();
         this.hutChoiceBox = hutChoiceBox;
         this.datePicker = datePicker;
         this.capacityText = capacityText;
@@ -74,7 +64,7 @@ public class ReservationFormController {
      * Additionally an event handler that updates the displayed capacity and the count selection box upon choosing a new
      * hut is added to the choice box.
      */
-    protected void initializeHutChoiceBox() {
+    private void initializeHutChoiceBox() {
         hutChoiceBox.setItems(huts);
         hutChoiceBox.setConverter(Hut.stringConverter);
 
@@ -114,7 +104,7 @@ public class ReservationFormController {
      * In addition an event handler that calls updateCapacity with the current hut every time a new selection is made is
      * added.
      */
-    protected void initializeDatePicker() {
+    private void initializeDatePicker() {
         // DayCellFactory that disables all dates before today.
         final Callback<DatePicker, DateCell> dayCellFactory = new Callback<DatePicker, DateCell>() {
             @Override
@@ -152,25 +142,21 @@ public class ReservationFormController {
      *
      * @param hut Hut from which capacity is to be retrieved.
      */
-    protected void updateCapacity(Hut hut) {
+    private void updateCapacity(Hut hut) {
         // XXX: Currently redundant, but the mistake is easy to make.
         if (hut == null) { return; }
 
-        // Convert the LocalDate from the datePicker to a java.util.Date
-        // object.
-        LocalDate ldt = datePicker.getValue();
-        Instant instant = ldt.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
-        Date date = Date.from(instant);
+        Date date = Util.dateFromLocalDate(datePicker.getValue());
 
-        Integer totalCapacity = hut.getCapacity();
+
         Integer occupancy = 0;
-        Integer hutID = hut.getID();
-        for (Reservation reservation : reservations) {
-            if (reservation.getHutID() == hutID && reservation.getDate().equals(date)) {
+        for (Reservation reservation : dataModel.getReservationListForHut(hut)) {
+            if (reservation.getDate().equals(date)) {
                 occupancy += reservation.getCount();
             }
         }
 
+        Integer totalCapacity = hut.getCapacity();
         Integer actualCapacity = totalCapacity - occupancy;
 
         capacityText.setText(String.format(capacityTextFormat, actualCapacity, totalCapacity));
@@ -201,7 +187,7 @@ public class ReservationFormController {
      * Disable the use of the name text field, the email text field, the choice box for number of people and the commit
      * button.
      */
-    protected void disableInput() {
+    private void disableInput() {
         nameTextField.setDisable(true);
         emailTextField.setDisable(true);
         countChoiceBox.setDisable(true);
@@ -213,7 +199,7 @@ public class ReservationFormController {
      * Enable the use of the name text field, the email text field, the choice box for number of people and the commit
      * button.
      */
-    protected void enableInput() {
+    private void enableInput() {
         nameTextField.setDisable(false);
         emailTextField.setDisable(false);
         countChoiceBox.setDisable(false);
@@ -224,7 +210,7 @@ public class ReservationFormController {
     /**
      * Validate the current form data and commit it to the database as a reservation if it is valid.
      */
-    protected void commitAction() {
+    private void commitAction() {
         // TODO: Disable input during commit.
         Hut hut = hutChoiceBox.getValue();
         Date date = Util.dateFromLocalDate(datePicker.getValue());
@@ -238,5 +224,7 @@ public class ReservationFormController {
         } catch (SQLException e) {
             // TODO: Handle exception.
         }
+
+        updateCapacity(hutChoiceBox.getValue());
     }
 }
