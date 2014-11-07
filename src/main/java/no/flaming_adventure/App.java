@@ -103,7 +103,7 @@ public class App extends Application {
      * @throws SQLException
      */
     public void connectionHook(Connection connection) throws SQLException {
-        mainScene = loadScene("main.fxml", new MainController(dateFormat, new DataModel(logger, connection)));
+        mainScene = loadScene("main.fxml", new MainController(new DataModel(logger, connection)));
         stage.setScene(mainScene);
     }
 }
