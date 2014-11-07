@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane minHeight="0.0" minWidth="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="no.flaming_adventure.controller.EquipmentTableController">
+   <children>
+      <VBox layoutX="8.0" layoutY="8.0" spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <HBox spacing="8.0">
+               <children>
+                  <Label text="Filter:" />
+                  <DatePicker fx:id="filterFromDatePicker" />
+                  <DatePicker fx:id="filterToDatePicker" />
+               </children>
+            </HBox>
+            <Separator />
+            <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <columns>
+                  <TableColumn fx:id="hutColumn" prefWidth="150.0" text="Koie" />
+                  <TableColumn fx:id="itemColumn" prefWidth="300.0" text="Ting" />
+                  <TableColumn fx:id="countColumn" prefWidth="75.0" text="Antall" />
+                  <TableColumn fx:id="dateColumn" prefWidth="75.0" text="Innkjøpt" />
+               </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+   </padding>
+</AnchorPane>

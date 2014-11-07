@@ -5,11 +5,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.shared.Destroyed;
-import no.flaming_adventure.shared.Equipment;
 import no.flaming_adventure.shared.Hut;
 import no.flaming_adventure.shared.Reservation;
 
@@ -21,7 +19,6 @@ import java.time.LocalDate;
  * Controller for the main view.
  *
  * <ul>
- *     <li>TODO (enhancement): extract equipment table controller and view.
  *     <li>TODO (enhancement): extract destroyed table controller and view.
  *     <li>TODO (enhancement): unify date handling application-wide.
  *     <li>TODO (enhancement): only initialize controllers when the corresponding tab is first opened.
@@ -38,12 +35,8 @@ public class MainController {
     @FXML private ReservationFormController     reservationFormController;
     @FXML private ReservationTableController    reservationTableController;
     @FXML private ForgottenTableController      forgottenTableController;
+    @FXML private EquipmentTableController      equipmentTableController;
 
-    @FXML protected TableView<Equipment> equipmentTableView;
-    @FXML protected TableColumn<Equipment, String> equipmentHutColumn;
-    @FXML protected TableColumn<Equipment, String> equipmentItemColumn;
-    @FXML protected TableColumn<Equipment, Integer> equipmentCountColumn;
-    @FXML protected TableColumn<Equipment, String> equipmentDateColumn;
 
     @FXML protected TableView<Destroyed> destroyedTableView;
     @FXML protected TableColumn<Destroyed, String> destroyedHutColumn;
@@ -65,22 +58,12 @@ public class MainController {
         reservationFormController.initializeData(dataModel);
         reservationTableController.initializeData(dataModel);
         forgottenTableController.initializeData(dataModel);
-        initializeEquipmentTable();
+        equipmentTableController.initializeData(dataModel);
         initializeDestroyedTable();
         initializeDestroyedForm();
     }
 
-    protected void initializeEquipmentTable() {
 
-        equipmentHutColumn.setCellValueFactory(
-                param -> param.getValue().getHut().nameProperty()
-        );
-        equipmentItemColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
-        equipmentCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
-        equipmentDateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-
-        equipmentTableView.setItems(dataModel.getEquipmentList());
-    }
 
     private void initializeDestroyedTable() {
         destroyedHutColumn.setCellValueFactory(

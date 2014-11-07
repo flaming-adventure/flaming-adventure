@@ -21,35 +21,9 @@
          </content>
     </Tab>
       <Tab text="Utstyr">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0">
-               <padding>
-                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-               </padding>
-               <children>
-                  <VBox layoutX="8.0" layoutY="8.0" spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <children>
-                        <HBox spacing="8.0">
-                           <children>
-                              <Label text="Filter:" />
-                              <DatePicker fx:id="reservationFilterFromDate11" />
-                              <DatePicker fx:id="reservationFilterToDate11" />
-                           </children>
-                        </HBox>
-                        <Separator />
-                              <TableView fx:id="equipmentTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                  <columns>
-                              <TableColumn fx:id="equipmentHutColumn" prefWidth="150.0" text="Koie" />
-                                      <TableColumn fx:id="equipmentItemColumn" prefWidth="300.0" text="Ting" />
-                                      <TableColumn fx:id="equipmentCountColumn" prefWidth="75.0" text="Antall" />
-                                      <TableColumn fx:id="equipmentDateColumn" prefWidth="75.0" text="Innkjøpt" />
-                                  </columns>
-                              </TableView>
-                     </children>
-                  </VBox>
-               </children>
-            </AnchorPane>
-        </content>
+         <content>
+            <fx:include fx:id="equipmentTable" source="equipmentTable.fxml" />
+         </content>
       </Tab>
       <Tab text="Odelagt">
         <content>
