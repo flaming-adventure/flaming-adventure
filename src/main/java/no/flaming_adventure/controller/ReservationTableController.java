@@ -16,14 +16,19 @@ import java.util.Date;
 
 /**
  * Controller for the reservation table view.
+ * <ul>
+ *     <li>TODO (low priority): inline editing of reservations.
+ *     <li>TODO (low priority): deletion/deactivation of reservations.
+ * </ul>
  */
 public class ReservationTableController {
     /**
      * Date cell for the dateColumn.
-     *
+     * <p>
      * Responsible for date formatting.
-     *
-     * TODO: use custom, application wide, date formatting.
+     * <ul>
+     *     <li>TODO: use custom, application wide, date formatting.
+     * </ul>
      */
     static private final class DateCell extends TableCell<Reservation, Date> {
         @Override
@@ -38,19 +43,19 @@ public class ReservationTableController {
         }
     }
 
-    /** Default value for the from date filter. */
+    /**
+     * Default value for the from date filter.
+     */
     static private final LocalDate defaultFromDate = LocalDate.now();
-    /** Default value for the to date filter. */
+
+    /**
+     * Default value for the to date filter.
+     */
     static private final LocalDate defaultToDate   = LocalDate.now().plusYears(1);
 
     @FXML private DatePicker filterFromDatePicker;
     @FXML private DatePicker filterToDatePicker;
 
-    /* The main table widgets.
-     *
-     * TODO (low priority): inline editing of reservations.
-     * TODO (low priority): deletion/deactivation of reservations.
-     */
     @FXML private TableView<Reservation>              tableView;
     @FXML private TableColumn<Reservation, String>    hutColumn;
     @FXML private TableColumn<Reservation, Date>      dateColumn;
@@ -61,19 +66,18 @@ public class ReservationTableController {
 
     /**
      * The list of reservations shown in the table.
-     *
-     * See #filterAction() for information about how the list is filtered.
+     * <p>
+     * See {@link #filterAction() filterAction()} for information about how the list is filtered.
      */
     private FilteredList<Reservation> reservations;
 
     /**
      * JavaFX initialization method.
-     *
-     * Set up cell value- and cell factories for the table columns and
-     * initialize static data (e.g. filter defaults).
-     *
-     * This method is called by JavaFX when all FXML dependencies have been
-     * injected. It should not be called by user code.
+     * <p>
+     * Set up cell value- and cell factories for the table columns and initialize static data (e.g. filter defaults).
+     * <p>
+     * This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by user
+     * code.
      */
     @FXML
     private void initialize() {
@@ -92,11 +96,10 @@ public class ReservationTableController {
 
     /**
      * Finalize the initialization by providing access to the data model.
+     * <p>
+     * Note: this method should be called after {@link #initialize() initialize()} has been called by JavaFX.
      *
-     * Note: this method should be called after #initialize() has been called
-     * by JavaFX.
-     *
-     * @param dataModel The application's data model.
+     * @param dataModel the application's data model.
      */
     public void initializeData(DataModel dataModel) {
         reservations = new FilteredList<>(dataModel.getReservationList(), p -> true);

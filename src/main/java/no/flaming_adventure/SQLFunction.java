@@ -3,7 +3,7 @@ package no.flaming_adventure;
 import java.sql.SQLException;
 
 /**
- * Interface for Function<T, R> objects throwing SQL exceptions.
+ * Interface for function objects throwing SQL exceptions.
  *
  * @param <T>   Argument type.
  * @param <R>   Return type.
