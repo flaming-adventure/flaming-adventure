@@ -8,7 +8,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
 import no.flaming_adventure.model.DataModel;
-import no.flaming_adventure.shared.*;
+import no.flaming_adventure.shared.Destroyed;
+import no.flaming_adventure.shared.Equipment;
+import no.flaming_adventure.shared.Hut;
+import no.flaming_adventure.shared.Reservation;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -18,7 +21,6 @@ import java.time.LocalDate;
  * Controller for the main view.
  *
  * <ul>
- *     <li>TODO (enhancement): extract forgotten table controller and view.
  *     <li>TODO (enhancement): extract equipment table controller and view.
  *     <li>TODO (enhancement): extract destroyed table controller and view.
  *     <li>TODO (enhancement): unify date handling application-wide.
@@ -35,14 +37,7 @@ public class MainController {
 
     @FXML private ReservationFormController     reservationFormController;
     @FXML private ReservationTableController    reservationTableController;
-
-    @FXML protected TableView<Forgotten> forgottenTableView;
-    @FXML protected TableColumn<Forgotten, String> forgottenHutColumn;
-    @FXML protected TableColumn<Forgotten, String> forgottenItemColumn;
-    @FXML protected TableColumn<Forgotten, String> forgottenCommentColumn;
-    @FXML protected TableColumn<Forgotten, String> forgottenNameColumn;
-    @FXML protected TableColumn<Forgotten, String> forgottenEmailColumn;
-    @FXML protected TableColumn<Forgotten, String> forgottenDateColumn;
+    @FXML private ForgottenTableController      forgottenTableController;
 
     @FXML protected TableView<Equipment> equipmentTableView;
     @FXML protected TableColumn<Equipment, String> equipmentHutColumn;
@@ -61,13 +56,6 @@ public class MainController {
     @FXML protected TextField destroyedTextField;
     @FXML protected Button destroyedCommitButton;
 
-    @FXML protected ComboBox<Hut> forgottenHutComboBox;
-    @FXML protected DatePicker forgottenDatePicker;
-    @FXML protected ChoiceBox<Reservation> forgottenReservationChoiceBox;
-    @FXML protected TextField forgottenItemTextField;
-    @FXML protected TextField forgottenCommentTextField;
-    @FXML protected Button forgottenCommitButton;
-
     public MainController(SimpleDateFormat dateFormat, DataModel dataModel) {
         this.dateFormat = dateFormat;
         this.dataModel  = dataModel;
@@ -76,9 +64,8 @@ public class MainController {
     @FXML protected void initialize() {
         reservationFormController.initializeData(dataModel);
         reservationTableController.initializeData(dataModel);
+        forgottenTableController.initializeData(dataModel);
         initializeEquipmentTable();
-        initializeForgottenTable();
-        initializeForgottenForm();
         initializeDestroyedTable();
         initializeDestroyedForm();
     }
@@ -93,93 +80,6 @@ public class MainController {
         equipmentDateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 
         equipmentTableView.setItems(dataModel.getEquipmentList());
-    }
-
-    protected void initializeForgottenTable() {
-        forgottenHutColumn.setCellValueFactory(
-                param -> param.getValue().getReservation().getHut().nameProperty()
-        );
-        forgottenItemColumn.setCellValueFactory(new PropertyValueFactory<Forgotten, String>("item"));
-        forgottenCommentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
-        forgottenNameColumn.setCellValueFactory(
-                param -> param.getValue().getReservation().nameProperty()
-        );
-        forgottenEmailColumn.setCellValueFactory(
-                param -> param.getValue().getReservation().emailProperty()
-        );
-        forgottenDateColumn.setCellValueFactory(
-                param -> new SimpleStringProperty(
-                        dateFormat.format(param.getValue().getReservation().getDate()))
-        );
-
-        forgottenTableView.setItems(dataModel.getForgottenList());
-    }
-
-    private void initializeForgottenForm() {
-        initializeComboBox(forgottenHutComboBox, dataModel.getHutList(),
-                (observable, oldHut, newHut) -> updateForgottenForm(newHut), Hut.stringConverter);
-
-        forgottenDatePicker.setValue(LocalDate.now());
-        forgottenDatePicker.setOnAction(event -> updateForgottenForm());
-
-        forgottenReservationChoiceBox.setConverter(Reservation.nameEmailConverter);
-
-        forgottenCommitButton.setOnAction(event -> forgottenCommitAction());
-
-        updateForgottenForm();
-    }
-
-    private void updateForgottenForm() {
-        updateForgottenForm(forgottenHutComboBox.getValue());
-    }
-
-    private void updateForgottenForm(Hut hut) {
-        forgottenReservationChoiceBox.setItems(dataModel.getReservationListForHut(hut));
-
-        if (forgottenReservationChoiceBox.getItems().isEmpty()) {
-            disableForgottenForm();
-        } else {
-            if (forgottenReservationChoiceBox.getValue() == null) {
-                forgottenReservationChoiceBox.getSelectionModel().selectFirst();
-            }
-            enableForgottenForm();
-        }
-    }
-
-    private void disableForgottenForm() {
-        forgottenReservationChoiceBox.setDisable(true);
-        forgottenItemTextField.setDisable(true);
-        forgottenCommentTextField.setDisable(true);
-        forgottenCommitButton.setDisable(true);
-    }
-
-    private void enableForgottenForm() {
-        forgottenReservationChoiceBox.setDisable(false);
-        forgottenItemTextField.setDisable(false);
-        forgottenCommentTextField.setDisable(false);
-        forgottenCommitButton.setDisable(false);
-    }
-
-    private void forgottenCommitAction() {
-        forgottenHutComboBox.setDisable(true);
-        forgottenDatePicker.setDisable(true);
-        disableForgottenForm();
-
-        Reservation reservation = forgottenReservationChoiceBox.getValue();
-        String item             = forgottenItemTextField.getText();
-        String comment          = forgottenCommentTextField.getText();
-        Boolean delivered       = false;
-
-        Forgotten forgotten = new Forgotten(reservation, -1, reservation.getID(), item, delivered, comment);
-
-        try {
-            dataModel.insertForgotten(forgotten);
-        } catch (SQLException ignored) {
-        }
-
-        forgottenHutComboBox.setDisable(false);
-        forgottenDatePicker.setDisable(false);
-        enableForgottenForm();
     }
 
     private void initializeDestroyedTable() {
