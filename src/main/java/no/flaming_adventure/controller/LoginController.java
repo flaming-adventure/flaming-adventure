@@ -15,14 +15,14 @@ import java.util.logging.Logger;
 /**
  * Controller for the login view.
  *
- * The login view is responsible for creating a connection to the database and calling the application's
- * connection hook with that connection.
+ * <p> Responsible for creating a connection to the database and calling the application's connection hook with that
+ * connection.
  */
 public class LoginController {
     /**
      * Database driver to use.
      *
-     * Note that we could possibly allow more dynamic loading of database drivers, but it's not within the current
+     * <p> Note that we could possibly allow more dynamic loading of database drivers, but it's not within the current
      * scope of the application.
      */
     private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
@@ -30,7 +30,6 @@ public class LoginController {
     private final Logger logger;
     private final App app;
 
-    /* Fields assigned by JavaFX at some point in time before initialize() is called. */
     @FXML private TextField URLField;
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
@@ -45,9 +44,11 @@ public class LoginController {
     /**
      * Initialization function called when JavaFX is ready to initialize the controller.
      *
-     * Sets the URL, username and password fields to data from the configuration if such data is available.
+     * <p> Sets the URL, username and password fields to data from the configuration if such data is available.
      *
-     * TODO: make credential persistence optional.
+     * <ul>
+     *     <li>TODO #44 (enhancement): make credential persistence optional.
+     * </ul>
      */
     @FXML private void initialize() {
         logger.info("Initializing login interface...");
@@ -65,7 +66,11 @@ public class LoginController {
     /**
      * Attempt to log in to the database with the entered credentials.
      *
-     * TODO: add database driver prefix if none is given.
+     * <ul>
+     *     <li>TODO #34 (enhancement): add database driver prefix if none is given.
+     *     <li>TODO #42 (enhancement): extract messages to localization file.
+     *     <li>TODO #43 (enhancement): make error interface consistent with main error interface.
+     * </ul>
      */
     private void logIn() {
         String URL = URLField.getText();

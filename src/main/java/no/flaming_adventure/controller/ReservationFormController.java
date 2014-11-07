@@ -16,9 +16,9 @@ import java.util.Date;
 /**
  * Controller for reservation form view.
  * <ul>
- *     <li>TODO (enhancement): provide visual feedback on field limits.
- *     <li>TODO (enhancement): provide visual feedback on required fields.
- *     <li>TODO (enhancement): provide visual feedback on successful database insert.
+ *     <li>TODO #45 (enhancement): provide visual feedback on field limits.
+ *     <li>TODO #45 (enhancement): provide visual feedback on required fields.
+ *     <li>TODO #45 (enhancement): provide visual feedback on successful database insert.
  * </ul>
  */
 public class ReservationFormController {
@@ -27,7 +27,7 @@ public class ReservationFormController {
      * <p>
      * Responsible for disabling selection of dates earlier than today's date.
      * <ul>
-     *     <li>TODO (low priority): mark dates with zero capacity.
+     *     <li>TODO #45 (enhancement, low priority): mark dates with zero capacity.
      * </ul>
      */
     static private final class DateCell extends javafx.scene.control.DateCell {
@@ -48,7 +48,7 @@ public class ReservationFormController {
     /**
      * Format string for capacity text.
      * <ul>
-     *     <li>TODO (low priority): extract to localization file.
+     *     <li>TODO #42 (low priority): extract to localization file.
      * </ul>
      */
     static private final String capacityTextFormat = "%d av totalt %d plasser ledige.";
@@ -66,12 +66,12 @@ public class ReservationFormController {
 
     /**
      * JavaFX initialization method.
-     * <p>
-     * Responsible for initializing the date picker. All other initialization is handled in
+     *
+     * <p> Responsible for initializing the date picker. All other initialization is handled in
      * {@link #initializeData(DataModel) initializeData(DataModel)}.
-     * <p>
-     * This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by user
-     * code.
+     *
+     * <p> This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by
+     * user code.
      */
     @FXML
     private void initialize() {
@@ -81,8 +81,9 @@ public class ReservationFormController {
 
     /**
      * Finalize the initialization by providing access to the data model.
-     * <p>
-     * Note: this method should be called after {@link #initialize() initialize()} has been called by JavaFX.
+     *
+     * <p> Note: this method should be called after {@link #initialize() initialize()} has been called by JavaFX.
+     *
      * <ul>
      *     <li>TODO (bug): handle initialization with an empty list of huts.
      * </ul>
@@ -110,12 +111,13 @@ public class ReservationFormController {
 
     /**
      * Update the form based on the currently selected hut and date.
+     *
      * <ul>
      *     <li>TODO (bug): handle the lack of a selected hut or date.
-     *     <li>TODO (enhancement): do occupancy calculation in the data model.
+     *     <li>TODO #38 (enhancement): do occupancy calculation in the data model.
      *     <li>TODO (enhancement, low priority): improve count choice update code.
-     *     <li>TODO (enhancement): make a default selection for count choice.
-     *     <li>TODO (enhancement): keep previously selected count choice if possible.
+     *     <li>TODO #45 (enhancement): make a default selection for count choice.
+     *     <li>TODO #45 (enhancement): keep previously selected count choice if possible.
      * </ul>
      */
     private void updateAction() {
@@ -144,6 +146,7 @@ public class ReservationFormController {
 
     /**
      * Disable the use of all inputs except for hut and date selection.
+     *
      * <ul>
      *     <li>TODO: (enhancement): rename to something more descriptive.
      * </ul>
@@ -158,6 +161,7 @@ public class ReservationFormController {
 
     /**
      * Enable the use of all inputs except for hut and date selection.
+     *
      * <ul>
      *     <li>TODO: (enhancement): rename to something more descriptive.
      * </ul>
@@ -172,11 +176,12 @@ public class ReservationFormController {
 
     /**
      * Validate the current form data and commit it to the database as a reservation if it is valid.
+     *
      * <ul>
-     *     <li>TODO (enhancement): disable input during commit.
-     *     <li>TODO (bug): validate data in the data model and throw an additional exception for that case.
-     *     <li>TODO (bug): handle error conditions.
-     *     <li>TODO (enhancement): display error conditions to the user instead of letting them pass silently.
+     *     <li>TODO #45 (enhancement): disable input during commit.
+     *     <li>TODO #38 (bug): validate data in the data model and throw an additional exception for that case.
+     *     <li>TODO #43 (bug): handle error conditions.
+     *     <li>TODO #43 (enhancement): display error conditions to the user instead of letting them pass silently.
      * </ul>
      */
     private void commitAction(DataModel dataModel) {

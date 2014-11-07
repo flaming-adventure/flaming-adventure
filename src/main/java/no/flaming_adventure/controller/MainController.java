@@ -16,6 +16,17 @@ import java.time.LocalDate;
 
 /**
  * Controller for the main view.
+ *
+ * <ul>
+ *     <li>TODO (enhancement): extract forgotten table controller and view.
+ *     <li>TODO (enhancement): extract equipment table controller and view.
+ *     <li>TODO (enhancement): extract destroyed table controller and view.
+ *     <li>TODO (enhancement): unify date handling application-wide.
+ *     <li>TODO (enhancement): only initialize controllers when the corresponding tab is first opened.
+ *     <li>TODO #38 (enhancement): add data validation application-wide.
+ *     <li>TODO #43 (enhancement): add error interface.
+ *     <li>TODO (bug): handle empty selections.
+ * </ul>
  */
 public class MainController {
     private final SimpleDateFormat dateFormat;
@@ -63,7 +74,6 @@ public class MainController {
     }
 
     @FXML protected void initialize() {
-        // TODO: Only initialize items when tab is first opened.
         reservationFormController.initializeData(dataModel);
         reservationTableController.initializeData(dataModel);
         initializeEquipmentTable();
@@ -98,7 +108,6 @@ public class MainController {
                 param -> param.getValue().getReservation().emailProperty()
         );
         forgottenDateColumn.setCellValueFactory(
-                // TODO: Date handling.
                 param -> new SimpleStringProperty(
                         dateFormat.format(param.getValue().getReservation().getDate()))
         );
@@ -156,7 +165,6 @@ public class MainController {
         forgottenDatePicker.setDisable(true);
         disableForgottenForm();
 
-        // TODO: Validate data.
         Reservation reservation = forgottenReservationChoiceBox.getValue();
         String item             = forgottenItemTextField.getText();
         String comment          = forgottenCommentTextField.getText();
@@ -166,8 +174,7 @@ public class MainController {
 
         try {
             dataModel.insertForgotten(forgotten);
-        } catch (SQLException e) {
-            // TODO: Handle exception.
+        } catch (SQLException ignored) {
         }
 
         forgottenHutComboBox.setDisable(false);
@@ -180,7 +187,6 @@ public class MainController {
                 param -> param.getValue().getReservation().getHut().nameProperty()
         );
         destroyedDateColumn.setCellValueFactory(
-                // TODO: Date handling.
                 param -> new SimpleStringProperty(
                         dateFormat.format(param.getValue().getReservation().getDate())
                 )
@@ -195,7 +201,6 @@ public class MainController {
                                                  StringConverter<E> converter) {
         if (converter != null) { comboBox.setConverter(converter); }
         comboBox.setItems(list);
-        // TODO: Handle the case where we have no huts.
         comboBox.getSelectionModel().selectFirst();
         comboBox.getSelectionModel().selectedItemProperty().addListener(changeListener);
     }
@@ -207,7 +212,6 @@ public class MainController {
         destroyedDatePicker.setValue(LocalDate.now());
         destroyedDatePicker.setOnAction(event -> updateDestroyedForm());
 
-        // TODO: Extract converter.
         destroyedReservationChoiceBox.setConverter(Reservation.nameEmailConverter);
 
         destroyedCommitButton.setOnAction(event -> destroyedCommitAction());
@@ -257,8 +261,7 @@ public class MainController {
 
         try {
             dataModel.insertDestroyed(destroyed);
-        } catch (SQLException e) {
-            // TODO: Handle exception.
+        } catch (SQLException ignored) {
         }
 
         destroyedHutComboBox.setDisable(false);
