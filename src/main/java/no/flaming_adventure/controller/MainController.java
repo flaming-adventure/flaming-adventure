@@ -21,7 +21,7 @@ public class MainController {
     @FXML private ReservationTableController    reservationTableController;
     @FXML private ForgottenTableController      forgottenTableController;
     @FXML private EquipmentTableController      equipmentTableController;
-    @FXML private DestroyedTableController      destroyedTableController;
+    @FXML private BrokenItemTableController brokenItemTableController;
 
     public MainController(DataModel dataModel) {
         this.dataModel  = dataModel;
@@ -32,6 +32,6 @@ public class MainController {
         reservationTableController.initializeData(dataModel);
         forgottenTableController.initializeData(dataModel);
         equipmentTableController.initializeData(dataModel);
-        destroyedTableController.initializeData(dataModel);
+        brokenItemTableController.initializeData(dataModel);
     }
 }

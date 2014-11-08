@@ -25,7 +25,7 @@
       </Tab>
       <Tab text="Odelagt">
          <content>
-            <fx:include fx:id="destroyedTable" source="destroyedTable.fxml" />
+            <fx:include fx:id="brokenItemTable" source="brokenItemTable.fxml" />
          </content>
       </Tab>
   </tabs>

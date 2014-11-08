@@ -3,22 +3,20 @@ package no.flaming_adventure.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import no.flaming_adventure.model.BrokenItem;
 import no.flaming_adventure.model.DataModel;
-import no.flaming_adventure.shared.Destroyed;
-import no.flaming_adventure.shared.Hut;
-import no.flaming_adventure.shared.Reservation;
+import no.flaming_adventure.model.Hut;
+import no.flaming_adventure.model.Reservation;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Date;
 
-public class DestroyedTableController {
+public class BrokenItemTableController {
     static private final LocalDate defaultDate = LocalDate.now();
 
-    @FXML private TableView<Destroyed> tableView;
-    @FXML private TableColumn<Destroyed, String> hutColumn;
-    @FXML private TableColumn<Destroyed, Date> dateColumn;
-    @FXML private TableColumn<Destroyed, String> itemColumn;
+    @FXML private TableView<BrokenItem>                 tableView;
+    @FXML private TableColumn<BrokenItem, String>       hutColumn;
+    @FXML private TableColumn<BrokenItem, LocalDate>    dateColumn;
+    @FXML private TableColumn<BrokenItem, String>       itemColumn;
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker datePicker;
@@ -30,19 +28,17 @@ public class DestroyedTableController {
 
     @FXML
     private void initialize() {
-        hutColumn.setCellValueFactory(param -> param.getValue().getReservation().getHut().nameProperty());
-        dateColumn.setCellValueFactory(param -> param.getValue().getReservation().dateProperty());
+        hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
+        dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
 
-        hutComboBox.setConverter(Hut.stringConverter);
         datePicker.setValue(defaultDate);
-        reservationChoiceBox.setConverter(Reservation.nameEmailConverter);
     }
 
     public void initializeData(DataModel dataModel) {
         this.dataModel = dataModel;
 
-        tableView.setItems(dataModel.getDestroyedList());
+        tableView.setItems(dataModel.getBrokenItemList());
 
         hutComboBox.setItems(dataModel.getHutList());
         hutComboBox.getSelectionModel().selectFirst();
@@ -69,21 +65,6 @@ public class DestroyedTableController {
     }
 
     private void formCommitAction(ActionEvent event) {
-        formDisable(true);
-
-        Reservation reservation = reservationChoiceBox.getValue();
-        String item = textField.getText();
-        Boolean fixed = false;
-
-        Destroyed destroyed = new Destroyed(reservation, -1, reservation.getID(), item, fixed);
-
-        try {
-            dataModel.insertDestroyed(destroyed);
-        } catch (SQLException ignored) {
-
-        }
-
-        formEnable(true);
     }
 
     private void formDisable(Boolean all) {

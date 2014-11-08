@@ -4,14 +4,12 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
-import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
-import no.flaming_adventure.shared.Hut;
-import no.flaming_adventure.shared.Reservation;
+import no.flaming_adventure.model.Hut;
+import no.flaming_adventure.model.Reservation;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Date;
 
 /**
  * Controller for reservation form view.
@@ -95,8 +93,8 @@ public class ReservationFormController {
 
         ObservableList<Hut> huts = dataModel.getHutList();
 
+        hutComboBox.getEditor().setDisable(true);
         hutComboBox.setItems(huts);
-        hutComboBox.setConverter(Hut.stringConverter);
         hutComboBox.getSelectionModel().selectFirst();
 
         hutComboBox.setOnAction(event -> updateAction());
@@ -122,7 +120,7 @@ public class ReservationFormController {
      */
     private void updateAction() {
         Hut hut = hutComboBox.getValue();
-        Date date = Util.dateFromLocalDate(datePicker.getValue());
+        LocalDate date = datePicker.getValue();
 
         if (hut == null || date == null) { return; }
 
@@ -186,14 +184,16 @@ public class ReservationFormController {
      */
     private void commitAction(DataModel dataModel) {
         Hut hut = hutComboBox.getValue();
-        Date date = Util.dateFromLocalDate(datePicker.getValue());
+        LocalDate date = datePicker.getValue();
         String name = nameTextField.getText();
         String email = emailTextField.getText();
         Integer count = countChoiceBox.getValue();
         String comment = commentTextArea.getText();
 
+        Reservation reservation = new Reservation(null, hut, date, name, email, count, comment);
+
         try {
-            dataModel.insertReservation(new Reservation(hut, -1, hut.getID(), date, name, email, count, comment));
+            dataModel.insertReservation(reservation);
         } catch (SQLException ignored) {
         }
     }

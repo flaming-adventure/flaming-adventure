@@ -3,7 +3,6 @@ package no.flaming_adventure.model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import no.flaming_adventure.SQLFunction;
-import no.flaming_adventure.shared.*;
 
 import java.sql.*;
 import java.util.Optional;
@@ -20,40 +19,7 @@ import java.util.logging.Logger;
  * <p> For the most up to date database layout see <code>src/dist/schema.ddl</code> in the source directory or
  * <code>schema.ddl</code> in the distributed files. This section deals mostly with architecture decisions.
  *
- * <p> The following section is copied from Ivar Nyland's system architecture description, updated to reflect the
- * current state of the database and translated by me (Erik Nyhus) to English.
- *
- * <blockquote>
- * <p> Because of time constraints, the database will not be highly normalized. We can for example look at the use of
- * the name and e-mail fields in the reservation table, where we would have preferred to build a customer register
- * with its own customer table. We regard this as good enough given the scope of the project.
- *
- * <p> In the <em>reservations</em> table we store all information needed to make a reservation for a hut. The
- * primary key <em>id</em> is an auto incrementing integer that is unique for each reservation.
- * <em>hut_id</em> keeps track of which hut the reservation is for. In addition we keep the date of the
- * reservation (<em>date</em>), the name and e-mail of the person responsible for the order (<em>name</em>
- * and <em>email</em>), the number of people (<em>count</em>) and a comment with any additional information
- * (<em>comment</em>).
- *
- * <p> The <em>huts</em> table keeps track of the different huts available for reservations. Each hut has a
- * <em>name</em>, a unique <em>id</em>, a <em>capacity</em> and a number of bags of <em>firewood</em>.
- *
- * <p> <em>equipment</em> is a table records for equipment available at the different huts. Each item has the
- * obligatory <em>id</em>, <em>hut_id</em> and <em>name</em> fields. Additionally we keep the data at which a set of
- * items were purchased (<em>purchase_date</em>) and the number of items purchased at that date <em>count</em>.
- *
- * <p> Tables for forgotten items (<em>forgotten_items</em>) and destroyed/out of order items (<em>out_of_order</em>)
- * also exist. These are relatively similar, both containing the obligatory <em>id</em> as well as being linked to a
- * reservation (<em>reservation_id</em>) and having a short name (<em>item</em>). The destroyed/out of order table
- * contains a <em>fixed</em> field of boolean type and the forgotten item table has a <em>delivered</em> field with
- * much the same function. Finally the forgotten item table has a <em>comment</em> field for additional information.
- * </blockquote>
- *
- * <ul>
- *     <li>TODO #36 (low priority): make a consistent decision on the naming of the destroyed/out of order table.
- *     <li>TODO #35 (enhancement): change the destroyed table's dependency on a reservation to a dependency on a hut.
- *     <li>TODO #40 (enhancement): change the forgotten table's dependency on a reservation to a dependency on a hut.
- * </ul>
+ * <p> <em>Section removed during refactor.</em>
  *
  * <h3>Database usage strategy</h3>
  *
@@ -75,26 +41,27 @@ import java.util.logging.Logger;
  * change.
  */
 public class DataModel {
-    private static final String sqlHutList          = "SELECT * FROM huts;";
-    private static final String sqlReservationList  = "SELECT * FROM reservations;";
-    private static final String sqlEquipmentList    = "SELECT * FROM equipment;";
-    private static final String sqlForgottenList    = "SELECT * FROM forgotten_items;";
-    private static final String sqlDestroyedList    = "SELECT * FROM out_of_order;";
+    private static final String sqlHutList              = "SELECT * FROM huts;";
+    private static final String sqlReservationList      = "SELECT * FROM reservations;";
+    private static final String sqlEquipmentList        = "SELECT * FROM equipment;";
+    private static final String sqlForgottenItemList    = "SELECT * FROM forgotten_items;";
+    private static final String sqlBrokenItemList       = "SELECT * FROM broken_items;";
 
     private static final String sqlInsertReservation    =
             "INSERT INTO reservations (hut_id, date, name, email, count, comment) VALUES (?, ?, ?, ?, ?, ?);";
 
-    private static final String sqlInsertDestroyed      =
-            "INSERT INTO out_of_order (reservation_id, item, fixed) VALUES (?, ?, ?);";
+    private static final String sqlInsertBrokenItem     =
+            "INSERT INTO broken_items (hut_id, item, date, fixed, comment) VALUES (?, ?, ?, ?, ?);";
 
-    private static final String sqlInsertForgotten      =
-            "INSERT INTO forgotten_items (reservation_id, item, delivered, comment) VALUES (?, ?, ?, ?);";
+    private static final String sqlInsertForgottenItem  =
+            "INSERT INTO forgotten_items (hut_id, item, name, contact, date, delivered, comment) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?);";
 
     private final Logger logger;
 
     private final PreparedStatement reservationInsertStmt;
-    private final PreparedStatement destroyedInsertStmt;
-    private final PreparedStatement forgottenInsertStmt;
+    private final PreparedStatement brokenItemInsertStmt;
+    private final PreparedStatement forgottenItemInsertStmt;
 
     /* We maintain all data from all tables in the database as ObservableList<> objects.
      *
@@ -108,15 +75,15 @@ public class DataModel {
     private final ObservableList<Hut>           hutList;
     private final ObservableList<Reservation>   reservationList;
     private final ObservableList<Equipment>     equipmentList;
-    private final ObservableList<Forgotten>     forgottenList;
-    private final ObservableList<Destroyed>     destroyedList;
+    private final ObservableList<ForgottenItem> forgottenItemList;
+    private final ObservableList<BrokenItem>    brokenItemList;
 
     /**
      * Create a data model from the given SQL connection.
      *
      * @param logger            Logger object to be used for all logging by the data model
      * @param connection        Connection to the SQL database.
-     * @throws SQLException     Any conceivable SQL exception.
+     * @throws java.sql.SQLException     Any conceivable SQL exception.
      */
     public DataModel(Logger logger, Connection connection) throws SQLException {
         this.logger = logger;
@@ -127,12 +94,12 @@ public class DataModel {
         PreparedStatement hutStmt           = connection.prepareStatement(sqlHutList);
         PreparedStatement reservationStmt   = connection.prepareStatement(sqlReservationList);
         PreparedStatement equipmentStmt     = connection.prepareStatement(sqlEquipmentList);
-        PreparedStatement forgottenStmt     = connection.prepareStatement(sqlForgottenList);
-        PreparedStatement destroyedStmt     = connection.prepareStatement(sqlDestroyedList);
+        PreparedStatement forgottenItemStmt = connection.prepareStatement(sqlForgottenItemList);
+        PreparedStatement brokenItemStmt    = connection.prepareStatement(sqlBrokenItemList);
 
         reservationInsertStmt   = connection.prepareStatement(sqlInsertReservation, Statement.RETURN_GENERATED_KEYS);
-        destroyedInsertStmt     = connection.prepareStatement(sqlInsertDestroyed,   Statement.RETURN_GENERATED_KEYS);
-        forgottenInsertStmt     = connection.prepareStatement(sqlInsertForgotten,   Statement.RETURN_GENERATED_KEYS);
+        brokenItemInsertStmt    = connection.prepareStatement(sqlInsertBrokenItem, Statement.RETURN_GENERATED_KEYS);
+        forgottenItemInsertStmt = connection.prepareStatement(sqlInsertForgottenItem, Statement.RETURN_GENERATED_KEYS);
 
         hutList = forceList(hutStmt, resultSet -> new Hut(
                 resultSet.getInt("id"),
@@ -143,13 +110,11 @@ public class DataModel {
 
         reservationList = forceList(reservationStmt, resultSet -> {
             Integer hutID = resultSet.getInt("hut_id");
-            // TODO: Don't unwrap optional.
             Hut hut = getHutFromID(hutID).get();
             return new Reservation(
-                    hut,
                     resultSet.getInt("id"),
-                    hutID,
-                    resultSet.getDate("date"),
+                    hut,
+                    resultSet.getDate("date").toLocalDate(),
                     resultSet.getString("name"),
                     resultSet.getString("email"),
                     resultSet.getInt("count"),
@@ -159,42 +124,41 @@ public class DataModel {
 
         equipmentList = forceList(equipmentStmt, resultSet -> {
             Integer hutID = resultSet.getInt("hut_id");
-            // TODO: Don't unwrap optional.
             Hut hut = getHutFromID(hutID).get();
             return new Equipment(
-                    hut,
                     resultSet.getInt("id"),
-                    hutID,
+                    hut,
                     resultSet.getString("name"),
-                    resultSet.getDate("purchase_date"),
+                    resultSet.getDate("purchase_date").toLocalDate(),
                     resultSet.getInt("count")
             );
         });
 
-        forgottenList = forceList(forgottenStmt, resultSet -> {
-            Integer reservationID = resultSet.getInt("reservation_id");
-            // TODO: Don't unwrap optional.
-            Reservation reservation = getReservationFromID(reservationID).get();
-            return new Forgotten(
-                    reservation,
+        forgottenItemList = forceList(forgottenItemStmt, resultSet -> {
+            Integer hutID = resultSet.getInt("hut_id");
+            Hut hut = getHutFromID(hutID).get();
+            return new ForgottenItem(
                     resultSet.getInt("id"),
-                    reservationID,
+                    hut,
                     resultSet.getString("item"),
+                    resultSet.getString("name"),
+                    resultSet.getString("contact"),
+                    resultSet.getDate("date").toLocalDate(),
                     resultSet.getBoolean("delivered"),
                     resultSet.getString("comment")
             );
         });
 
-        destroyedList   = forceList(destroyedStmt, resultSet -> {
-            Integer reservationID = resultSet.getInt("reservation_id");
-            // TODO: Don't unwrap optional.
-            Reservation reservation = getReservationFromID(reservationID).get();
-            return new Destroyed(
-                    reservation,
+        brokenItemList = forceList(brokenItemStmt, resultSet -> {
+            Integer hutID = resultSet.getInt("hut_id");
+            Hut hut = getHutFromID(hutID).get();
+            return new BrokenItem(
                     resultSet.getInt("id"),
-                    reservationID,
+                    hut,
                     resultSet.getString("item"),
-                    resultSet.getBoolean("fixed")
+                    resultSet.getDate("date").toLocalDate(),
+                    resultSet.getBoolean("fixed"),
+                    resultSet.getString("comment")
             );
         });
 
@@ -223,7 +187,7 @@ public class DataModel {
     public Optional<Hut> getHutFromID(Integer ID) {
         // TODO: Improve search algorithm.
         for (Hut hut : getHutList()) {
-            if (hut.getID() == ID) { return Optional.of(hut); }
+            if (hut.getId() == ID) { return Optional.of(hut); }
         }
         return Optional.empty();
     }
@@ -246,7 +210,7 @@ public class DataModel {
      * @deprecated a new data model API is under development and will replace the current one.
      */
     public ObservableList<Reservation> getReservationListForHut(Hut hut) {
-        return getReservationList().filtered(reservation -> reservation.getHutID() == hut.getID());
+        return getReservationList().filtered(reservation -> reservation.getHut().getId() == hut.getId());
     }
 
     /**
@@ -258,7 +222,7 @@ public class DataModel {
      */
     public Optional<Reservation> getReservationFromID(Integer ID) {
         for (Reservation reservation : getReservationList()) {
-            if (reservation.getID() == ID) { return Optional.of(reservation); }
+            if (reservation.getId() == ID) { return Optional.of(reservation); }
         }
         return Optional.empty();
     }
@@ -273,8 +237,8 @@ public class DataModel {
     public void insertReservation(Reservation reservation) throws SQLException {
         logger.info("Adding reservation to database...");
 
-        reservationInsertStmt.setInt(1, reservation.getHutID());
-        reservationInsertStmt.setDate(2, new java.sql.Date(reservation.getDate().getTime()));
+        reservationInsertStmt.setInt(1, reservation.getHut().getId());
+        reservationInsertStmt.setDate(2, Date.valueOf(reservation.getDate()));
         reservationInsertStmt.setString(3, reservation.getName());
         reservationInsertStmt.setString(4, reservation.getEmail());
         reservationInsertStmt.setInt(5, reservation.getCount());
@@ -287,7 +251,7 @@ public class DataModel {
         if (resultSet.next()) {
             logger.fine("Database returned primary key for reservation.");
 
-            reservation.setID(resultSet.getInt(1));
+            reservation.setId(resultSet.getInt(1));
         } else {
             logger.warning("Database failed to return primary key for reservation.");
         }
@@ -315,7 +279,7 @@ public class DataModel {
      * @deprecated a new data model API is under development and will replace the current one.
      */
     public ObservableList<Equipment> getEquipmentListForHut(Hut hut) {
-        return getEquipmentList().filtered(item -> item.getHutID() == hut.getID());
+        return getEquipmentList().filtered(item -> item.getHut().getId() == hut.getId());
     }
 
     /**
@@ -324,39 +288,42 @@ public class DataModel {
      * @return the list of all forgotten items.
      * @deprecated a new data model API is under development and will replace the current one.
      */
-    public ObservableList<Forgotten> getForgottenList() {
-        return forgottenList;
+    public ObservableList<ForgottenItem> getForgottenItemList() {
+        return forgottenItemList;
     }
 
     /**
-     * Insert a forgotten item into the database, setting the ID of the object to the database ID used.
+     * Insert a forgottenItem item into the database, setting the ID of the object to the database ID used.
      *
-     * @param forgotten the item to insert into the database.
+     * @param forgottenItem the item to insert into the database.
      * @throws SQLException any conceivable SQL exception.
      * @deprecated a new data model API is under development and will replace the current one.
      */
-    public void insertForgotten(Forgotten forgotten) throws SQLException {
-        logger.info("Adding forgotten item to database...");
+    public void insertForgotten(ForgottenItem forgottenItem) throws SQLException {
+        logger.info("Adding forgottenItem item to database...");
 
-        forgottenInsertStmt.setInt(1, forgotten.getReservationID());
-        forgottenInsertStmt.setString(2, forgotten.getItem());
-        forgottenInsertStmt.setBoolean(3, forgotten.getDelivered());
-        forgottenInsertStmt.setString(4, forgotten.getComment());
+        forgottenItemInsertStmt.setInt(1, forgottenItem.getHut().getId());
+        forgottenItemInsertStmt.setString(2, forgottenItem.getItem());
+        forgottenItemInsertStmt.setString(3, forgottenItem.getName());
+        forgottenItemInsertStmt.setString(4, forgottenItem.getContact());
+        forgottenItemInsertStmt.setDate(5, Date.valueOf(forgottenItem.getDate()));
+        forgottenItemInsertStmt.setBoolean(6, forgottenItem.getDelivered());
+        forgottenItemInsertStmt.setString(7, forgottenItem.getComment());
 
-        forgottenInsertStmt.executeUpdate();
+        forgottenItemInsertStmt.executeUpdate();
 
-        ResultSet resultSet = forgottenInsertStmt.getGeneratedKeys();
+        ResultSet resultSet = forgottenItemInsertStmt.getGeneratedKeys();
 
         if (resultSet.next()) {
-            logger.fine("Database returned primary key for forgotten item.");
+            logger.fine("Database returned primary key for forgottenItem item.");
 
-            forgotten.setID(resultSet.getInt(1));
+            forgottenItem.setId(resultSet.getInt(1));
         } else {
-            logger.warning("Database failed to return primary key for forgotten item.");
+            logger.warning("Database failed to return primary key for forgottenItem item.");
         }
 
-        logger.info("Adding new forgotten item to list.");
-        getForgottenList().add(forgotten);
+        logger.info("Adding new forgottenItem item to list.");
+        getForgottenItemList().add(forgottenItem);
     }
 
     /**
@@ -365,39 +332,41 @@ public class DataModel {
      * @return a list of all destroyed items for all huts.
      * @deprecated a new data model API is under development and will replace the current one.
      */
-    public ObservableList<Destroyed> getDestroyedList() {
-        return destroyedList;
+    public ObservableList<BrokenItem> getBrokenItemList() {
+        return brokenItemList;
     }
 
     /**
-     * Insert a destroyed item into the database, setting the ID of the object to the database ID used.
+     * Insert a brokenItem item into the database, setting the ID of the object to the database ID used.
      *
-     * @param destroyed the item to insert into the database.
+     * @param brokenItem the item to insert into the database.
      * @throws SQLException any conceivable SQL exception.
      * @deprecated a new data model API is under development and will replace the current one.
      */
-    public void insertDestroyed(Destroyed destroyed) throws SQLException {
-        logger.info("Adding destroyed item to database...");
+    public void insertBrokenItem(BrokenItem brokenItem) throws SQLException {
+        logger.info("Adding brokenItem item to database...");
 
-        destroyedInsertStmt.setInt(1, destroyed.getReservationID());
-        destroyedInsertStmt.setString(2, destroyed.getItem());
-        destroyedInsertStmt.setBoolean(3, destroyed.getFixed());
+        brokenItemInsertStmt.setInt(1, brokenItem.getHut().getId());
+        brokenItemInsertStmt.setString(2, brokenItem.getItem());
+        brokenItemInsertStmt.setDate(3, Date.valueOf(brokenItem.getDate()));
+        brokenItemInsertStmt.setBoolean(4, brokenItem.getFixed());
+        brokenItemInsertStmt.setString(5, brokenItem.getComment());
 
-        destroyedInsertStmt.executeUpdate();
+        brokenItemInsertStmt.executeUpdate();
 
-        ResultSet resultSet = destroyedInsertStmt.getGeneratedKeys();
+        ResultSet resultSet = brokenItemInsertStmt.getGeneratedKeys();
 
         if (resultSet.next()) {
-            logger.fine("Database returned primary key for destroyed item.");
+            logger.fine("Database returned primary key for brokenItem item.");
 
-            destroyed.setID(resultSet.getInt(1));
+            brokenItem.setId(resultSet.getInt(1));
         } else {
-            logger.warning("Database failed to return primary key for destroyed item.");
+            logger.warning("Database failed to return primary key for brokenItem item.");
         }
 
-        logger.info("Adding new destroyed item to list.");
+        logger.info("Adding new brokenItem item to list.");
 
-        destroyedList.add(destroyed);
+        brokenItemList.add(brokenItem);
     }
 
     /**

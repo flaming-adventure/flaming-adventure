@@ -3,14 +3,11 @@ package no.flaming_adventure.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import no.flaming_adventure.model.DataModel;
-import no.flaming_adventure.shared.Forgotten;
-import no.flaming_adventure.shared.Hut;
-import no.flaming_adventure.shared.Reservation;
+import no.flaming_adventure.model.ForgottenItem;
+import no.flaming_adventure.model.Hut;
+import no.flaming_adventure.model.Reservation;
 
-import java.sql.SQLException;
-import java.text.DateFormat;
 import java.time.LocalDate;
-import java.util.Date;
 
 /**
  * Controller for the forgotten item tab, responsible for both table and form.
@@ -24,38 +21,17 @@ import java.util.Date;
  */
 public class ForgottenTableController {
     /**
-     * Date cell for the dateColumn.
-     * <p>
-     * Responsible for date formatting.
-     * <ul>
-     *     <li>TODO: use custom, application wide, date formatting.
-     * </ul>
-     */
-    static private final class DateCell extends TableCell<Forgotten, Date> {
-        @Override
-        protected void updateItem(Date date, boolean empty) {
-            super.updateItem(date, empty);
-
-            if (date == null) {
-                setText(null);
-            } else {
-                setText(DateFormat.getDateInstance().format(date));
-            }
-        }
-    }
-
-    /**
      * Default date for the form's date picker.
      */
     static private final LocalDate defaultDate = LocalDate.now();
 
-    @FXML private TableView<Forgotten> tableView;
-    @FXML private TableColumn<Forgotten, String> hutColumn;
-    @FXML private TableColumn<Forgotten, String> itemColumn;
-    @FXML private TableColumn<Forgotten, String> commentColumn;
-    @FXML private TableColumn<Forgotten, String> nameColumn;
-    @FXML private TableColumn<Forgotten, String> emailColumn;
-    @FXML private TableColumn<Forgotten, Date>   dateColumn;
+    @FXML private TableView<ForgottenItem>              tableView;
+    @FXML private TableColumn<ForgottenItem, String>    hutColumn;
+    @FXML private TableColumn<ForgottenItem, String>    itemColumn;
+    @FXML private TableColumn<ForgottenItem, String>    commentColumn;
+    @FXML private TableColumn<ForgottenItem, String>    nameColumn;
+    @FXML private TableColumn<ForgottenItem, String>    emailColumn;
+    @FXML private TableColumn<ForgottenItem, LocalDate> dateColumn;
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker datePicker;
@@ -76,18 +52,14 @@ public class ForgottenTableController {
      */
     @FXML
     private void initialize() {
-        dateColumn.setCellFactory(column -> new DateCell());
-
-        hutColumn.setCellValueFactory(param -> param.getValue().getReservation().getHut().nameProperty());
+        hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
-        nameColumn.setCellValueFactory(param -> param.getValue().getReservation().nameProperty());
-        emailColumn.setCellValueFactory(param -> param.getValue().getReservation().emailProperty());
-        dateColumn.setCellValueFactory(param -> param.getValue().getReservation().dateProperty());
+        nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
+        emailColumn.setCellValueFactory(param -> param.getValue().contactProperty());
+        dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
 
-        hutComboBox.setConverter(Hut.stringConverter);
         datePicker.setValue(defaultDate);
-        reservationChoiceBox.setConverter(Reservation.nameEmailConverter);
     }
 
     /**
@@ -100,7 +72,7 @@ public class ForgottenTableController {
     public void initializeData(DataModel dataModel) {
         this.dataModel = dataModel;
 
-        tableView.setItems(dataModel.getForgottenList());
+        tableView.setItems(dataModel.getForgottenItemList());
 
         hutComboBox.setItems(dataModel.getHutList());
         hutComboBox.getSelectionModel().selectFirst();
@@ -154,24 +126,5 @@ public class ForgottenTableController {
      * Attempt to add a new forgotten item from the form to the database.
      */
     private void commitAction() {
-        hutComboBox.setDisable(true);
-        datePicker.setDisable(true);
-        disableForm();
-
-        Reservation reservation = reservationChoiceBox.getValue();
-        String item             = itemTextField.getText();
-        String comment          = commentTextField.getText();
-        Boolean delivered       = false;
-
-        Forgotten forgotten = new Forgotten(reservation, -1, reservation.getID(), item, delivered, comment);
-
-        try {
-            dataModel.insertForgotten(forgotten);
-        } catch (SQLException ignored) {
-        }
-
-        hutComboBox.setDisable(false);
-        datePicker.setDisable(false);
-        enableForm();
     }
 }

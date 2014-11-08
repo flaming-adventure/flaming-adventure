@@ -3,16 +3,12 @@ package no.flaming_adventure.controller;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
-import no.flaming_adventure.shared.Reservation;
+import no.flaming_adventure.model.Reservation;
 
-import java.text.DateFormat;
 import java.time.LocalDate;
-import java.util.Date;
 
 /**
  * Controller for the reservation table view.
@@ -22,27 +18,6 @@ import java.util.Date;
  * </ul>
  */
 public class ReservationTableController {
-    /**
-     * Date cell for the dateColumn.
-     * <p>
-     * Responsible for date formatting.
-     * <ul>
-     *     <li>TODO: use custom, application wide, date formatting.
-     * </ul>
-     */
-    static private final class DateCell extends TableCell<Reservation, Date> {
-        @Override
-        protected void updateItem(Date date, boolean empty) {
-            super.updateItem(date, empty);
-
-            if (date == null) {
-                setText(null);
-            } else {
-                setText(DateFormat.getDateInstance().format(date));
-            }
-        }
-    }
-
     /**
      * Default value for the from date filter.
      */
@@ -58,7 +33,7 @@ public class ReservationTableController {
 
     @FXML private TableView<Reservation>              tableView;
     @FXML private TableColumn<Reservation, String>    hutColumn;
-    @FXML private TableColumn<Reservation, Date>      dateColumn;
+    @FXML private TableColumn<Reservation, LocalDate> dateColumn;
     @FXML private TableColumn<Reservation, String>    nameColumn;
     @FXML private TableColumn<Reservation, String>    emailColumn;
     @FXML private TableColumn<Reservation, Number>    countColumn;
@@ -81,8 +56,6 @@ public class ReservationTableController {
      */
     @FXML
     private void initialize() {
-        dateColumn.setCellFactory(column -> new DateCell());
-
         hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
@@ -116,9 +89,9 @@ public class ReservationTableController {
      */
     private void filterAction() {
         reservations.setPredicate(reservation -> {
-            Date date = reservation.getDate();
-            Date from = Util.dateFromLocalDate(filterFromDatePicker.getValue());
-            Date to = Util.dateFromLocalDate(filterToDatePicker.getValue());
+            LocalDate date  = reservation.getDate();
+            LocalDate from  = filterFromDatePicker.getValue();
+            LocalDate to    = filterToDatePicker.getValue();
             // Show only reservations with dates in the inclusive range
             // [from, to]. Ignore unset filters, and always show reservations
             // without a date (which do not exist, and cannot be created, at
