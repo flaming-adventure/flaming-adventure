@@ -93,7 +93,6 @@ public class LoginController {
      * Attempt to log in to the database with the entered credentials.
      *
      * <ul>
-     *     <li>TODO #34 (enhancement): add database driver prefix if none is given.
      *     <li>TODO #42 (enhancement): extract messages to localization file.
      * </ul>
      */
@@ -101,6 +100,10 @@ public class LoginController {
         String URL = URLField.getText();
         String username = usernameField.getText();
         String password = passwordField.getText();
+
+        if (! URL.startsWith("jdbc:mysql://")) {
+            URL = "jdbc:mysql://" + URL;
+        }
 
         LOGGER.log(Level.INFO, "Attempting to log in to {0} as {1}.",
                 new Object[]{URL, username});
@@ -110,7 +113,7 @@ public class LoginController {
             Connection connection = DriverManager.getConnection(URL, username, password);
 
             LOGGER.log(Level.INFO, "Storing user credentials.");
-            preferences.put(DATABASE_URL, URL);
+            preferences.put(DATABASE_URL, URL.replace("jdbc:mysql://", ""));
             preferences.put(USERNAME, username);
             preferences.put(PASSWORD, password);
 
