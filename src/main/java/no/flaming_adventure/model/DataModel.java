@@ -6,6 +6,8 @@ import no.flaming_adventure.SQLFunction;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -78,6 +80,8 @@ public class DataModel {
 
     private final PreparedStatement occupancyStmt;
 
+    private final Map<Integer, Hut> hutMap = new HashMap<>();
+
     /************************************************************************
      *
      * Fields (deprecated)
@@ -116,12 +120,11 @@ public class DataModel {
      * @throws java.sql.SQLException     Any conceivable SQL exception.
      */
     public DataModel(Connection connection) throws SQLException {
+        LOGGER.log(Level.FINE, "Initializing data model.");
+
         statement = connection.createStatement();
         occupancyStmt = connection.prepareStatement("SELECT SUM(reservations.count) FROM reservations " +
                         "WHERE reservations.hut_id = ? AND reservations.date = ?;");
-
-        LOGGER.fine("Initializing data model...");
-        LOGGER.finest("Preparing data model statements...");
 
         PreparedStatement hutStmt           = connection.prepareStatement(sqlHutList);
         PreparedStatement reservationStmt   = connection.prepareStatement(sqlReservationList);
@@ -208,7 +211,9 @@ public class DataModel {
         String query = "SELECT * FROM huts;";
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
-            huts.add(hutFromResultSet(resultSet));
+            Hut hut = hutFromResultSet(resultSet);
+            huts.add(hut);
+            hutMap.put(hut.getId(), hut);
         }
         return huts;
     }
@@ -220,6 +225,16 @@ public class DataModel {
         ResultSet resultSet = occupancyStmt.executeQuery();
         resultSet.next();
         return resultSet.getInt(1);
+    }
+
+    public ObservableList<Reservation> getReservations() throws SQLException {
+        ObservableList<Reservation> reservations = FXCollections.observableArrayList();
+        String query = "SELECT * FROM reservations;";
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            reservations.add(reservationFromResultSet(resultSet));
+        }
+        return reservations;
     }
 
     /**
@@ -431,6 +446,19 @@ public class DataModel {
                 resultSet.getString("name"),
                 resultSet.getInt("capacity"),
                 resultSet.getInt("firewood")
+        );
+    }
+
+    private Reservation reservationFromResultSet(ResultSet resultSet) throws SQLException {
+        Hut hut = hutMap.get(resultSet.getInt("hut_id"));
+        return new Reservation(
+                resultSet.getInt("id"),
+                hut,
+                resultSet.getDate("date").toLocalDate(),
+                resultSet.getString("name"),
+                resultSet.getString("email"),
+                resultSet.getInt("count"),
+                resultSet.getString("comment")
         );
     }
 

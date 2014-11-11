@@ -1,14 +1,15 @@
 package no.flaming_adventure.controller;
 
-import javafx.collections.transformation.FilteredList;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Reservation;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.function.Consumer;
 
 /**
  * Controller for the reservation table view.
@@ -18,18 +19,22 @@ import java.time.LocalDate;
  * </ul>
  */
 public class ReservationTableController {
-    /**
-     * Default value for the from date filter.
-     */
-    static private final LocalDate defaultFromDate = LocalDate.now();
 
-    /**
-     * Default value for the to date filter.
-     */
-    static private final LocalDate defaultToDate   = LocalDate.now().plusYears(1);
+    /************************************************************************
+     *
+     * Static fields
+     *
+     ************************************************************************/
 
-    @FXML private DatePicker filterFromDatePicker;
-    @FXML private DatePicker filterToDatePicker;
+    /************************************************************************
+     *
+     * Fields
+     *
+     ************************************************************************/
+
+    /* Injected fields. */
+    private DataModel dataModel;
+    private Consumer<Throwable> unhandledExceptionHook;
 
     @FXML private TableView<Reservation>              tableView;
     @FXML private TableColumn<Reservation, String>    hutColumn;
@@ -39,12 +44,34 @@ public class ReservationTableController {
     @FXML private TableColumn<Reservation, Number>    countColumn;
     @FXML private TableColumn<Reservation, String>    commentColumn;
 
-    /**
-     * The list of reservations shown in the table.
-     * <p>
-     * See {@link #filterAction() filterAction()} for information about how the list is filtered.
-     */
-    private FilteredList<Reservation> reservations;
+    /************************************************************************
+     *
+     * Public API
+     *
+     ************************************************************************/
+
+    public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+        this.dataModel = dataModel;
+        this.unhandledExceptionHook = unhandledExceptionHook;
+    }
+
+    public void load() {
+        ObservableList<Reservation> reservations;
+        try {
+            reservations = dataModel.getReservations();
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+
+        tableView.setItems(reservations);
+    }
+
+    /************************************************************************
+     *
+     * Private implementation
+     *
+     ************************************************************************/
 
     /**
      * JavaFX initialization method.
@@ -62,43 +89,5 @@ public class ReservationTableController {
         emailColumn.setCellValueFactory(param -> param.getValue().emailProperty());
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
-
-        filterFromDatePicker.setValue(defaultFromDate);
-        filterToDatePicker.setValue(defaultToDate);
-    }
-
-    /**
-     * Finalize the initialization by providing access to the data model.
-     * <p>
-     * Note: this method should be called after {@link #initialize() initialize()} has been called by JavaFX.
-     *
-     * @param dataModel the application's data model.
-     */
-    public void initializeData(DataModel dataModel) {
-        reservations = new FilteredList<>(dataModel.getReservationList(), p -> true);
-        tableView.setItems(reservations);
-
-        filterFromDatePicker.setOnAction(event -> filterAction());
-        filterToDatePicker.setOnAction(event -> filterAction());
-
-        filterAction();
-    }
-
-    /**
-     * Update the table data by applying the current filters.
-     */
-    private void filterAction() {
-        reservations.setPredicate(reservation -> {
-            LocalDate date  = reservation.getDate();
-            LocalDate from  = filterFromDatePicker.getValue();
-            LocalDate to    = filterToDatePicker.getValue();
-            // Show only reservations with dates in the inclusive range
-            // [from, to]. Ignore unset filters, and always show reservations
-            // without a date (which do not exist, and cannot be created, at
-            // the time of writing).
-            return date == null
-                    || (from    == null || date.compareTo(from) >= 0)
-                    && (to      == null || date.compareTo(to)   <= 0);
-        });
     }
 }
