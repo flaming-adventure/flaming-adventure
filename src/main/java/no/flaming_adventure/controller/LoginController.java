@@ -92,7 +92,7 @@ public class LoginController {
 
         EventHandler<KeyEvent> enterHandler = event -> {
             if (event.getCode() == KeyCode.ENTER) {
-                logInButtonActionHook(new Object());
+                logInButton.fire();
             }
         };
 
@@ -100,6 +100,7 @@ public class LoginController {
         usernameField.setOnKeyReleased(enterHandler);
         passwordField.setOnKeyReleased(enterHandler);
         rememberMeCheckBox.setOnKeyReleased(enterHandler);
+        logInButton.setOnKeyReleased(enterHandler);
     }
 
     /**
