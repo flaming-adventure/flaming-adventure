@@ -10,6 +10,7 @@ import no.flaming_adventure.model.Reservation;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.function.Consumer;
 
 /**
  * Controller for reservation form view.
@@ -20,6 +21,13 @@ import java.time.LocalDate;
  * </ul>
  */
 public class ReservationFormController {
+
+    /************************************************************************
+     *
+     * Static fields
+     *
+     ************************************************************************/
+
     /**
      * Date cell for the datePicker.
      * <p>
@@ -51,8 +59,17 @@ public class ReservationFormController {
      */
     static private final String capacityTextFormat = "%d av totalt %d plasser ledige.";
 
-    private DataModel dataModel;
+    /************************************************************************
+     *
+     * Fields
+     *
+     ************************************************************************/
 
+    /* Injected dependencies (see #inject()). */
+    private DataModel dataModel;
+    private Consumer<Throwable> unhandledExceptionHook;
+
+    /* JavaFX injected dependencies. */
     @FXML private ComboBox<Hut>         hutComboBox;
     @FXML private DatePicker            datePicker;
     @FXML private Text                  capacityText;
@@ -62,19 +79,15 @@ public class ReservationFormController {
     @FXML private TextArea              commentTextArea;
     @FXML private Button                commitButton;
 
-    /**
-     * JavaFX initialization method.
+    /************************************************************************
      *
-     * <p> Responsible for initializing the date picker. All other initialization is handled in
-     * {@link #initializeData(DataModel) initializeData(DataModel)}.
+     * Public API
      *
-     * <p> This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by
-     * user code.
-     */
-    @FXML
-    private void initialize() {
-        datePicker.setValue(defaultDate);
-        datePicker.setDayCellFactory(param -> new DateCell());
+     ************************************************************************/
+
+    public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+        this.dataModel = dataModel;
+        this.unhandledExceptionHook = unhandledExceptionHook;
     }
 
     /**
@@ -85,13 +98,15 @@ public class ReservationFormController {
      * <ul>
      *     <li>TODO (bug): handle initialization with an empty list of huts.
      * </ul>
-     *
-     * @param dataModel The application's data model.
      */
-    public void initializeData(DataModel dataModel) {
-        this.dataModel = dataModel;
-
-        ObservableList<Hut> huts = dataModel.getHutListDeprecated();
+    public void load() {
+        ObservableList<Hut> huts;
+        try {
+            huts = dataModel.getHutList();
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
 
         hutComboBox.getEditor().setDisable(true);
         hutComboBox.setItems(huts);
@@ -100,11 +115,32 @@ public class ReservationFormController {
         hutComboBox.setOnAction(event -> updateAction());
         datePicker.setOnAction(event -> updateAction());
         commitButton.setOnAction(event -> {
-            commitAction(dataModel);
+            commitAction();
             updateAction();
         });
 
         updateAction();
+    }
+
+    /************************************************************************
+     *
+     * Private implementation
+     *
+     ************************************************************************/
+
+    /**
+     * JavaFX initialization method.
+     *
+     * <p> Responsible for initializing the date picker. All other initialization is handled in
+     * {@link #load() load()}.
+     *
+     * <p> This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by
+     * user code.
+     */
+    @FXML
+    private void initialize() {
+        datePicker.setValue(defaultDate);
+        datePicker.setDayCellFactory(param -> new DateCell());
     }
 
     /**
@@ -138,18 +174,18 @@ public class ReservationFormController {
         countChoiceBoxItems.clear();
         for (int i = 1; i <= actualCapacity; i++) { countChoiceBoxItems.add(i); }
 
-        if (actualCapacity < 1) { disableInput(); }
-        else { enableInput(); }
+        if (actualCapacity < 1) { disableInput(false); }
+        else { enableInput(false); }
     }
 
     /**
      * Disable the use of all inputs except for hut and date selection.
-     *
-     * <ul>
-     *     <li>TODO: (enhancement): rename to something more descriptive.
-     * </ul>
      */
-    private void disableInput() {
+    private void disableInput(Boolean disableAll) {
+        if (disableAll) {
+            hutComboBox.setDisable(true);
+            datePicker.setDisable(true);
+        }
         nameTextField.setDisable(true);
         emailTextField.setDisable(true);
         countChoiceBox.setDisable(true);
@@ -159,12 +195,12 @@ public class ReservationFormController {
 
     /**
      * Enable the use of all inputs except for hut and date selection.
-     *
-     * <ul>
-     *     <li>TODO: (enhancement): rename to something more descriptive.
-     * </ul>
      */
-    private void enableInput() {
+    private void enableInput(Boolean disableAll) {
+        if (disableAll) {
+            hutComboBox.setDisable(false);
+            datePicker.setDisable(false);
+        }
         nameTextField.setDisable(false);
         emailTextField.setDisable(false);
         countChoiceBox.setDisable(false);
@@ -182,19 +218,25 @@ public class ReservationFormController {
      *     <li>TODO #43 (enhancement): display error conditions to the user instead of letting them pass silently.
      * </ul>
      */
-    private void commitAction(DataModel dataModel) {
-        Hut hut = hutComboBox.getValue();
-        LocalDate date = datePicker.getValue();
-        String name = nameTextField.getText();
-        String email = emailTextField.getText();
-        Integer count = countChoiceBox.getValue();
-        String comment = commentTextArea.getText();
+    private void commitAction() {
+        disableInput(true);
+
+        Hut hut         = hutComboBox.getValue();
+        LocalDate date  = datePicker.getValue();
+        String name     = nameTextField.getText();
+        String email    = emailTextField.getText();
+        Integer count   = countChoiceBox.getValue();
+        String comment  = commentTextArea.getText();
 
         Reservation reservation = new Reservation(null, hut, date, name, email, count, comment);
 
         try {
             dataModel.insertReservation(reservation);
-        } catch (SQLException ignored) {
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
         }
+
+        enableInput(true);
     }
 }

@@ -161,7 +161,7 @@ public class App extends Application {
             throw new IllegalStateException(e);
         }
 
-        MainController mainController = new MainController(dataModel);
+        MainController mainController = new MainController(dataModel, this::unhandledExceptionHook);
         Scene mainScene = loadScene("main.fxml", mainController);
         stage.hide();
         stage.setScene(mainScene);
