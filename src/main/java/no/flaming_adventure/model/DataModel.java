@@ -7,6 +7,7 @@ import no.flaming_adventure.SQLFunction;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -221,6 +222,29 @@ public class DataModel {
         return resultSet.getInt(1);
     }
 
+    /**
+     * Insert a reservation object into the database, setting the ID of the object to the database ID used.
+     *
+     * @param reservation the reservation object to insert into the database.
+     * @throws SQLException any conceivable SQL exception.
+     */
+    public void insertReservation(Reservation reservation) throws SQLException {
+        LOGGER.log(Level.INFO, "Adding reservation to database.");
+
+        reservationInsertStmt.setInt(1, reservation.getHut().getId());
+        reservationInsertStmt.setDate(2, Date.valueOf(reservation.getDate()));
+        reservationInsertStmt.setString(3, reservation.getName());
+        reservationInsertStmt.setString(4, reservation.getEmail());
+        reservationInsertStmt.setInt(5, reservation.getCount());
+        reservationInsertStmt.setString(6, reservation.getComment());
+
+        reservationInsertStmt.executeUpdate();
+
+        ResultSet resultSet = reservationInsertStmt.getGeneratedKeys();
+        resultSet.next();
+        reservation.setId(resultSet.getInt(1));
+    }
+
     /************************************************************************
      *
      * Public API (deprecated)
@@ -285,40 +309,6 @@ public class DataModel {
             if (reservation.getId() == ID) { return Optional.of(reservation); }
         }
         return Optional.empty();
-    }
-
-    /**
-     * Insert a reservation object into the database, setting the ID of the object to the database ID used.
-     *
-     * @param reservation the reservation object to insert into the database.
-     * @throws SQLException any conceivable SQL exception.
-     * @deprecated a new data model API is under development and will replace the current one.
-     */
-    public void insertReservation(Reservation reservation) throws SQLException {
-        LOGGER.info("Adding reservation to database...");
-
-        reservationInsertStmt.setInt(1, reservation.getHut().getId());
-        reservationInsertStmt.setDate(2, Date.valueOf(reservation.getDate()));
-        reservationInsertStmt.setString(3, reservation.getName());
-        reservationInsertStmt.setString(4, reservation.getEmail());
-        reservationInsertStmt.setInt(5, reservation.getCount());
-        reservationInsertStmt.setString(6, reservation.getComment());
-
-        reservationInsertStmt.executeUpdate();
-
-        ResultSet resultSet = reservationInsertStmt.getGeneratedKeys();
-
-        if (resultSet.next()) {
-            LOGGER.fine("Database returned primary key for reservation.");
-
-            reservation.setId(resultSet.getInt(1));
-        } else {
-            LOGGER.warning("Database failed to return primary key for reservation.");
-        }
-
-        LOGGER.info("Adding new reservation to reservation list.");
-
-        reservationList.add(reservation);
     }
 
     /**
