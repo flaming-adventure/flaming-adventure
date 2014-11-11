@@ -2,6 +2,7 @@ package no.flaming_adventure.controller;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import no.flaming_adventure.model.DataModel;
@@ -26,6 +27,8 @@ public class ReservationTableController {
      *
      ************************************************************************/
 
+    private static final Integer ITEMS_PER_PAGE = 50;
+
     /************************************************************************
      *
      * Fields
@@ -44,6 +47,8 @@ public class ReservationTableController {
     @FXML private TableColumn<Reservation, Number>    countColumn;
     @FXML private TableColumn<Reservation, String>    commentColumn;
 
+    @FXML private Pagination pagination;
+
     /************************************************************************
      *
      * Public API
@@ -56,15 +61,9 @@ public class ReservationTableController {
     }
 
     public void load() {
-        ObservableList<Reservation> reservations;
-        try {
-            reservations = dataModel.getReservations();
-        } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
-            throw new IllegalStateException(e);
-        }
-
-        tableView.setItems(reservations);
+        pagination.currentPageIndexProperty()
+                .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
+        loadPage(0);
     }
 
     /************************************************************************
@@ -75,19 +74,33 @@ public class ReservationTableController {
 
     /**
      * JavaFX initialization method.
-     * <p>
-     * Set up cell value- and cell factories for the table columns and initialize static data (e.g. filter defaults).
-     * <p>
-     * This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by user
-     * code.
+     *
+     * <p> This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by
+     * user code.
      */
-    @FXML
-    private void initialize() {
+    @FXML private void initialize() {
         hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         emailColumn.setCellValueFactory(param -> param.getValue().emailProperty());
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
+    }
+
+    private void loadPage(Integer pageIndex) {
+        Integer reservationCount;
+        ObservableList<Reservation> reservations;
+        try {
+            reservationCount = dataModel.reservationCount();
+            reservations = dataModel.reservationPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+
+        tableView.setItems(reservations);
+
+        pagination.setPageCount((reservationCount + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
+        pagination.setCurrentPageIndex(pageIndex);
     }
 }

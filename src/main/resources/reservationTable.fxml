@@ -5,16 +5,21 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane minHeight="0.0" minWidth="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="no.flaming_adventure.controller.ReservationTableController">
    <children>
-      <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <columns>
-            <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" text="Koie" />
-            <TableColumn fx:id="dateColumn" editable="false" prefWidth="75.0" text="Dato" />
-            <TableColumn fx:id="nameColumn" editable="false" prefWidth="200.0" text="Navn" />
-            <TableColumn fx:id="emailColumn" editable="false" prefWidth="200.0" text="E-Post" />
-            <TableColumn fx:id="countColumn" prefWidth="75.0" text="Antall" />
-            <TableColumn fx:id="commentColumn" prefWidth="400.0" text="Kommentar" />
-         </columns>
-      </TableView>
+      <VBox spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
+               <columns>
+                  <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" text="Koie" />
+                  <TableColumn fx:id="dateColumn" editable="false" prefWidth="75.0" text="Dato" />
+                  <TableColumn fx:id="nameColumn" editable="false" prefWidth="200.0" text="Navn" />
+                  <TableColumn fx:id="emailColumn" editable="false" prefWidth="200.0" text="E-Post" />
+                  <TableColumn fx:id="countColumn" prefWidth="75.0" text="Antall" />
+                  <TableColumn fx:id="commentColumn" prefWidth="400.0" text="Kommentar" />
+               </columns>
+            </TableView>
+            <Pagination fx:id="pagination" VBox.vgrow="NEVER" />
+         </children>
+      </VBox>
    </children>
    <padding>
       <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />

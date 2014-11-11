@@ -159,6 +159,22 @@ public class DataModel {
         return resultSet.getInt(1);
     }
 
+    public Integer reservationCount() throws SQLException {
+        ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM reservations;");
+        resultSet.next();
+        return resultSet.getInt(1);
+    }
+
+    public ObservableList<Reservation> reservationPage(Integer pageStart, Integer pageSize) throws SQLException {
+        ObservableList<Reservation> reservations = FXCollections.observableArrayList();
+        String query = String.format("SELECT * FROM reservations LIMIT %d, %d;", pageStart, pageSize);
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            reservations.add(reservationFromResultSet(resultSet));
+        }
+        return reservations;
+    }
+
     /**
      * Insert a reservation object into the database, setting the ID of the object to the database ID used.
      *
