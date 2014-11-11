@@ -102,7 +102,7 @@ public class ReservationFormController {
     public void load() {
         ObservableList<Hut> huts;
         try {
-            huts = dataModel.getHutList();
+            huts = dataModel.getHuts();
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);

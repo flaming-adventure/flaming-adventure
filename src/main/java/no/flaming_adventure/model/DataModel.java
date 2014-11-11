@@ -56,7 +56,6 @@ public class DataModel {
     private static final String sqlReservationList      = "SELECT * FROM reservations;";
     private static final String sqlEquipmentList        = "SELECT * FROM equipment;";
     private static final String sqlForgottenItemList    = "SELECT * FROM forgotten_items;";
-    private static final String sqlBrokenItemList       = "SELECT * FROM broken_items;";
 
     private static final String sqlInsertReservation    =
             "INSERT INTO reservations (hut_id, date, name, email, count, comment) VALUES (?, ?, ?, ?, ?, ?);";
@@ -95,7 +94,6 @@ public class DataModel {
     private final ObservableList<Reservation>   reservationList;
     private final ObservableList<Equipment>     equipmentList;
     private final ObservableList<ForgottenItem> forgottenItemList;
-    private final ObservableList<BrokenItem>    brokenItemList;
 
     /************************************************************************
      *
@@ -120,7 +118,6 @@ public class DataModel {
         PreparedStatement reservationStmt   = connection.prepareStatement(sqlReservationList);
         PreparedStatement equipmentStmt     = connection.prepareStatement(sqlEquipmentList);
         PreparedStatement forgottenItemStmt = connection.prepareStatement(sqlForgottenItemList);
-        PreparedStatement brokenItemStmt    = connection.prepareStatement(sqlBrokenItemList);
 
         reservationInsertStmt   = connection.prepareStatement(sqlInsertReservation, Statement.RETURN_GENERATED_KEYS);
 
@@ -172,19 +169,6 @@ public class DataModel {
             );
         });
 
-        brokenItemList = forceList(brokenItemStmt, resultSet -> {
-            Integer hutID = resultSet.getInt("hut_id");
-            Hut hut = getHutFromID(hutID).get();
-            return new BrokenItem(
-                    resultSet.getInt("id"),
-                    hut,
-                    resultSet.getString("item"),
-                    resultSet.getDate("date").toLocalDate(),
-                    resultSet.getBoolean("fixed"),
-                    resultSet.getString("comment")
-            );
-        });
-
         LOGGER.fine("Data model successfully initialized.");
     }
 
@@ -194,7 +178,7 @@ public class DataModel {
      *
      ************************************************************************/
 
-    public ObservableList<Hut> getHutList() throws SQLException {
+    public ObservableList<Hut> getHuts() throws SQLException {
         ObservableList<Hut> huts = FXCollections.observableArrayList();
         String query = "SELECT * FROM huts;";
         ResultSet resultSet = statement.executeQuery(query);
@@ -206,15 +190,6 @@ public class DataModel {
         return huts;
     }
 
-    public Integer occupancy(Hut hut, LocalDate date) throws SQLException {
-        occupancyStmt.setInt(1, hut.getId());
-        occupancyStmt.setDate(2, Date.valueOf(date));
-
-        ResultSet resultSet = occupancyStmt.executeQuery();
-        resultSet.next();
-        return resultSet.getInt(1);
-    }
-
     public ObservableList<Reservation> getReservations() throws SQLException {
         ObservableList<Reservation> reservations = FXCollections.observableArrayList();
         String query = "SELECT * FROM reservations;";
@@ -223,6 +198,25 @@ public class DataModel {
             reservations.add(reservationFromResultSet(resultSet));
         }
         return reservations;
+    }
+
+    public ObservableList<BrokenItem> getBrokenItems() throws SQLException {
+        ObservableList<BrokenItem> brokenItems = FXCollections.observableArrayList();
+        String query = "SELECT * FROM broken_items;";
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            brokenItems.add(brokenItemFromResultSet(resultSet));
+        }
+        return brokenItems;
+    }
+
+    public Integer occupancy(Hut hut, LocalDate date) throws SQLException {
+        occupancyStmt.setInt(1, hut.getId());
+        occupancyStmt.setDate(2, Date.valueOf(date));
+
+        ResultSet resultSet = occupancyStmt.executeQuery();
+        resultSet.next();
+        return resultSet.getInt(1);
     }
 
     /**
@@ -320,16 +314,6 @@ public class DataModel {
         return forgottenItemList;
     }
 
-    /**
-     * Return the list of destroyed (or out of order) items.
-     *
-     * @return a list of all destroyed items for all huts.
-     * @deprecated a new data model API is under development and will replace the current one.
-     */
-    public ObservableList<BrokenItem> getBrokenItemList() {
-        return brokenItemList;
-    }
-
     /************************************************************************
      *
      * Private implementation
@@ -354,6 +338,18 @@ public class DataModel {
                 resultSet.getString("name"),
                 resultSet.getString("email"),
                 resultSet.getInt("count"),
+                resultSet.getString("comment")
+        );
+    }
+
+    private BrokenItem brokenItemFromResultSet(ResultSet resultSet) throws SQLException {
+        Hut hut = hutMap.get(resultSet.getInt("hut_id"));
+        return new BrokenItem(
+                resultSet.getInt("id"),
+                hut,
+                resultSet.getString("item"),
+                resultSet.getDate("date").toLocalDate(),
+                resultSet.getBoolean("fixed"),
                 resultSet.getString("comment")
         );
     }

@@ -7,19 +7,12 @@
    <children>
       <VBox layoutX="8.0" layoutY="8.0" spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <HBox spacing="8.0">
-               <children>
-                  <Label text="Filter:" />
-                  <DatePicker fx:id="reservationFilterFromDate111" />
-                  <DatePicker fx:id="reservationFilterToDate111" />
-               </children>
-            </HBox>
-            <Separator />
             <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <columns>
-                  <TableColumn fx:id="hutColumn" prefWidth="150.0" text="Koie" />
-                  <TableColumn fx:id="dateColumn" prefWidth="75.0" text="Dato" />
-                  <TableColumn fx:id="itemColumn" prefWidth="300.0" text="Ting" />
+                  <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" sortable="false" text="Koie" />
+                  <TableColumn fx:id="dateColumn" editable="false" prefWidth="75.0" sortable="false" text="Dato" />
+                  <TableColumn fx:id="itemColumn" editable="false" prefWidth="300.0" sortable="false" text="Ting" />
+                  <TableColumn fx:id="commentColumn" editable="false" prefWidth="300.0" sortable="false" text="Kommentar" />
                </columns>
             </TableView>
             <HBox>
@@ -39,11 +32,11 @@
                <children>
                   <ComboBox fx:id="hutComboBox" prefWidth="150.0" />
                   <DatePicker fx:id="datePicker" />
-                  <ChoiceBox fx:id="reservationChoiceBox" prefWidth="300.0" />
                   <TextField fx:id="textField" promptText="Ting" HBox.hgrow="ALWAYS" />
                   <Button fx:id="commitButton" mnemonicParsing="false" text="Lagre" />
                </children>
             </HBox>
+            <TextField fx:id="commentTextField" />
          </children>
       </VBox>
    </children>

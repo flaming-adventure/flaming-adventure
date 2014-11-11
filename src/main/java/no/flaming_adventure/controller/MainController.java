@@ -34,12 +34,13 @@ public class MainController {
     @FXML protected void initialize() {
         reservationFormController.inject(dataModel, unhandledExceptionHook);
         reservationTableController.inject(dataModel, unhandledExceptionHook);
+        brokenItemTableController.inject(dataModel, unhandledExceptionHook);
 
         reservationFormController.load();
         reservationTableController.load();
+        brokenItemTableController.load();
 
         forgottenTableController.initializeData(dataModel);
         equipmentTableController.initializeData(dataModel);
-        brokenItemTableController.initializeData(dataModel);
     }
 }
