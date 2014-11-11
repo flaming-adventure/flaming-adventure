@@ -40,7 +40,7 @@ public class BrokenItemTableController {
 
         tableView.setItems(dataModel.getBrokenItemList());
 
-        hutComboBox.setItems(dataModel.getHutList());
+        hutComboBox.setItems(dataModel.getHutListDeprecated());
         hutComboBox.getSelectionModel().selectFirst();
         hutComboBox.setOnAction(this::formUpdateAction);
 

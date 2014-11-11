@@ -74,7 +74,7 @@ public class ForgottenTableController {
 
         tableView.setItems(dataModel.getForgottenItemList());
 
-        hutComboBox.setItems(dataModel.getHutList());
+        hutComboBox.setItems(dataModel.getHutListDeprecated());
         hutComboBox.getSelectionModel().selectFirst();
         hutComboBox.setOnAction(event -> updateAction());
 

@@ -91,7 +91,7 @@ public class ReservationFormController {
     public void initializeData(DataModel dataModel) {
         this.dataModel = dataModel;
 
-        ObservableList<Hut> huts = dataModel.getHutList();
+        ObservableList<Hut> huts = dataModel.getHutListDeprecated();
 
         hutComboBox.getEditor().setDisable(true);
         hutComboBox.setItems(huts);

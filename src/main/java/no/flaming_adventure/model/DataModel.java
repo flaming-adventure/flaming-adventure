@@ -41,6 +41,13 @@ import java.util.logging.Logger;
  * change.
  */
 public class DataModel {
+
+    /************************************************************************
+     *
+     * Static fields
+     *
+     ************************************************************************/
+
     private static final String sqlHutList              = "SELECT * FROM huts;";
     private static final String sqlReservationList      = "SELECT * FROM reservations;";
     private static final String sqlEquipmentList        = "SELECT * FROM equipment;";
@@ -58,6 +65,20 @@ public class DataModel {
             "VALUES (?, ?, ?, ?, ?, ?, ?);";
 
     private static final Logger LOGGER = Logger.getLogger(DataModel.class.getName());;
+
+    /************************************************************************
+     *
+     * Fields
+     *
+     ************************************************************************/
+
+    private final Statement statement;
+
+    /************************************************************************
+     *
+     * Fields (deprecated)
+     *
+     ************************************************************************/
 
     private final PreparedStatement reservationInsertStmt;
     private final PreparedStatement brokenItemInsertStmt;
@@ -78,6 +99,12 @@ public class DataModel {
     private final ObservableList<ForgottenItem> forgottenItemList;
     private final ObservableList<BrokenItem>    brokenItemList;
 
+    /************************************************************************
+     *
+     * Constructors
+     *
+     ************************************************************************/
+
     /**
      * Create a data model from the given SQL connection.
      *
@@ -85,6 +112,8 @@ public class DataModel {
      * @throws java.sql.SQLException     Any conceivable SQL exception.
      */
     public DataModel(Connection connection) throws SQLException {
+        statement = connection.createStatement();
+
         LOGGER.fine("Initializing data model...");
         LOGGER.finest("Preparing data model statements...");
 
@@ -162,7 +191,27 @@ public class DataModel {
         LOGGER.fine("Data model successfully initialized.");
     }
 
-    /* --- end of SQL section. --- */
+    /************************************************************************
+     *
+     * Public API
+     *
+     ************************************************************************/
+
+    public ObservableList<Hut> getsHutList() throws SQLException {
+        ObservableList<Hut> huts = FXCollections.observableArrayList();
+        String query = "SELECT * FROM huts;";
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            huts.add(hutFromResultSet(resultSet));
+        }
+        return huts;
+    }
+
+    /************************************************************************
+     *
+     * Public API (deprecated)
+     *
+     ************************************************************************/
 
     /**
      * Return the list of huts.
@@ -170,7 +219,7 @@ public class DataModel {
      * @return  The list of all huts.
      * @deprecated a new data model API is under development and will replace the current one.
      */
-    public ObservableList<Hut> getHutList() {
+    public ObservableList<Hut> getHutListDeprecated() {
         return hutList;
     }
 
@@ -183,7 +232,7 @@ public class DataModel {
      */
     public Optional<Hut> getHutFromID(Integer ID) {
         // TODO: Improve search algorithm.
-        for (Hut hut : getHutList()) {
+        for (Hut hut : getHutListDeprecated()) {
             if (hut.getId() == ID) { return Optional.of(hut); }
         }
         return Optional.empty();
@@ -365,6 +414,27 @@ public class DataModel {
 
         brokenItemList.add(brokenItem);
     }
+
+    /************************************************************************
+     *
+     * Private implementation
+     *
+     ************************************************************************/
+
+    private Hut hutFromResultSet(ResultSet resultSet) throws SQLException {
+        return new Hut(
+                resultSet.getInt("id"),
+                resultSet.getString("name"),
+                resultSet.getInt("capacity"),
+                resultSet.getInt("firewood")
+        );
+    }
+
+    /************************************************************************
+     *
+     * Private implementation (deprecated)
+     *
+     ************************************************************************/
 
     /**
      * Retrieve a list of records from the database and create an ObservableList<> of objects.
