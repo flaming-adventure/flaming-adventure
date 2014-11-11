@@ -14,11 +14,8 @@ import java.util.function.Consumer;
 
 /**
  * Controller for reservation form view.
- * <ul>
- *     <li>TODO #45 (enhancement): provide visual feedback on field limits.
- *     <li>TODO #45 (enhancement): provide visual feedback on required fields.
- *     <li>TODO #45 (enhancement): provide visual feedback on successful database insert.
- * </ul>
+ *
+ * <p> The reservation form has the singular purpose of adding records to the reservations table in the database.
  */
 public class ReservationFormController {
 
@@ -29,12 +26,9 @@ public class ReservationFormController {
      ************************************************************************/
 
     /**
-     * Date cell for the datePicker.
-     * <p>
-     * Responsible for disabling selection of dates earlier than today's date.
-     * <ul>
-     *     <li>TODO #45 (enhancement, low priority): mark dates with zero capacity.
-     * </ul>
+     * Date cell for the date picker.
+     *
+     * <p> Disables dates before today.
      */
     static private final class DateCell extends javafx.scene.control.DateCell {
         @Override
@@ -49,15 +43,12 @@ public class ReservationFormController {
         }
     }
 
-    static private final LocalDate defaultDate = LocalDate.now();
+    static private final LocalDate TODAY = LocalDate.now();
 
     /**
      * Format string for capacity text.
-     * <ul>
-     *     <li>TODO #42 (low priority): extract to localization file.
-     * </ul>
      */
-    static private final String capacityTextFormat = "%d av totalt %d plasser ledige.";
+    static private final String CAPACITY_TEXT_FORMAT = "%d av totalt %d plasser ledige.";
 
     /************************************************************************
      *
@@ -110,7 +101,7 @@ public class ReservationFormController {
 
         hutComboBox.setItems(huts);
         hutComboBox.getSelectionModel().selectFirst();
-        datePicker.setValue(defaultDate);
+        datePicker.setValue(TODAY);
 
         updateAction();
     }
@@ -168,7 +159,7 @@ public class ReservationFormController {
         Integer totalCapacity = hut.getCapacity();
         Integer actualCapacity = totalCapacity - occupancy;
 
-        capacityText.setText(String.format(capacityTextFormat, actualCapacity, totalCapacity));
+        capacityText.setText(String.format(CAPACITY_TEXT_FORMAT, actualCapacity, totalCapacity));
 
         ObservableList<Integer> countChoiceBoxItems = countChoiceBox.getItems();
         countChoiceBoxItems.clear();
