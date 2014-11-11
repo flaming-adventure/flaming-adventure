@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import no.flaming_adventure.SQLFunction;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -74,6 +75,8 @@ public class DataModel {
 
     private final Statement statement;
 
+    private final PreparedStatement occupancyStmt;
+
     /************************************************************************
      *
      * Fields (deprecated)
@@ -113,6 +116,8 @@ public class DataModel {
      */
     public DataModel(Connection connection) throws SQLException {
         statement = connection.createStatement();
+        occupancyStmt = connection.prepareStatement("SELECT SUM(reservations.count) FROM reservations " +
+                        "WHERE reservations.hut_id = ? AND reservations.date = ?;");
 
         LOGGER.fine("Initializing data model...");
         LOGGER.finest("Preparing data model statements...");
@@ -205,6 +210,15 @@ public class DataModel {
             huts.add(hutFromResultSet(resultSet));
         }
         return huts;
+    }
+
+    public Integer occupancy(Hut hut, LocalDate date) throws SQLException {
+        occupancyStmt.setInt(1, hut.getId());
+        occupancyStmt.setDate(2, Date.valueOf(date));
+
+        ResultSet resultSet = occupancyStmt.executeQuery();
+        resultSet.next();
+        return resultSet.getInt(1);
     }
 
     /************************************************************************
