@@ -57,7 +57,7 @@ public class DataModel {
             "INSERT INTO forgotten_items (hut_id, item, name, contact, date, delivered, comment) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?);";
 
-    private final Logger logger;
+    private static final Logger LOGGER = Logger.getLogger(DataModel.class.getName());;
 
     private final PreparedStatement reservationInsertStmt;
     private final PreparedStatement brokenItemInsertStmt;
@@ -81,15 +81,12 @@ public class DataModel {
     /**
      * Create a data model from the given SQL connection.
      *
-     * @param logger            Logger object to be used for all logging by the data model
      * @param connection        Connection to the SQL database.
      * @throws java.sql.SQLException     Any conceivable SQL exception.
      */
-    public DataModel(Logger logger, Connection connection) throws SQLException {
-        this.logger = logger;
-
-        logger.fine("Initializing data model...");
-        logger.finest("Preparing data model statements...");
+    public DataModel(Connection connection) throws SQLException {
+        LOGGER.fine("Initializing data model...");
+        LOGGER.finest("Preparing data model statements...");
 
         PreparedStatement hutStmt           = connection.prepareStatement(sqlHutList);
         PreparedStatement reservationStmt   = connection.prepareStatement(sqlReservationList);
@@ -162,7 +159,7 @@ public class DataModel {
             );
         });
 
-        logger.fine("Data model successfully initialized.");
+        LOGGER.fine("Data model successfully initialized.");
     }
 
     /* --- end of SQL section. --- */
@@ -235,7 +232,7 @@ public class DataModel {
      * @deprecated a new data model API is under development and will replace the current one.
      */
     public void insertReservation(Reservation reservation) throws SQLException {
-        logger.info("Adding reservation to database...");
+        LOGGER.info("Adding reservation to database...");
 
         reservationInsertStmt.setInt(1, reservation.getHut().getId());
         reservationInsertStmt.setDate(2, Date.valueOf(reservation.getDate()));
@@ -249,14 +246,14 @@ public class DataModel {
         ResultSet resultSet = reservationInsertStmt.getGeneratedKeys();
 
         if (resultSet.next()) {
-            logger.fine("Database returned primary key for reservation.");
+            LOGGER.fine("Database returned primary key for reservation.");
 
             reservation.setId(resultSet.getInt(1));
         } else {
-            logger.warning("Database failed to return primary key for reservation.");
+            LOGGER.warning("Database failed to return primary key for reservation.");
         }
 
-        logger.info("Adding new reservation to reservation list.");
+        LOGGER.info("Adding new reservation to reservation list.");
 
         reservationList.add(reservation);
     }
@@ -300,7 +297,7 @@ public class DataModel {
      * @deprecated a new data model API is under development and will replace the current one.
      */
     public void insertForgotten(ForgottenItem forgottenItem) throws SQLException {
-        logger.info("Adding forgottenItem item to database...");
+        LOGGER.info("Adding forgottenItem item to database...");
 
         forgottenItemInsertStmt.setInt(1, forgottenItem.getHut().getId());
         forgottenItemInsertStmt.setString(2, forgottenItem.getItem());
@@ -315,14 +312,14 @@ public class DataModel {
         ResultSet resultSet = forgottenItemInsertStmt.getGeneratedKeys();
 
         if (resultSet.next()) {
-            logger.fine("Database returned primary key for forgottenItem item.");
+            LOGGER.fine("Database returned primary key for forgottenItem item.");
 
             forgottenItem.setId(resultSet.getInt(1));
         } else {
-            logger.warning("Database failed to return primary key for forgottenItem item.");
+            LOGGER.warning("Database failed to return primary key for forgottenItem item.");
         }
 
-        logger.info("Adding new forgottenItem item to list.");
+        LOGGER.info("Adding new forgottenItem item to list.");
         getForgottenItemList().add(forgottenItem);
     }
 
@@ -344,7 +341,7 @@ public class DataModel {
      * @deprecated a new data model API is under development and will replace the current one.
      */
     public void insertBrokenItem(BrokenItem brokenItem) throws SQLException {
-        logger.info("Adding brokenItem item to database...");
+        LOGGER.info("Adding brokenItem item to database...");
 
         brokenItemInsertStmt.setInt(1, brokenItem.getHut().getId());
         brokenItemInsertStmt.setString(2, brokenItem.getItem());
@@ -357,14 +354,14 @@ public class DataModel {
         ResultSet resultSet = brokenItemInsertStmt.getGeneratedKeys();
 
         if (resultSet.next()) {
-            logger.fine("Database returned primary key for brokenItem item.");
+            LOGGER.fine("Database returned primary key for brokenItem item.");
 
             brokenItem.setId(resultSet.getInt(1));
         } else {
-            logger.warning("Database failed to return primary key for brokenItem item.");
+            LOGGER.warning("Database failed to return primary key for brokenItem item.");
         }
 
-        logger.info("Adding new brokenItem item to list.");
+        LOGGER.info("Adding new brokenItem item to list.");
 
         brokenItemList.add(brokenItem);
     }

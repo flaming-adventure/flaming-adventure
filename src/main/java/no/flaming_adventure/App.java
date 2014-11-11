@@ -1,83 +1,73 @@
 package no.flaming_adventure;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import no.flaming_adventure.controller.LoginController;
 import no.flaming_adventure.controller.MainController;
 import no.flaming_adventure.model.DataModel;
 
-import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 public class App extends Application {
-    public static final String DATABASE_URL = "databaseURL";
-    public static final String USERNAME = "username";
-    public static final String PASSWORD = "password";
 
-    public Preferences preferences = Preferences.userNodeForPackage(App.class);
+    /************************************************************************
+     *
+     * Static fields
+     *
+     ************************************************************************/
 
-    protected final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+    public static final Preferences preferences = Preferences.userNodeForPackage(App.class);
 
-    private static final Logger logger = Logger.getAnonymousLogger();
-
-    protected Stage stage;
-
-    protected Scene loginScene;
-    protected Scene mainScene;
+    /************************************************************************
+     *
+     * Static methods
+     *
+     ************************************************************************/
 
     /**
      * Program entry point.
      *
-     * @param args Commandline arguments.
+     * @param args commandline arguments.
      */
     public static void main(String[] args) {
-        logger.setLevel(Level.ALL);
-        logger.info("Launching...");
+        LOGGER.log(Level.FINEST, "Launching application.");
         launch(args);
     }
 
-    /**
-     * Attempt to load a view from the given filename and assign the given controller to it.
+    /************************************************************************
      *
-     * @param filename   Name of FXML file in resources.
-     * @param controller Controller object for the view.
-     * @return A JavaFX scene object.
-     */
-    public static Scene loadScene(String filename, Object controller) {
-        logger.info("Loading scene: \"" + filename + "\"...");
+     * Fields
+     *
+     ************************************************************************/
 
-        URL resource = App.class.getClassLoader().getResource(filename);
-        FXMLLoader loader = new FXMLLoader(resource);
+    private Stage stage;
 
-        loader.setController(controller);
-
-        Parent root = null;
-        try {
-            root = loader.load();
-        } catch (IOException e) {
-            // XXX: We don't necessarily have any GUI capabilities at this point, so we fall back to logging the error
-            //  and exiting.
-            //
-            // Note that this exception is extremely unlikely to occur in production.
-            logger.severe("Failed to load scene: \"" + filename + "\"");
-            System.exit(1);
-        }
-
-        logger.fine("\"" + filename + "\" loaded successfully.");
-        return new Scene(root);
-    }
+    /************************************************************************
+     *
+     * Public API
+     *
+     ************************************************************************/
 
     /**
      * Called by JavaFX when the stage is set for the application to run.
+     *
+     * <p> Note that this function shouldn't be called by user code.
      *
      * @param stage Stage provided by JavaFX.
      */
@@ -85,25 +75,110 @@ public class App extends Application {
     public void start(Stage stage) {
         this.stage = stage;
 
-        loginScene = loadScene("login.fxml", new LoginController(logger, this));
+        LoginController loginController = new LoginController(preferences, this::connectionHook);
+
+        Scene loginScene = loadScene("login.fxml", loginController);
 
         stage.setTitle("Flaming Adventure");
-
         stage.setScene(loginScene);
+        stage.centerOnScreen();
         stage.show();
+    }
+
+    /************************************************************************
+     *
+     * Private implementation
+     *
+     ************************************************************************/
+
+    /**
+     * Display an error dialog showing the given throwable and exit.
+     *
+     * @param throwable the throwable to display.
+     */
+    private void unhandledExceptionHook(Throwable throwable) {
+        // Create the alert dialog.
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error!");
+        alert.setHeaderText("An unhandled throwable occurred.");
+        alert.setContentText(throwable.getMessage());
+
+        // Get the stack trace.
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        throwable.printStackTrace(printWriter);
+        String stackTrace = stringWriter.toString();
+
+        // Create the stack trace pane.
+        Label label = new Label("Stack trace:");
+        TextArea textArea = new TextArea(stackTrace);
+        textArea.setEditable(false);
+        textArea.setWrapText(false);
+        textArea.setMaxWidth(Double.MAX_VALUE);
+        textArea.setMaxHeight(Double.MAX_VALUE);
+        GridPane.setVgrow(textArea, Priority.ALWAYS);
+        GridPane.setHgrow(textArea, Priority.ALWAYS);
+        GridPane exceptionContent = new GridPane();
+        exceptionContent.setMaxWidth(Double.MAX_VALUE);
+        exceptionContent.add(label, 0, 0);
+        exceptionContent.add(textArea, 0, 1);
+
+        // Add the stack trace pane to the alert dialog.
+        alert.getDialogPane().setExpandableContent(exceptionContent);
+
+        alert.showAndWait();
+
+        stage.close();
+        Platform.exit();
+        LOGGER.log(Level.SEVERE, throwable.toString(), throwable);
     }
 
     /**
      * Function to be called when a database connection is established.
      *
-     * Responsible for starting up the meat of the application. No functions in this class should be called after
-     * connectionHook().
-     *
      * @param connection A connection to the database (server).
-     * @throws SQLException
      */
-    public void connectionHook(Connection connection) throws SQLException {
-        mainScene = loadScene("main.fxml", new MainController(new DataModel(logger, connection)));
+    private void connectionHook(Connection connection)  {
+        DataModel dataModel;
+        try {
+            dataModel = new DataModel(connection);
+        } catch (Exception e) {
+            unhandledExceptionHook(e);
+            throw new IllegalStateException(e);
+        }
+
+        MainController mainController = new MainController(dataModel);
+        Scene mainScene = loadScene("main.fxml", mainController);
+        stage.hide();
         stage.setScene(mainScene);
+        stage.centerOnScreen();
+        stage.show();
+    }
+
+    /**
+     * Attempt to load a view from the given filename and assign the given
+     * controller to it.
+     *
+     * @param filename   Name of FXML file in resources.
+     * @param controller Controller object for the view.
+     * @return A JavaFX scene object.
+     */
+    private Scene loadScene(String filename, Object controller) {
+        LOGGER.log(Level.INFO, "Loading scene: \"{0}\".", filename);
+
+        URL resource = App.class.getClassLoader().getResource(filename);
+        FXMLLoader loader = new FXMLLoader(resource);
+
+        loader.setController(controller);
+
+        Parent root;
+        try {
+            root = loader.load();
+        } catch (Exception e) {
+            unhandledExceptionHook(e);
+            throw new IllegalStateException(e);
+        }
+
+        return new Scene(root);
     }
 }
