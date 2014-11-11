@@ -10,11 +10,24 @@ import java.util.function.Consumer;
 /**
  * Controller for the main view.
  *
- * <ul>
- *     <li>TODO #38 (enhancement): add data validation application-wide.
- * </ul>
+ * <p> The main controller simply manages the application's tab pane by making sure that the various subcontrollers
+ * have access to the needed data and know when they're being displayed. The meat of the GUI logic can be found in
+ * the tab content controllers.
+ *
+ * @see no.flaming_adventure.controller.ReservationFormController
+ * @see no.flaming_adventure.controller.ReservationTableController
+ * @see no.flaming_adventure.controller.ForgottenTableController
+ * @see no.flaming_adventure.controller.EquipmentTableController
+ * @see no.flaming_adventure.controller.BrokenItemTableController
  */
 public class MainController {
+
+    /************************************************************************
+     *
+     * Fields
+     *
+     ************************************************************************/
+
     private final DataModel dataModel;
     private final Consumer<Throwable> unhandledExceptionHook;
 
@@ -31,11 +44,35 @@ public class MainController {
     @FXML private Tab       equipmentTab;
     @FXML private Tab       brokenTab;
 
+    /************************************************************************
+     *
+     * Constructors
+     *
+     ************************************************************************/
+
+    /**
+     * Construct a MainController with the given data model and exception hook.
+     *
+     * @param dataModel                 active data model for the application instance.
+     * @param unhandledExceptionHook    a function to be called on exceptions where we intend to exit.
+     */
     public MainController(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
         this.dataModel  = dataModel;
         this.unhandledExceptionHook = unhandledExceptionHook;
     }
 
+    /************************************************************************
+     *
+     * Private implementation
+     *
+     ************************************************************************/
+
+    /**
+     * Initialize the controller.
+     *
+     * <p> This function is called by JavaFX after all UI elements and controllers have been injected. It is used
+     * here to inject dependencies into the various subcontrollers and initialize tab-loading.
+     */
     @FXML private void initialize() {
         reservationFormController.inject(dataModel, unhandledExceptionHook);
         reservationTableController.inject(dataModel, unhandledExceptionHook);
@@ -49,6 +86,16 @@ public class MainController {
         loadTab(tabPane.getSelectionModel().getSelectedItem());
     }
 
+    /**
+     * Call the load() function of the controller corresponding to the given tab, if any.
+     *
+     * @param tab the tab whose corresponding controller's load() function should be called.
+     * @see no.flaming_adventure.controller.ReservationFormController#load()
+     * @see no.flaming_adventure.controller.ReservationTableController#load()
+     * @see no.flaming_adventure.controller.ForgottenTableController#load()
+     * @see no.flaming_adventure.controller.EquipmentTableController#load()
+     * @see no.flaming_adventure.controller.BrokenItemTableController#load()
+     */
     private void loadTab(Tab tab) {
         if (tab == reservationFormTab) {
             reservationFormController.load();
