@@ -2,13 +2,11 @@ package no.flaming_adventure.model;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import no.flaming_adventure.SQLFunction;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,10 +50,7 @@ public class DataModel {
      *
      ************************************************************************/
 
-    private static final String sqlHutList              = "SELECT * FROM huts;";
-    private static final String sqlEquipmentList        = "SELECT * FROM equipment;";
-
-    private static final String sqlInsertReservation    =
+    private static final String SQL_INSERT_RESERVATION =
             "INSERT INTO reservations (hut_id, date, name, email, count, comment) VALUES (?, ?, ?, ?, ?, ?);";
 
     private static final Logger LOGGER = Logger.getLogger(DataModel.class.getName());;
@@ -72,24 +67,6 @@ public class DataModel {
     private final PreparedStatement reservationInsertStmt;
 
     private final Map<Integer, Hut> hutMap = new HashMap<>();
-
-    /************************************************************************
-     *
-     * Fields (deprecated)
-     *
-     ************************************************************************/
-
-    /* We maintain all data from all tables in the database as ObservableList<> objects.
-     *
-     * This allows very simple/fast code outside of the DataModel. It does however cause overhead relative to the size
-     * of the database, first in the retrieval of the data, subsequently in memory usage. As long as the database
-     * remains small this should be fine, but if this code ever goes into an actual production scenario this situation
-     * should be changed.
-     *
-     * See issue #39 and issue #41.
-     */
-    private final ObservableList<Hut>           hutList;
-    private final ObservableList<Equipment>     equipmentList;
 
     /************************************************************************
      *
@@ -110,29 +87,7 @@ public class DataModel {
         occupancyStmt = connection.prepareStatement("SELECT SUM(reservations.count) FROM reservations " +
                         "WHERE reservations.hut_id = ? AND reservations.date = ?;");
 
-        PreparedStatement hutStmt           = connection.prepareStatement(sqlHutList);
-        PreparedStatement equipmentStmt     = connection.prepareStatement(sqlEquipmentList);
-
-        reservationInsertStmt   = connection.prepareStatement(sqlInsertReservation, Statement.RETURN_GENERATED_KEYS);
-
-        hutList = forceList(hutStmt, resultSet -> new Hut(
-                resultSet.getInt("id"),
-                resultSet.getString("name"),
-                resultSet.getInt("capacity"),
-                resultSet.getInt("firewood")
-        ));
-
-        equipmentList = forceList(equipmentStmt, resultSet -> {
-            Integer hutID = resultSet.getInt("hut_id");
-            Hut hut = getHutFromID(hutID).get();
-            return new Equipment(
-                    resultSet.getInt("id"),
-                    hut,
-                    resultSet.getString("name"),
-                    resultSet.getDate("purchase_date").toLocalDate(),
-                    resultSet.getInt("count")
-            );
-        });
+        reservationInsertStmt   = connection.prepareStatement(SQL_INSERT_RESERVATION, Statement.RETURN_GENERATED_KEYS);
 
         LOGGER.fine("Data model successfully initialized.");
     }
@@ -185,6 +140,16 @@ public class DataModel {
         return brokenItems;
     }
 
+    public ObservableList<Equipment> getEquipmentList() throws SQLException {
+        ObservableList<Equipment> equipmentList = FXCollections.observableArrayList();
+        String query = "SELECT * FROM equipment;";
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            equipmentList.add(equipmentFromResultSet(resultSet));
+        }
+        return equipmentList;
+    }
+
     public Integer occupancy(Hut hut, LocalDate date) throws SQLException {
         occupancyStmt.setInt(1, hut.getId());
         occupancyStmt.setDate(2, Date.valueOf(date));
@@ -215,47 +180,6 @@ public class DataModel {
         ResultSet resultSet = reservationInsertStmt.getGeneratedKeys();
         resultSet.next();
         reservation.setId(resultSet.getInt(1));
-    }
-
-    /************************************************************************
-     *
-     * Public API (deprecated)
-     *
-     ************************************************************************/
-
-    /**
-     * Return the list of huts.
-     *
-     * @return  The list of all huts.
-     * @deprecated a new data model API is under development and will replace the current one.
-     */
-    public ObservableList<Hut> getHutListDeprecated() {
-        return hutList;
-    }
-
-    /**
-     * Return the hut object corresponding to the given database ID if it exists.
-     *
-     * @param ID the identity of the hut to retrieve.
-     * @return either a hut or nothing, depending on the existence of a hut with the given ID.
-     * @deprecated a new data model API is under development and will replace the current one.
-     */
-    public Optional<Hut> getHutFromID(Integer ID) {
-        // TODO: Improve search algorithm.
-        for (Hut hut : getHutListDeprecated()) {
-            if (hut.getId() == ID) { return Optional.of(hut); }
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Return the list of equipment.
-     *
-     * @return the list of all equipment for all huts.
-     * @deprecated a new data model API is under development and will replace the current one.
-     */
-    public ObservableList<Equipment> getEquipmentList() {
-        return equipmentList;
     }
 
     /************************************************************************
@@ -312,30 +236,14 @@ public class DataModel {
         );
     }
 
-    /************************************************************************
-     *
-     * Private implementation (deprecated)
-     *
-     ************************************************************************/
-
-    /**
-     * Retrieve a list of records from the database and create an ObservableList<> of objects.
-     *
-     * @param stmt  Prepared statement to retrieve the records from the database.
-     * @param fn    A function taking a resultSet and returning a list element.
-     * @param <E>   The type of elements in the final list.
-     * @throws SQLException any conceivable SQL exception.
-     * @deprecated a new data model API is under development and will replace the current one.
-     */
-    private static <E> ObservableList<E> forceList(PreparedStatement stmt, SQLFunction<ResultSet, E> fn)
-            throws SQLException {
-        ObservableList<E> list = FXCollections.observableArrayList();
-
-        ResultSet resultSet = stmt.executeQuery();
-        while (resultSet.next()) {
-            list.add(fn.apply(resultSet));
-        }
-
-        return list;
+    private Equipment equipmentFromResultSet(ResultSet resultSet) throws SQLException {
+        Hut hut = hutMap.get(resultSet.getInt("hut_id"));
+        return new Equipment(
+                resultSet.getInt("id"),
+                hut,
+                resultSet.getString("name"),
+                resultSet.getDate("purchase_date").toLocalDate(),
+                resultSet.getInt("count")
+        );
     }
 }

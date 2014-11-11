@@ -36,12 +36,12 @@ public class MainController {
         reservationTableController.inject(dataModel, unhandledExceptionHook);
         forgottenTableController.inject(dataModel, unhandledExceptionHook);
         brokenItemTableController.inject(dataModel, unhandledExceptionHook);
+        equipmentTableController.inject(dataModel, unhandledExceptionHook);
 
         reservationFormController.load();
         reservationTableController.load();
         forgottenTableController.load();
         brokenItemTableController.load();
-
-        equipmentTableController.initializeData(dataModel);
+        equipmentTableController.load();
     }
 }
