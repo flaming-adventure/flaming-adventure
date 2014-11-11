@@ -160,9 +160,12 @@ public class ReservationFormController {
 
         if (hut == null || date == null) { return; }
 
-        Integer occupancy =  0;
-        for (Reservation reservation : dataModel.getReservationListForHut(hut)) {
-            if (reservation.getDate().equals(date)) { occupancy += reservation.getCount(); }
+        Integer occupancy;
+        try {
+            occupancy = dataModel.occupancy(hut, date);
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
         }
 
         Integer totalCapacity = hut.getCapacity();
