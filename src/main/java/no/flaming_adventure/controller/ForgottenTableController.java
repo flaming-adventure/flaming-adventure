@@ -1,5 +1,6 @@
 package no.flaming_adventure.controller;
 
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import no.flaming_adventure.model.DataModel;
@@ -7,7 +8,9 @@ import no.flaming_adventure.model.ForgottenItem;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.model.Reservation;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.function.Consumer;
 
 /**
  * Controller for the forgotten item tab, responsible for both table and form.
@@ -20,10 +23,23 @@ import java.time.LocalDate;
  * </ul>
  */
 public class ForgottenTableController {
-    /**
-     * Default date for the form's date picker.
-     */
-    static private final LocalDate defaultDate = LocalDate.now();
+
+    /************************************************************************
+     *
+     * Static fields
+     *
+     ************************************************************************/
+
+    static private final LocalDate YESTERDAY = LocalDate.now().minusDays(1);
+
+    /************************************************************************
+     *
+     * Fields
+     *
+     ************************************************************************/
+
+    private DataModel dataModel;
+    private Consumer<Throwable> unhandledExceptionHook;
 
     @FXML private TableView<ForgottenItem>              tableView;
     @FXML private TableColumn<ForgottenItem, String>    hutColumn;
@@ -40,7 +56,41 @@ public class ForgottenTableController {
     @FXML private TextField commentTextField;
     @FXML private Button commitButton;
 
-    private DataModel dataModel;
+    /************************************************************************
+     *
+     * Public API
+     *
+     ************************************************************************/
+
+    public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+        this.dataModel = dataModel;
+        this.unhandledExceptionHook = unhandledExceptionHook;
+    }
+
+    public void load() {
+        ObservableList<Hut> huts;
+        ObservableList<ForgottenItem> forgottenItems;
+        try {
+            huts = dataModel.getHuts();
+            forgottenItems = dataModel.getForgottenItems();
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+
+        tableView.setItems(forgottenItems);
+
+        hutComboBox.setItems(huts);
+        hutComboBox.getSelectionModel().selectFirst();
+
+        datePicker.setValue(YESTERDAY);
+    }
+
+    /************************************************************************
+     *
+     * Private API
+     *
+     ************************************************************************/
 
     /**
      * JavaFX initialization method.
@@ -58,73 +108,5 @@ public class ForgottenTableController {
         nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         emailColumn.setCellValueFactory(param -> param.getValue().contactProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
-
-        datePicker.setValue(defaultDate);
-    }
-
-    /**
-     * Finalize the initialization by providing access to the data model.
-     * <p>
-     * Note: this method should be called after {@link #initialize() initialize()} has been called by JavaFX.
-     *
-     * @param dataModel the application's data model.
-     */
-    public void initializeData(DataModel dataModel) {
-        this.dataModel = dataModel;
-
-        tableView.setItems(dataModel.getForgottenItemList());
-
-        hutComboBox.setItems(dataModel.getHutListDeprecated());
-        hutComboBox.getSelectionModel().selectFirst();
-        hutComboBox.setOnAction(event -> updateAction());
-
-        datePicker.setOnAction(event -> updateAction());
-        commitButton.setOnAction(event -> {
-            commitAction();
-            updateAction();
-        });
-
-        updateAction();
-    }
-
-    /**
-     * Update action for the form.
-     */
-    private void updateAction() {
-        Hut hut = hutComboBox.getValue();
-
-        reservationChoiceBox.setItems(dataModel.getReservationListForHut(hut));
-        if (reservationChoiceBox.getItems().isEmpty()) {
-            disableForm();
-        } else {
-            reservationChoiceBox.getSelectionModel().selectFirst();
-            enableForm();
-        }
-    }
-
-    /**
-     * Disable all parts of the form with the exception of the hut combo box and the date picker.
-     */
-    private void disableForm() {
-        reservationChoiceBox.setDisable(true);
-        itemTextField.setDisable(true);
-        commentTextField.setDisable(true);
-        commitButton.setDisable(true);
-    }
-
-    /**
-     * Enable all parts of the form with the exception of the hut combo box and the date picker.
-     */
-    private void enableForm() {
-        reservationChoiceBox.setDisable(false);
-        itemTextField.setDisable(false);
-        commentTextField.setDisable(false);
-        commitButton.setDisable(false);
-    }
-
-    /**
-     * Attempt to add a new forgotten item from the form to the database.
-     */
-    private void commitAction() {
     }
 }

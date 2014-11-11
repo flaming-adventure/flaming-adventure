@@ -53,9 +53,7 @@ public class DataModel {
      ************************************************************************/
 
     private static final String sqlHutList              = "SELECT * FROM huts;";
-    private static final String sqlReservationList      = "SELECT * FROM reservations;";
     private static final String sqlEquipmentList        = "SELECT * FROM equipment;";
-    private static final String sqlForgottenItemList    = "SELECT * FROM forgotten_items;";
 
     private static final String sqlInsertReservation    =
             "INSERT INTO reservations (hut_id, date, name, email, count, comment) VALUES (?, ?, ?, ?, ?, ?);";
@@ -91,9 +89,7 @@ public class DataModel {
      * See issue #39 and issue #41.
      */
     private final ObservableList<Hut>           hutList;
-    private final ObservableList<Reservation>   reservationList;
     private final ObservableList<Equipment>     equipmentList;
-    private final ObservableList<ForgottenItem> forgottenItemList;
 
     /************************************************************************
      *
@@ -115,9 +111,7 @@ public class DataModel {
                         "WHERE reservations.hut_id = ? AND reservations.date = ?;");
 
         PreparedStatement hutStmt           = connection.prepareStatement(sqlHutList);
-        PreparedStatement reservationStmt   = connection.prepareStatement(sqlReservationList);
         PreparedStatement equipmentStmt     = connection.prepareStatement(sqlEquipmentList);
-        PreparedStatement forgottenItemStmt = connection.prepareStatement(sqlForgottenItemList);
 
         reservationInsertStmt   = connection.prepareStatement(sqlInsertReservation, Statement.RETURN_GENERATED_KEYS);
 
@@ -128,20 +122,6 @@ public class DataModel {
                 resultSet.getInt("firewood")
         ));
 
-        reservationList = forceList(reservationStmt, resultSet -> {
-            Integer hutID = resultSet.getInt("hut_id");
-            Hut hut = getHutFromID(hutID).get();
-            return new Reservation(
-                    resultSet.getInt("id"),
-                    hut,
-                    resultSet.getDate("date").toLocalDate(),
-                    resultSet.getString("name"),
-                    resultSet.getString("email"),
-                    resultSet.getInt("count"),
-                    resultSet.getString("comment")
-            );
-        });
-
         equipmentList = forceList(equipmentStmt, resultSet -> {
             Integer hutID = resultSet.getInt("hut_id");
             Hut hut = getHutFromID(hutID).get();
@@ -151,21 +131,6 @@ public class DataModel {
                     resultSet.getString("name"),
                     resultSet.getDate("purchase_date").toLocalDate(),
                     resultSet.getInt("count")
-            );
-        });
-
-        forgottenItemList = forceList(forgottenItemStmt, resultSet -> {
-            Integer hutID = resultSet.getInt("hut_id");
-            Hut hut = getHutFromID(hutID).get();
-            return new ForgottenItem(
-                    resultSet.getInt("id"),
-                    hut,
-                    resultSet.getString("item"),
-                    resultSet.getString("name"),
-                    resultSet.getString("contact"),
-                    resultSet.getDate("date").toLocalDate(),
-                    resultSet.getBoolean("delivered"),
-                    resultSet.getString("comment")
             );
         });
 
@@ -198,6 +163,16 @@ public class DataModel {
             reservations.add(reservationFromResultSet(resultSet));
         }
         return reservations;
+    }
+
+    public ObservableList<ForgottenItem> getForgottenItems() throws SQLException {
+        ObservableList<ForgottenItem> forgottenItems = FXCollections.observableArrayList();
+        String query = "SELECT * FROM forgotten_items;";
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            forgottenItems.add(forgottenItemFromResultSet(resultSet));
+        }
+        return forgottenItems;
     }
 
     public ObservableList<BrokenItem> getBrokenItems() throws SQLException {
@@ -274,27 +249,6 @@ public class DataModel {
     }
 
     /**
-     * Return the list of reservations.
-     *
-     * @return the list of all reservations.
-     * @deprecated a new data model API is under development and will replace the current one.
-     */
-    public ObservableList<Reservation> getReservationList() {
-        return reservationList;
-    }
-
-    /**
-     * Return the list of reservations for the given hut.
-     *
-     * @param hut the hut whose reservations should be returned.
-     * @return the list of all reservations for the given hut.
-     * @deprecated a new data model API is under development and will replace the current one.
-     */
-    public ObservableList<Reservation> getReservationListForHut(Hut hut) {
-        return getReservationList().filtered(reservation -> reservation.getHut().getId() == hut.getId());
-    }
-
-    /**
      * Return the list of equipment.
      *
      * @return the list of all equipment for all huts.
@@ -302,16 +256,6 @@ public class DataModel {
      */
     public ObservableList<Equipment> getEquipmentList() {
         return equipmentList;
-    }
-
-    /**
-     * Return the list of forgotten items.
-     *
-     * @return the list of all forgotten items.
-     * @deprecated a new data model API is under development and will replace the current one.
-     */
-    public ObservableList<ForgottenItem> getForgottenItemList() {
-        return forgottenItemList;
     }
 
     /************************************************************************
@@ -338,6 +282,20 @@ public class DataModel {
                 resultSet.getString("name"),
                 resultSet.getString("email"),
                 resultSet.getInt("count"),
+                resultSet.getString("comment")
+        );
+    }
+
+    private ForgottenItem forgottenItemFromResultSet(ResultSet resultSet) throws SQLException {
+        Hut hut = hutMap.get(resultSet.getInt("hut_id"));
+        return new ForgottenItem(
+                resultSet.getInt("id"),
+                hut,
+                resultSet.getString("item"),
+                resultSet.getString("name"),
+                resultSet.getString("contact"),
+                resultSet.getDate("date").toLocalDate(),
+                resultSet.getBoolean("delivered"),
                 resultSet.getString("comment")
         );
     }
