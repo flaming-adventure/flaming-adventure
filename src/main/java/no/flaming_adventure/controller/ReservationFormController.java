@@ -231,11 +231,10 @@ public class ReservationFormController {
         Integer count   = countChoiceBox.getValue();
         String comment  = commentTextArea.getText();
 
-        Reservation reservation = new Reservation(null, hut, date, name, email, count, comment);
-
         try {
+            Reservation reservation = new Reservation(-1, hut, date, name, email, count, comment);
             dataModel.insertReservation(reservation);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
         }
