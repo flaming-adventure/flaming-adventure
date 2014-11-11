@@ -6,41 +6,35 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.*?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="vBox" alignment="CENTER" prefWidth="300.0" spacing="8.0"
-      xmlns="http://javafx.com/javafx/8">
+<VBox fx:id="vBox" alignment="CENTER" prefWidth="300.0" spacing="8.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Flaming Adventure">
             <font>
-                <Font size="24.0"/>
+                <Font size="24.0" />
             </font>
         </Text>
         <TextField fx:id="URLField" promptText="Database URL">
             <font>
-                <Font size="14.0"/>
+                <Font size="14.0" />
             </font>
         </TextField>
         <TextField fx:id="usernameField" promptText="Username">
             <font>
-                <Font size="14.0"/>
+                <Font size="14.0" />
             </font>
         </TextField>
         <PasswordField fx:id="passwordField" promptText="Password">
             <font>
-                <Font size="14.0"/>
+                <Font size="14.0" />
             </font>
         </PasswordField>
-        <Text fx:id="errorText" fill="RED" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.0" visible="false">
-            <font>
-                <Font size="14.0"/>
-            </font>
-        </Text>
         <Button fx:id="logInButton" mnemonicParsing="false" text="Log in">
             <font>
-                <Font size="14.0"/>
+                <Font size="14.0" />
             </font>
         </Button>
     </children>
     <padding>
-        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
     </padding>
 </VBox>

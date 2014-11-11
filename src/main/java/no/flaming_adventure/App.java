@@ -34,6 +34,14 @@ public class App extends Application {
     private static final Logger LOGGER = Logger.getLogger(App.class.getName());
     public static final Preferences preferences = Preferences.userNodeForPackage(App.class);
 
+    /**
+     * Database driver to use.
+     *
+     * <p> Note that we could possibly allow more dynamic loading of database
+     * drivers, but it's not within the current scope of the application.
+     */
+    private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
+
     /************************************************************************
      *
      * Static methods
@@ -74,6 +82,14 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         this.stage = stage;
+
+        LOGGER.log(Level.INFO, "Loading database driver...");
+        try {
+            Class.forName(DB_DRIVER);
+        } catch (ClassNotFoundException e) {
+            unhandledExceptionHook(e);
+            throw new IllegalStateException(e);
+        }
 
         LoginController loginController = new LoginController(preferences, this::connectionHook);
 
