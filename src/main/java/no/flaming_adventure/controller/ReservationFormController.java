@@ -108,16 +108,9 @@ public class ReservationFormController {
             throw new IllegalStateException(e);
         }
 
-        hutComboBox.getEditor().setDisable(true);
         hutComboBox.setItems(huts);
         hutComboBox.getSelectionModel().selectFirst();
-
-        hutComboBox.setOnAction(event -> updateAction());
-        datePicker.setOnAction(event -> updateAction());
-        commitButton.setOnAction(event -> {
-            commitAction();
-            updateAction();
-        });
+        datePicker.setValue(defaultDate);
 
         updateAction();
     }
@@ -139,8 +132,12 @@ public class ReservationFormController {
      */
     @FXML
     private void initialize() {
-        datePicker.setValue(defaultDate);
         datePicker.setDayCellFactory(param -> new DateCell());
+        hutComboBox.getEditor().setDisable(true);
+
+        hutComboBox.setOnAction(ignored -> updateAction());
+        datePicker.setOnAction(ignored -> updateAction());
+        commitButton.setOnAction(ignored -> commitAction());
     }
 
     /**
@@ -238,6 +235,8 @@ public class ReservationFormController {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
         }
+
+        updateAction();
 
         enableInput(true);
     }
