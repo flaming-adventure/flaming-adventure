@@ -21,7 +21,6 @@ import java.net.URL;
 import java.sql.Connection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 public class App extends Application {
 
@@ -32,7 +31,6 @@ public class App extends Application {
      ************************************************************************/
 
     private static final Logger LOGGER = Logger.getLogger(App.class.getName());
-    public static final Preferences preferences = Preferences.userNodeForPackage(App.class);
 
     /**
      * Database driver to use.
@@ -91,7 +89,7 @@ public class App extends Application {
             throw new IllegalStateException(e);
         }
 
-        LoginController loginController = new LoginController(preferences, this::connectionHook);
+        LoginController loginController = new LoginController(this::connectionHook);
 
         Scene loginScene = loadScene("login.fxml", loginController);
 
