@@ -197,7 +197,7 @@ public class DataModel {
      *
      ************************************************************************/
 
-    public ObservableList<Hut> getsHutList() throws SQLException {
+    public ObservableList<Hut> getHutList() throws SQLException {
         ObservableList<Hut> huts = FXCollections.observableArrayList();
         String query = "SELECT * FROM huts;";
         ResultSet resultSet = statement.executeQuery(query);
