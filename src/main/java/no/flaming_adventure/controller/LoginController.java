@@ -1,10 +1,8 @@
 package no.flaming_adventure.controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -31,6 +29,7 @@ public class LoginController {
     public static final String DATABASE_URL = "databaseURL";
     public static final String USERNAME     = "username";
     public static final String PASSWORD     = "password";
+    public static final String REMEMBER_ME  = "remember_me";
 
     private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
 
@@ -47,6 +46,7 @@ public class LoginController {
     @FXML private TextField     usernameField;
     @FXML private PasswordField passwordField;
     @FXML private Button        logInButton;
+    @FXML private CheckBox      rememberMeCheckBox;
 
     /************************************************************************
      *
@@ -79,14 +79,15 @@ public class LoginController {
     @FXML private void initialize() {
         LOGGER.info("Initializing login interface...");
 
-        URLField.setText(preferences.get(DATABASE_URL, ""));
-        if (! URLField.getText().isEmpty()) { LOGGER.info("Database URL was set from configuration."); }
-        usernameField.setText(preferences.get(USERNAME, ""));
-        if (! usernameField.getText().isEmpty()) { LOGGER.info("Username was set from configuration."); }
-        passwordField.setText(preferences.get(PASSWORD, ""));
-        if (! passwordField.getText().isEmpty()) { LOGGER.info("Password was set from configuration."); }
+        if (preferences.getBoolean(REMEMBER_ME, false)) {
+            rememberMeCheckBox.setSelected(true);
+            LOGGER.log(Level.INFO, "Getting user login data from configuration.");
+            URLField.setText(preferences.get(DATABASE_URL, ""));
+            usernameField.setText(preferences.get(USERNAME, ""));
+            passwordField.setText(preferences.get(PASSWORD, ""));
+        }
 
-        logInButton.setOnAction(event -> logIn());
+        logInButton.setOnAction(this::logInButtonActionHook);
     }
 
     /**
@@ -96,7 +97,7 @@ public class LoginController {
      *     <li>TODO #42 (enhancement): extract messages to localization file.
      * </ul>
      */
-    private void logIn() {
+    private void logInButtonActionHook(ActionEvent ignored) {
         String URL = URLField.getText();
         String username = usernameField.getText();
         String password = passwordField.getText();
@@ -112,10 +113,19 @@ public class LoginController {
             LOGGER.log(Level.INFO, "Connecting to database.");
             Connection connection = DriverManager.getConnection(URL, username, password);
 
-            LOGGER.log(Level.INFO, "Storing user credentials.");
-            preferences.put(DATABASE_URL, URL.replace("jdbc:mysql://", ""));
-            preferences.put(USERNAME, username);
-            preferences.put(PASSWORD, password);
+            if (rememberMeCheckBox.isSelected()) {
+                LOGGER.log(Level.INFO, "Storing user credentials.");
+                preferences.put(DATABASE_URL, URL.replace("jdbc:mysql://", ""));
+                preferences.put(USERNAME, username);
+                preferences.put(PASSWORD, password);
+                preferences.putBoolean(REMEMBER_ME, true);
+            } else {
+                // Make sure we don't keep old credentials around.
+                preferences.remove(DATABASE_URL);
+                preferences.remove(USERNAME);
+                preferences.remove(PASSWORD);
+                preferences.putBoolean(REMEMBER_ME, false);
+            }
 
             connectionHook.accept(connection);
         } catch (SQLException e) {
