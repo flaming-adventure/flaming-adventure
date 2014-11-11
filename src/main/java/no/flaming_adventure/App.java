@@ -142,9 +142,9 @@ public class App extends Application {
 
         alert.showAndWait();
 
+        LOGGER.log(Level.SEVERE, throwable.toString(), throwable);
         stage.close();
         Platform.exit();
-        LOGGER.log(Level.SEVERE, throwable.toString(), throwable);
     }
 
     /**
