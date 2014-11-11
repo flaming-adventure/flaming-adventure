@@ -1,8 +1,11 @@
 package no.flaming_adventure.controller;
 
-import javafx.event.ActionEvent;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -45,8 +48,8 @@ public class LoginController {
     @FXML private TextField     URLField;
     @FXML private TextField     usernameField;
     @FXML private PasswordField passwordField;
-    @FXML private Button        logInButton;
     @FXML private CheckBox      rememberMeCheckBox;
+    @FXML private Button        logInButton;
 
     /************************************************************************
      *
@@ -85,8 +88,19 @@ public class LoginController {
             URLField.setText(preferences.get(DATABASE_URL, ""));
             usernameField.setText(preferences.get(USERNAME, ""));
             passwordField.setText(preferences.get(PASSWORD, ""));
+            Platform.runLater(logInButton::requestFocus);
         }
 
+        EventHandler<KeyEvent> enterHandler = event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                logInButtonActionHook(new Object());
+            }
+        };
+
+        URLField.setOnKeyReleased(enterHandler);
+        usernameField.setOnKeyReleased(enterHandler);
+        passwordField.setOnKeyReleased(enterHandler);
+        rememberMeCheckBox.setOnKeyReleased(enterHandler);
         logInButton.setOnAction(this::logInButtonActionHook);
     }
 
@@ -97,7 +111,7 @@ public class LoginController {
      *     <li>TODO #42 (enhancement): extract messages to localization file.
      * </ul>
      */
-    private void logInButtonActionHook(ActionEvent ignored) {
+    private void logInButtonActionHook(Object ignored) {
         String URL = URLField.getText();
         String username = usernameField.getText();
         String password = passwordField.getText();
