@@ -74,10 +74,6 @@ public class LoginController {
      *
      * <p> Sets the URL, username and password fields to data from the
      * configuration if such data is available.
-     *
-     * <ul>
-     *     <li>TODO #44 (enhancement): make credential persistence optional.
-     * </ul>
      */
     @FXML private void initialize() {
         LOGGER.info("Initializing login interface...");
