@@ -1,8 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <TabPane fx:id="tabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <tabs>
+      <Tab text="Oversikt">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0">
+               <children>
+                  <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <columns>
+                      <TableColumn prefWidth="150.0" text="Koie" />
+                      <TableColumn prefWidth="75.0" text="Ved (sekker)" />
+                        <TableColumn prefWidth="75.0" text="Ødelagt" />
+                        <TableColumn prefWidth="75.0" text="Glemt" />
+                        <TableColumn prefWidth="200.0" text="Neste reservasjon" />
+                    </columns>
+                  </TableView>
+               </children>
+               <padding>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </padding>
+            </AnchorPane>
+        </content>
+      </Tab>
     <Tab fx:id="reservationFormTab" text="Reserver">
          <content>
             <fx:include fx:id="reservationForm" source="reservationForm.fxml" />
@@ -23,7 +45,7 @@
             <fx:include fx:id="equipmentTable" source="equipmentTable.fxml" />
          </content>
       </Tab>
-      <Tab fx:id="brokenTab" text="Odelagt">
+      <Tab fx:id="brokenTab" text="Ødelagt">
          <content>
             <fx:include fx:id="brokenItemTable" source="brokenItemTable.fxml" />
          </content>
