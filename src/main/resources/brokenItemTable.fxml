@@ -15,6 +15,7 @@
                   <TableColumn fx:id="commentColumn" editable="false" prefWidth="300.0" sortable="false" text="Kommentar" />
                </columns>
             </TableView>
+            <Pagination fx:id="pagination" VBox.vgrow="NEVER" />
             <HBox>
                <children>
                   <Label text="Legg til" textFill="#888888" />

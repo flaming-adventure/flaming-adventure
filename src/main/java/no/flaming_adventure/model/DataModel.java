@@ -153,6 +153,22 @@ public class DataModel {
         return reservations;
     }
 
+    public Integer brokenItemCount() throws SQLException {
+        ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM broken_items;");
+        resultSet.next();
+        return resultSet.getInt(1);
+    }
+
+    public ObservableList<BrokenItem> brokenItemPage(Integer pageStart, Integer pageSize) throws SQLException {
+        ObservableList<BrokenItem> brokenItems = FXCollections.observableArrayList();
+        String query = String.format("SELECT * FROM broken_items LIMIT %d, %d;", pageStart, pageSize);
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            brokenItems.add(brokenItemFromResultSet(resultSet));
+        }
+        return brokenItems;
+    }
+
     public Integer forgottenItemCount() throws SQLException {
         ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM forgotten_items;");
         resultSet.next();

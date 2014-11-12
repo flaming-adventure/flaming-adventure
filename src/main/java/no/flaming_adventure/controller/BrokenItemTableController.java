@@ -19,6 +19,8 @@ public class BrokenItemTableController {
      *
      ************************************************************************/
 
+    private static final Integer ITEMS_PER_PAGE = 50;
+
     private static final LocalDate YESTERDAY = LocalDate.now().minusDays(1);
 
     /************************************************************************
@@ -35,6 +37,8 @@ public class BrokenItemTableController {
     @FXML private TableColumn<BrokenItem, LocalDate>    dateColumn;
     @FXML private TableColumn<BrokenItem, String>       itemColumn;
     @FXML private TableColumn<BrokenItem, String>       commentColumn;
+
+    @FXML private Pagination pagination;
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker    datePicker;
@@ -55,16 +59,16 @@ public class BrokenItemTableController {
 
     public void load() {
         ObservableList<Hut>         huts;
-        ObservableList<BrokenItem>  brokenItems;
         try {
             huts = dataModel.getHuts();
-            brokenItems = dataModel.getBrokenItems();
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
         }
 
-        tableView.setItems(brokenItems);
+        pagination.currentPageIndexProperty()
+                .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
+        loadPage(0);
 
         hutComboBox.setItems(huts);
         hutComboBox.getSelectionModel().selectFirst();
@@ -84,5 +88,27 @@ public class BrokenItemTableController {
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
+    }
+
+    private void loadPage(Integer pageIndex) {
+        Integer brokenItemCount;
+        ObservableList<BrokenItem> brokenItems;
+        try {
+            brokenItemCount = dataModel.brokenItemCount();
+            brokenItems = dataModel.brokenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+
+        tableView.setItems(brokenItems);
+
+        if (brokenItemCount == 0) {
+            pagination.setPageCount(1);
+        } else {
+            pagination.setPageCount((brokenItemCount + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
+        }
+
+        pagination.setCurrentPageIndex(pageIndex);
     }
 }
