@@ -22,25 +22,6 @@ import java.util.logging.Logger;
  * <code>schema.ddl</code> in the distributed files. This section deals mostly with architecture decisions.
  *
  * <p> <em>Section removed during refactor.</em>
- *
- * <h3>Database usage strategy</h3>
- *
- * <p> Currently the data model simply requests all data from the database upon construction and creates an
- * observable list for each table. While this is not currently an issue because of the size of the data set it will
- * most certainly become one when more data is added to the database. Therefore the following tasks should be
- * completed as soon as possible.
- *
- * <ol>
- *     <li>TODO #38 (high priority): create and implement a specification for the data model API.
- *     <li>TODO #39 (high priority): create a consistent database usage strategy.
- *     <li>TODO #41 (enhancement): deploy database usage strategy.
- * </ol>
- *
- * <h4>SQL queries</h4>
- *
- * <p> All SQL queries in the entire project should be located in this class. If for any reason this should change it
- * is imperative that both this comment is modified and that the commit message presents a compelling reason for the
- * change.
  */
 public class DataModel {
 
