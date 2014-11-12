@@ -122,7 +122,12 @@ public class ForgottenTableController {
 
         tableView.setItems(forgottenItems);
 
-        pagination.setPageCount((forgottenItemCount + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
+        if (forgottenItemCount == 0) {
+            pagination.setPageCount(1);
+        } else {
+            pagination.setPageCount((forgottenItemCount + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
+        }
+
         pagination.setCurrentPageIndex(pageIndex);
     }
 
