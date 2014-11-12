@@ -14,10 +14,6 @@ import java.util.function.Consumer;
 
 /**
  * Controller for the reservation table view.
- * <ul>
- *     <li>TODO (low priority): inline editing of reservations.
- *     <li>TODO (low priority): deletion/deactivation of reservations.
- * </ul>
  */
 public class ReservationTableController {
 
