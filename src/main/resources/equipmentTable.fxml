@@ -7,14 +7,6 @@
    <children>
       <VBox layoutX="8.0" layoutY="8.0" spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <HBox spacing="8.0">
-               <children>
-                  <Label text="Filter:" />
-                  <DatePicker fx:id="filterFromDatePicker" />
-                  <DatePicker fx:id="filterToDatePicker" />
-               </children>
-            </HBox>
-            <Separator />
             <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <columns>
                   <TableColumn fx:id="hutColumn" prefWidth="150.0" text="Koie" />
