@@ -7,21 +7,13 @@
    <children>
       <VBox layoutX="8.0" layoutY="8.0" spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <HBox spacing="8.0">
-               <children>
-                  <Label text="Filter:" />
-                  <DatePicker fx:id="filterFromDatePicker" />
-                  <DatePicker fx:id="filterToDatePicker" />
-               </children>
-            </HBox>
-            <Separator />
-            <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
                <columns>
                   <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" text="Koie" />
                   <TableColumn fx:id="itemColumn" editable="false" prefWidth="150.0" text="Ting" />
                   <TableColumn fx:id="commentColumn" editable="false" prefWidth="400.0" text="Kommentar" />
                   <TableColumn fx:id="nameColumn" editable="false" prefWidth="150.0" text="Navn" />
-                  <TableColumn fx:id="emailColumn" editable="false" prefWidth="200.0" text="E-Post" />
+                  <TableColumn fx:id="emailColumn" editable="false" prefWidth="200.0" text="Kontakt" />
                   <TableColumn fx:id="dateColumn" editable="false" prefWidth="75.0" text="Dato" />
                </columns>
             </TableView>
