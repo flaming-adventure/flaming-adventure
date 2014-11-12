@@ -147,6 +147,9 @@ public class ForgottenTableController {
             throw new IllegalStateException(e);
         }
 
+        itemTextField.clear();
+        commentTextField.clear();
+
         loadPage(pagination.getCurrentPageIndex());
     }
 }

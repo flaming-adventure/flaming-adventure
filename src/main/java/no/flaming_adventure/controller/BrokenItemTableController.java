@@ -128,6 +128,9 @@ public class BrokenItemTableController {
             throw new IllegalStateException(e);
         }
 
+        itemTextField.clear();
+        commentTextField.clear();
+
         loadPage(pagination.getCurrentPageIndex());
     }
 }
