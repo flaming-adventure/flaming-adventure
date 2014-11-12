@@ -1,8 +1,11 @@
 package no.flaming_adventure.controller;
 
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.ForgottenItem;
 import no.flaming_adventure.model.Hut;
@@ -62,6 +65,9 @@ public class ForgottenTableController {
     public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
         this.dataModel = dataModel;
         this.unhandledExceptionHook = unhandledExceptionHook;
+
+        commitButton.setOnAction(ignored -> commitButtonHook());
+
     }
 
     public void load() {
@@ -106,7 +112,18 @@ public class ForgottenTableController {
         emailColumn.setCellValueFactory(param -> param.getValue().contactProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
 
-        commitButton.setOnAction(ignored -> commitButtonHook());
+        EventHandler<KeyEvent> enterHandler = event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                commitButton.fire();
+            }
+        };
+
+        hutComboBox.setOnKeyReleased(enterHandler);
+        datePicker.setOnKeyReleased(enterHandler);
+        itemTextField.setOnKeyReleased(enterHandler);
+        nameTextField.setOnKeyReleased(enterHandler);
+        contactTextField.setOnKeyReleased(enterHandler);
+        commentTextField.setOnKeyReleased(enterHandler);
     }
 
     private void loadPage(Integer pageIndex) {

@@ -1,8 +1,11 @@
 package no.flaming_adventure.controller;
 
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import no.flaming_adventure.model.BrokenItem;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
@@ -55,6 +58,8 @@ public class BrokenItemTableController {
     public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
         this.dataModel = dataModel;
         this.unhandledExceptionHook = unhandledExceptionHook;
+
+        commitButton.setOnAction(ignored -> commitButtonHook());
     }
 
     public void load() {
@@ -89,7 +94,16 @@ public class BrokenItemTableController {
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
 
-        commitButton.setOnAction(ignored -> commitButtonHook());
+        EventHandler<KeyEvent> enterHandler = event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                commitButton.fire();
+            }
+        };
+
+        hutComboBox.setOnKeyReleased(enterHandler);
+        datePicker.setOnKeyReleased(enterHandler);
+        itemTextField.setOnKeyReleased(enterHandler);
+        commentTextField.setOnKeyReleased(enterHandler);
     }
 
     private void loadPage(Integer pageIndex) {
