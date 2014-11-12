@@ -51,6 +51,7 @@ public class DataModel {
      ************************************************************************/
 
     private final Statement statement;
+    private final Statement altStatement;
 
     private final PreparedStatement occupancyStmt;
     private final PreparedStatement reservationInsertStmt;
@@ -75,6 +76,7 @@ public class DataModel {
         LOGGER.log(Level.FINE, "Initializing data model.");
 
         statement = connection.createStatement();
+        altStatement = connection.createStatement();
         occupancyStmt = connection.prepareStatement("SELECT SUM(reservations.count) FROM reservations " +
                         "WHERE reservations.hut_id = ? AND reservations.date = ?;");
 
@@ -254,6 +256,18 @@ public class DataModel {
      *
      ************************************************************************/
 
+    private Hut hutFromId(Integer id) throws SQLException {
+        Hut hut = hutMap.get(id);
+        if (hut == null) {
+            String query = String.format("SELECT * FROM huts WHERE id = %d;", id);
+            ResultSet resultSet = altStatement.executeQuery(query);
+            // The result set might not contain a hut, but we simply let exception be thrown.
+            resultSet.next();
+            hut = hutFromResultSet(resultSet);
+        }
+        return hut;
+    }
+
     private Hut hutFromResultSet(ResultSet resultSet) throws SQLException {
         return new Hut(
                 resultSet.getInt("id"),
@@ -264,7 +278,7 @@ public class DataModel {
     }
 
     private Reservation reservationFromResultSet(ResultSet resultSet) throws SQLException {
-        Hut hut = hutMap.get(resultSet.getInt("hut_id"));
+        Hut hut = hutFromId(resultSet.getInt("hut_id"));
         return new Reservation(
                 resultSet.getInt("id"),
                 hut,
@@ -277,7 +291,7 @@ public class DataModel {
     }
 
     private ForgottenItem forgottenItemFromResultSet(ResultSet resultSet) throws SQLException {
-        Hut hut = hutMap.get(resultSet.getInt("hut_id"));
+        Hut hut = hutFromId(resultSet.getInt("hut_id"));
         return new ForgottenItem(
                 resultSet.getInt("id"),
                 hut,
@@ -291,7 +305,7 @@ public class DataModel {
     }
 
     private BrokenItem brokenItemFromResultSet(ResultSet resultSet) throws SQLException {
-        Hut hut = hutMap.get(resultSet.getInt("hut_id"));
+        Hut hut = hutFromId(resultSet.getInt("hut_id"));
         return new BrokenItem(
                 resultSet.getInt("id"),
                 hut,
@@ -303,7 +317,7 @@ public class DataModel {
     }
 
     private Equipment equipmentFromResultSet(ResultSet resultSet) throws SQLException {
-        Hut hut = hutMap.get(resultSet.getInt("hut_id"));
+        Hut hut = hutFromId(resultSet.getInt("hut_id"));
         return new Equipment(
                 resultSet.getInt("id"),
                 hut,
