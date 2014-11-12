@@ -6,7 +6,6 @@ import javafx.scene.control.*;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.ForgottenItem;
 import no.flaming_adventure.model.Hut;
-import no.flaming_adventure.model.Reservation;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -44,8 +43,9 @@ public class ForgottenTableController {
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker datePicker;
-    @FXML private ChoiceBox<Reservation> reservationChoiceBox;
     @FXML private TextField itemTextField;
+    @FXML private TextField nameTextField;
+    @FXML private TextField contactTextField;
     @FXML private TextField commentTextField;
     @FXML private Button commitButton;
 
@@ -101,5 +101,24 @@ public class ForgottenTableController {
         nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         emailColumn.setCellValueFactory(param -> param.getValue().contactProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
+
+        commitButton.setOnAction(ignored -> commitButtonHook());
+    }
+
+    private void commitButtonHook() {
+        Hut hut         = hutComboBox.getValue();
+        LocalDate date  = datePicker.getValue();
+        String item     = itemTextField.getText();
+        String name     = nameTextField.getText();
+        String contact  = contactTextField.getText();
+        String comment  = commentTextField.getText();
+
+        try {
+            ForgottenItem forgottenItem = new ForgottenItem(-1, hut, item, name, contact, date, false, comment);
+            dataModel.insertForgottenItem(forgottenItem);
+        } catch (SQLException|NullPointerException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
     }
 }

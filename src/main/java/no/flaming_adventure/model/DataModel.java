@@ -34,6 +34,10 @@ public class DataModel {
     private static final String SQL_INSERT_RESERVATION =
             "INSERT INTO reservations (hut_id, date, name, email, count, comment) VALUES (?, ?, ?, ?, ?, ?);";
 
+    private static final String SQL_INSERT_FORGOTTEN_ITEM =
+            "INSERT INTO forgotten_items (hut_id, item, name, contact, date, delivered, comment) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?);";
+
     private static final Logger LOGGER = Logger.getLogger(DataModel.class.getName());
 
     /************************************************************************
@@ -46,6 +50,7 @@ public class DataModel {
 
     private final PreparedStatement occupancyStmt;
     private final PreparedStatement reservationInsertStmt;
+    private final PreparedStatement forgottenItemInsertStmt;
 
     private final Map<Integer, Hut> hutMap = new HashMap<>();
 
@@ -69,6 +74,8 @@ public class DataModel {
                         "WHERE reservations.hut_id = ? AND reservations.date = ?;");
 
         reservationInsertStmt   = connection.prepareStatement(SQL_INSERT_RESERVATION, Statement.RETURN_GENERATED_KEYS);
+        forgottenItemInsertStmt = connection.prepareStatement(SQL_INSERT_FORGOTTEN_ITEM,
+                Statement.RETURN_GENERATED_KEYS);
 
         LOGGER.fine("Data model successfully initialized.");
     }
@@ -167,6 +174,24 @@ public class DataModel {
         ResultSet resultSet = reservationInsertStmt.getGeneratedKeys();
         resultSet.next();
         reservation.setId(resultSet.getInt(1));
+    }
+
+    public void insertForgottenItem(ForgottenItem forgottenItem) throws SQLException {
+        LOGGER.log(Level.INFO, "Adding forgotten item to database.");
+
+        forgottenItemInsertStmt.setInt(1, forgottenItem.getHut().getId());
+        forgottenItemInsertStmt.setString(2, forgottenItem.getItem());
+        forgottenItemInsertStmt.setString(3, forgottenItem.getName());
+        forgottenItemInsertStmt.setString(4, forgottenItem.getContact());
+        forgottenItemInsertStmt.setDate(5, Date.valueOf(forgottenItem.getDate()));
+        forgottenItemInsertStmt.setBoolean(6, forgottenItem.getDelivered());
+        forgottenItemInsertStmt.setString(7, forgottenItem.getComment());
+
+        forgottenItemInsertStmt.executeUpdate();
+
+        ResultSet resultSet = forgottenItemInsertStmt.getGeneratedKeys();
+        resultSet.next();
+        forgottenItem.setId(resultSet.getInt(1));
     }
 
     /************************************************************************
