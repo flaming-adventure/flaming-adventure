@@ -42,9 +42,9 @@ public class BrokenItemTableController {
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker    datePicker;
-    @FXML private TextField     textField;
-    @FXML private Button        commitButton;
+    @FXML private TextField     itemTextField;
     @FXML private TextField     commentTextField;
+    @FXML private Button        commitButton;
 
     /************************************************************************
      *
@@ -88,6 +88,8 @@ public class BrokenItemTableController {
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
+
+        commitButton.setOnAction(ignored -> commitButtonHook());
     }
 
     private void loadPage(Integer pageIndex) {
@@ -110,5 +112,22 @@ public class BrokenItemTableController {
         }
 
         pagination.setCurrentPageIndex(pageIndex);
+    }
+
+    private void commitButtonHook() {
+        Hut hut         = hutComboBox.getValue();
+        LocalDate date  = datePicker.getValue();
+        String item     = itemTextField.getText();
+        String comment  = commentTextField.getText();
+
+        try {
+            BrokenItem brokenItem = new BrokenItem(-1, hut, item, date, false, comment);
+            dataModel.insertBrokenItem(brokenItem);
+        } catch (NullPointerException|SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+
+        loadPage(pagination.getCurrentPageIndex());
     }
 }

@@ -38,6 +38,10 @@ public class DataModel {
             "INSERT INTO forgotten_items (hut_id, item, name, contact, date, delivered, comment) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?);";
 
+    private static final String SQL_INSERT_BROKEN_ITEM =
+            "INSERT INTO broken_items (hut_id, item, date, fixed, comment) " +
+                    "VALUES (?, ?, ?, ?, ?);";
+
     private static final Logger LOGGER = Logger.getLogger(DataModel.class.getName());
 
     /************************************************************************
@@ -51,6 +55,7 @@ public class DataModel {
     private final PreparedStatement occupancyStmt;
     private final PreparedStatement reservationInsertStmt;
     private final PreparedStatement forgottenItemInsertStmt;
+    private final PreparedStatement brokenItemInsertStmt;
 
     private final Map<Integer, Hut> hutMap = new HashMap<>();
 
@@ -76,6 +81,7 @@ public class DataModel {
         reservationInsertStmt   = connection.prepareStatement(SQL_INSERT_RESERVATION, Statement.RETURN_GENERATED_KEYS);
         forgottenItemInsertStmt = connection.prepareStatement(SQL_INSERT_FORGOTTEN_ITEM,
                 Statement.RETURN_GENERATED_KEYS);
+        brokenItemInsertStmt    = connection.prepareStatement(SQL_INSERT_BROKEN_ITEM, Statement.RETURN_GENERATED_KEYS);
 
         LOGGER.fine("Data model successfully initialized.");
     }
@@ -224,6 +230,22 @@ public class DataModel {
         ResultSet resultSet = forgottenItemInsertStmt.getGeneratedKeys();
         resultSet.next();
         forgottenItem.setId(resultSet.getInt(1));
+    }
+
+    public void insertBrokenItem(BrokenItem brokenItem) throws SQLException {
+        LOGGER.log(Level.INFO, "Adding broken item to database.");
+
+        brokenItemInsertStmt.setInt(1, brokenItem.getHut().getId());
+        brokenItemInsertStmt.setString(2, brokenItem.getItem());
+        brokenItemInsertStmt.setDate(3, Date.valueOf(brokenItem.getDate()));
+        brokenItemInsertStmt.setBoolean(4, brokenItem.getFixed());
+        brokenItemInsertStmt.setString(5, brokenItem.getComment());
+
+        brokenItemInsertStmt.executeUpdate();
+
+        ResultSet resultSet = brokenItemInsertStmt.getGeneratedKeys();
+        resultSet.next();
+        brokenItem.setId(resultSet.getInt(1));
     }
 
     /************************************************************************
