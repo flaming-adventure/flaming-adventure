@@ -17,6 +17,7 @@
                   <TableColumn fx:id="dateColumn" editable="false" prefWidth="75.0" text="Dato" />
                </columns>
             </TableView>
+            <Pagination VBox.vgrow="NEVER" />
             <HBox>
                <children>
                   <Label text="Legg til" textFill="#888888" />
