@@ -22,6 +22,8 @@ public class ForgottenTableController {
      *
      ************************************************************************/
 
+    static private final Integer ITEMS_PER_PAGE = 50;
+
     static private final LocalDate YESTERDAY = LocalDate.now().minusDays(1);
 
     /************************************************************************
@@ -40,6 +42,8 @@ public class ForgottenTableController {
     @FXML private TableColumn<ForgottenItem, String>    nameColumn;
     @FXML private TableColumn<ForgottenItem, String>    emailColumn;
     @FXML private TableColumn<ForgottenItem, LocalDate> dateColumn;
+
+    @FXML private Pagination pagination;
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker datePicker;
@@ -62,16 +66,16 @@ public class ForgottenTableController {
 
     public void load() {
         ObservableList<Hut> huts;
-        ObservableList<ForgottenItem> forgottenItems;
         try {
             huts = dataModel.getHuts();
-            forgottenItems = dataModel.getForgottenItems();
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
         }
 
-        tableView.setItems(forgottenItems);
+        pagination.currentPageIndexProperty()
+                .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
+        loadPage(0);
 
         hutComboBox.setItems(huts);
         hutComboBox.getSelectionModel().selectFirst();
@@ -105,6 +109,23 @@ public class ForgottenTableController {
         commitButton.setOnAction(ignored -> commitButtonHook());
     }
 
+    private void loadPage(Integer pageIndex) {
+        Integer forgottenItemCount;
+        ObservableList<ForgottenItem> forgottenItems;
+        try {
+            forgottenItemCount = dataModel.forgottenItemCount();
+            forgottenItems = dataModel.forgottenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+
+        tableView.setItems(forgottenItems);
+
+        pagination.setPageCount((forgottenItemCount + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
+        pagination.setCurrentPageIndex(pageIndex);
+    }
+
     private void commitButtonHook() {
         Hut hut         = hutComboBox.getValue();
         LocalDate date  = datePicker.getValue();
@@ -120,5 +141,7 @@ public class ForgottenTableController {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
         }
+
+        loadPage(pagination.getCurrentPageIndex());
     }
 }
