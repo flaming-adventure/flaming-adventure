@@ -14,13 +14,6 @@ import java.util.function.Consumer;
 
 /**
  * Controller for the forgotten item tab, responsible for both table and form.
- *
- * <ul>
- *     <li>TODO (high priority): add filter functionality.
- *     <li>TODO (low priority): add inline editing of records.
- *     <li>TODO (low priority): add deletion or deactivation of records.
- *     <li>TODO (high priority): show whether items have been returned.
- * </ul>
  */
 public class ForgottenTableController {
 
