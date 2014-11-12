@@ -34,7 +34,7 @@ public class DataModel {
     private static final String SQL_INSERT_RESERVATION =
             "INSERT INTO reservations (hut_id, date, name, email, count, comment) VALUES (?, ?, ?, ?, ?, ?);";
 
-    private static final Logger LOGGER = Logger.getLogger(DataModel.class.getName());;
+    private static final Logger LOGGER = Logger.getLogger(DataModel.class.getName());
 
     /************************************************************************
      *
@@ -89,16 +89,6 @@ public class DataModel {
             hutMap.put(hut.getId(), hut);
         }
         return huts;
-    }
-
-    public ObservableList<Reservation> getReservations() throws SQLException {
-        ObservableList<Reservation> reservations = FXCollections.observableArrayList();
-        String query = "SELECT * FROM reservations;";
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            reservations.add(reservationFromResultSet(resultSet));
-        }
-        return reservations;
     }
 
     public ObservableList<ForgottenItem> getForgottenItems() throws SQLException {
