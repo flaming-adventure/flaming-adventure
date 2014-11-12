@@ -85,10 +85,6 @@ public class ReservationFormController {
      * Finalize the initialization by providing access to the data model.
      *
      * <p> Note: this method should be called after {@link #initialize() initialize()} has been called by JavaFX.
-     *
-     * <ul>
-     *     <li>TODO (bug): handle initialization with an empty list of huts.
-     * </ul>
      */
     public void load() {
         ObservableList<Hut> huts;
@@ -133,14 +129,6 @@ public class ReservationFormController {
 
     /**
      * Update the form based on the currently selected hut and date.
-     *
-     * <ul>
-     *     <li>TODO (bug): handle the lack of a selected hut or date.
-     *     <li>TODO #38 (enhancement): do occupancy calculation in the data model.
-     *     <li>TODO (enhancement, low priority): improve count choice update code.
-     *     <li>TODO #45 (enhancement): make a default selection for count choice.
-     *     <li>TODO #45 (enhancement): keep previously selected count choice if possible.
-     * </ul>
      */
     private void updateAction() {
         Hut hut = hutComboBox.getValue();
@@ -201,13 +189,6 @@ public class ReservationFormController {
 
     /**
      * Validate the current form data and commit it to the database as a reservation if it is valid.
-     *
-     * <ul>
-     *     <li>TODO #45 (enhancement): disable input during commit.
-     *     <li>TODO #38 (bug): validate data in the data model and throw an additional exception for that case.
-     *     <li>TODO #43 (bug): handle error conditions.
-     *     <li>TODO #43 (enhancement): display error conditions to the user instead of letting them pass silently.
-     * </ul>
      */
     private void commitAction() {
         disableInput(true);

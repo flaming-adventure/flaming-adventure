@@ -105,10 +105,6 @@ public class LoginController {
 
     /**
      * Attempt to log in to the database with the entered credentials.
-     *
-     * <ul>
-     *     <li>TODO #42 (enhancement): extract messages to localization file.
-     * </ul>
      */
     private void logInButtonActionHook(Object ignored) {
         String URL      = URLField.getText();
