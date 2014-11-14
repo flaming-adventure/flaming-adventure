@@ -2,10 +2,9 @@ package no.flaming_adventure.controller;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Pagination;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import no.flaming_adventure.model.DataModel;
+import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.model.Reservation;
 
 import java.sql.SQLException;
@@ -34,6 +33,10 @@ public class ReservationTableController {
     /* Injected fields. */
     private DataModel dataModel;
     private Consumer<Throwable> unhandledExceptionHook;
+
+    @FXML private ComboBox<Hut> hutFilter;
+    @FXML private DatePicker    fromDateFilter;
+    @FXML private DatePicker    toDateFilter;
 
     @FXML private TableView<Reservation>              tableView;
     @FXML private TableColumn<Reservation, String>    hutColumn;
