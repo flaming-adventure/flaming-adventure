@@ -3,8 +3,11 @@ package no.flaming_adventure.model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.temporal.ChronoField;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -191,6 +194,70 @@ public class DataModel {
             forgottenItems.add(forgottenItemFromResultSet(resultSet));
         }
         return forgottenItems;
+    }
+
+    /**
+     * Retrieve the records required for the overview table.
+     *
+     * <p> This is a potentially costly query.
+     */
+    public ObservableList<OverviewRow> overviewRows(LocalDate from, LocalDate to) throws SQLException {
+        final String queryFormat = "SELECT" +
+                "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count " +
+                "FROM huts " +
+                "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) as next" +
+                "             FROM reservations" +
+                "             %1$s" +
+                "             GROUP BY hut_id)" +
+                "    AS R ON R.hut_id = huts.id" +
+                "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count" +
+                "             FROM broken_items" +
+                "             %1$s" +
+                "             GROUP BY hut_id)" +
+                "    AS B ON B.hut_id = huts.id" +
+                "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS forgotten_count" +
+                "             FROM forgotten_items" +
+                "             %1$s" +
+                "             GROUP BY hut_id)" +
+                "    AS F ON F.hut_id = huts.id " +
+                ";";
+        String query;
+        long days = 0;
+        if (from != null && to != null) {
+            String predicate = String.format(
+                    "WHERE date BETWEEN '%s' AND '%s'",
+                    Date.valueOf(from).toString(), Date.valueOf(to).toString());
+            query = String.format(queryFormat, predicate);
+            days =  to.getLong(ChronoField.EPOCH_DAY) - from.getLong(ChronoField.EPOCH_DAY) + 1;
+        } else {
+            query = String.format(queryFormat, "");
+        }
+
+        ObservableList<OverviewRow> overviewRows = FXCollections.observableArrayList();
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            Hut hut = hutFromResultSet(resultSet);
+
+            // Calculate occupancy percentage.
+            BigDecimal count = resultSet.getBigDecimal("count");
+            BigDecimal occupancy = null;
+            if (days > 0 && count != null) {
+                BigDecimal totalCapacity = BigDecimal.valueOf(days * hut.getCapacity());
+                occupancy = count.divide(totalCapacity, MathContext.DECIMAL32)
+                        .multiply(BigDecimal.valueOf(100), MathContext.DECIMAL32);
+            }
+
+            // Get possible next date.
+            Date sqlDate = resultSet.getDate("next");
+            LocalDate date = null;
+            if (sqlDate != null) { date = sqlDate.toLocalDate(); }
+
+            Integer brokenCount = resultSet.getInt("broken_count");
+            Integer forgottenCount = resultSet.getInt("forgotten_count");
+
+            overviewRows.add(new OverviewRow(hut, brokenCount, forgottenCount, occupancy, date));
+        }
+        return overviewRows;
     }
 
     /**

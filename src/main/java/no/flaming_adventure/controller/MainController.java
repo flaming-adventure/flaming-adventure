@@ -31,6 +31,7 @@ public class MainController {
     private final DataModel dataModel;
     private final Consumer<Throwable> unhandledExceptionHook;
 
+    @FXML private OverviewController            overviewTableController;
     @FXML private ReservationFormController     reservationFormController;
     @FXML private ReservationTableController    reservationTableController;
     @FXML private ForgottenTableController      forgottenTableController;
@@ -38,6 +39,7 @@ public class MainController {
     @FXML private BrokenItemTableController     brokenItemTableController;
 
     @FXML private TabPane   tabPane;
+    @FXML private Tab       overviewTab;
     @FXML private Tab       reservationFormTab;
     @FXML private Tab       reservationTableTab;
     @FXML private Tab       forgottenTab;
@@ -74,6 +76,7 @@ public class MainController {
      * here to inject dependencies into the various subcontrollers and initialize tab-loading.
      */
     @FXML private void initialize() {
+        overviewTableController.inject(dataModel, unhandledExceptionHook);
         reservationFormController.inject(dataModel, unhandledExceptionHook);
         reservationTableController.inject(dataModel, unhandledExceptionHook);
         forgottenTableController.inject(dataModel, unhandledExceptionHook);
@@ -97,7 +100,9 @@ public class MainController {
      * @see no.flaming_adventure.controller.BrokenItemTableController#load()
      */
     private void loadTab(Tab tab) {
-        if (tab == reservationFormTab) {
+        if (tab == overviewTab) {
+            overviewTableController.load();
+        } else if (tab == reservationFormTab) {
             reservationFormController.load();
         } else if (tab == reservationTableTab) {
             reservationTableController.load();
