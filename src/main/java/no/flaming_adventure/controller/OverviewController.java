@@ -22,9 +22,6 @@ public class OverviewController {
      *
      ************************************************************************/
 
-    static private final LocalDate TODAY = LocalDate.now();
-    static private final LocalDate NEXT_CENTURY = TODAY.plusYears(100);
-
     /************************************************************************
      *
      * Fields
@@ -58,9 +55,6 @@ public class OverviewController {
     }
 
     public void load() {
-        fromDatePicker.setValue(TODAY);
-        toDatePicker.setValue(NEXT_CENTURY);
-
         loadImpl();
     }
 
@@ -73,7 +67,6 @@ public class OverviewController {
     private void loadImpl() {
         LocalDate fromDate = fromDatePicker.getValue();
         LocalDate toDate = toDatePicker.getValue();
-        if (fromDate != null && toDate == null) { toDate = NEXT_CENTURY; }
 
         ObservableList<OverviewRow> overviewRows;
         try {

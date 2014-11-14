@@ -228,16 +228,11 @@ public class DataModel {
                 "             GROUP BY hut_id)" +
                 "    AS F ON F.hut_id = huts.id " +
                 ";";
-        String query;
+        String query = String.format(queryFormat, hutDatePredicate(null, "date", null, from, to));
         long days = 0;
+
         if (from != null && to != null) {
-            String predicate = String.format(
-                    "WHERE date BETWEEN '%s' AND '%s'",
-                    Date.valueOf(from).toString(), Date.valueOf(to).toString());
-            query = String.format(queryFormat, predicate);
             days =  to.getLong(ChronoField.EPOCH_DAY) - from.getLong(ChronoField.EPOCH_DAY) + 1;
-        } else {
-            query = String.format(queryFormat, "");
         }
 
         ObservableList<OverviewRow> overviewRows = FXCollections.observableArrayList();
