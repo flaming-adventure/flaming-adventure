@@ -52,6 +52,9 @@ public class OverviewController {
     public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
         this.dataModel = dataModel;
         this.unhandledExceptionHook = unhandledExceptionHook;
+
+        fromDatePicker.setOnAction(e -> loadImpl());
+        toDatePicker.setOnAction(e -> loadImpl());
     }
 
     public void load() {
@@ -92,8 +95,5 @@ public class OverviewController {
         nextReservationColumn.setCellValueFactory(p -> p.getValue().nextReservationProperty());
         brokenCountColumn.setCellValueFactory(p -> p.getValue().brokenCountProperty());
         forgottenCountColumn.setCellValueFactory(p -> p.getValue().forgottenCountProperty());
-
-        fromDatePicker.setOnAction(e -> loadImpl());
-        toDatePicker.setOnAction(e -> loadImpl());
     }
 }
