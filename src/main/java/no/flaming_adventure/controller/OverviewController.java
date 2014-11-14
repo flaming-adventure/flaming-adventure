@@ -22,6 +22,9 @@ public class OverviewController {
      *
      ************************************************************************/
 
+    static private final LocalDate TODAY = LocalDate.now();
+    static private final LocalDate NEXT_CENTURY = TODAY.plusYears(100);
+
     /************************************************************************
      *
      * Fields
@@ -55,15 +58,10 @@ public class OverviewController {
     }
 
     public void load() {
-        ObservableList<OverviewRow> overviewRows;
-        try {
-            overviewRows = dataModel.overviewRows(fromDatePicker.getValue(), toDatePicker.getValue());
-        } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
-            throw new IllegalStateException(e);
-        }
+        fromDatePicker.setValue(TODAY);
+        toDatePicker.setValue(NEXT_CENTURY);
 
-        tableView.setItems(overviewRows);
+        loadImpl();
     }
 
     /************************************************************************
@@ -71,6 +69,22 @@ public class OverviewController {
      * Private implementation
      *
      ************************************************************************/
+
+    private void loadImpl() {
+        LocalDate fromDate = fromDatePicker.getValue();
+        LocalDate toDate = toDatePicker.getValue();
+        if (fromDate != null && toDate == null) { toDate = NEXT_CENTURY; }
+
+        ObservableList<OverviewRow> overviewRows;
+        try {
+            overviewRows = dataModel.overviewRows(fromDate, toDate);
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+
+        tableView.setItems(overviewRows);
+    }
 
     @FXML private void initialize() {
         hutColumn.setCellValueFactory(p -> p.getValue().getHut().nameProperty());
@@ -86,7 +100,7 @@ public class OverviewController {
         brokenCountColumn.setCellValueFactory(p -> p.getValue().brokenCountProperty());
         forgottenCountColumn.setCellValueFactory(p -> p.getValue().forgottenCountProperty());
 
-        fromDatePicker.setOnAction(e -> load());
-        toDatePicker.setOnAction(e -> load());
+        fromDatePicker.setOnAction(e -> loadImpl());
+        toDatePicker.setOnAction(e -> loadImpl());
     }
 }
