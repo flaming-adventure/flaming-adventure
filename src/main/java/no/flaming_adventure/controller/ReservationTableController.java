@@ -23,6 +23,7 @@ public class ReservationTableController {
      ************************************************************************/
 
     private static final Integer ITEMS_PER_PAGE = 50;
+    private static final Hut ALL_HUTS = new Hut(-1, "ALLE", 0, 0);
 
     /************************************************************************
      *
@@ -60,9 +61,20 @@ public class ReservationTableController {
     }
 
     public void load() {
-        pagination.currentPageIndexProperty()
-                .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
-        loadPage(0);
+        ObservableList<Hut> huts;
+        try {
+            huts = dataModel.getHuts();
+        } catch (SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+
+        hutFilter.setItems(huts);
+        hutFilter.getItems().add(0, ALL_HUTS);
+
+        pagination.setCurrentPageIndex(0);
+        // This triggers loadPage(0).
+        hutFilter.setValue(ALL_HUTS);
     }
 
     /************************************************************************
@@ -84,14 +96,27 @@ public class ReservationTableController {
         emailColumn.setCellValueFactory(param -> param.getValue().emailProperty());
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
+
+        hutFilter.setOnAction(e -> loadPage(0));
+        fromDateFilter.setOnAction(e -> loadPage(0));
+        toDateFilter.setOnAction(e -> loadPage(0));
+
+        pagination.currentPageIndexProperty()
+                .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
     }
 
     private void loadPage(Integer pageIndex) {
+        Hut hut = hutFilter.getValue();
+        if (hut == ALL_HUTS) { hut = null; }
+        LocalDate fromDate = fromDateFilter.getValue();
+        LocalDate toDate = toDateFilter.getValue();
+
         Integer reservationCount;
         ObservableList<Reservation> reservations;
         try {
-            reservationCount = dataModel.reservationCount();
-            reservations = dataModel.reservationPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+            reservationCount = dataModel.reservationCount(hut, fromDate, toDate);
+            reservations = dataModel.reservationPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
+                    hut, fromDate, toDate);
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);

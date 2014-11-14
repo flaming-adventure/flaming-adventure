@@ -148,15 +148,22 @@ public class DataModel {
         return resultSet.getInt(1);
     }
 
-    public Integer reservationCount() throws SQLException {
-        ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM reservations;");
+    public Integer reservationCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
+        String query = String.format("SELECT COUNT(*), hut_id FROM reservations %s;",
+                hutDatePredicate("hut_id", "date", hut, fromDate, toDate));
+        ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
     }
 
-    public ObservableList<Reservation> reservationPage(Integer pageStart, Integer pageSize) throws SQLException {
+
+
+    public ObservableList<Reservation> reservationPage(Integer pageStart, Integer pageSize,
+                                                       Hut hut, LocalDate fromDate, LocalDate toDate)
+            throws SQLException {
         ObservableList<Reservation> reservations = FXCollections.observableArrayList();
-        String query = String.format("SELECT * FROM reservations LIMIT %d, %d;", pageStart, pageSize);
+        String query = String.format("SELECT * FROM reservations %3$s LIMIT %1$d, %2$d;", pageStart, pageSize,
+                hutDatePredicate("hut_id", "date", hut, fromDate, toDate));
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             reservations.add(reservationFromResultSet(resultSet));
@@ -392,5 +399,31 @@ public class DataModel {
                 resultSet.getDate("purchase_date").toLocalDate(),
                 resultSet.getInt("count")
         );
+    }
+
+    private String hutDatePredicate(String hutField, String dateField, Hut hut, LocalDate from, LocalDate to) {
+        StringBuilder builder = new StringBuilder();
+        String datePredicate = datePredicate(dateField, from, to);
+        if (hut != null) {
+            builder.append("WHERE ").append(hutField).append(" = ").append(hut.getId());
+            if (datePredicate.isEmpty()) { return builder.toString(); }
+        } else if (! datePredicate.isEmpty()) {
+            return builder.append("WHERE ").append(datePredicate).toString();
+        } else {
+            return "";
+        }
+        return builder.append(" AND ").append(datePredicate).toString();
+    }
+
+    private String datePredicate(String field, LocalDate from, LocalDate to) {
+        String predicate = "";
+        if (from != null && to != null) {
+            predicate = String.format("%s BETWEEN '%s' AND '%s'", field, Date.valueOf(from), Date.valueOf(to));
+        } else if (from != null) {
+            predicate = String.format("%s >= '%s'", field, Date.valueOf(from));
+        } else if (to != null) {
+            predicate = String.format("%s <= '%s'", field, Date.valueOf(to));
+        }
+        return predicate;
     }
 }
