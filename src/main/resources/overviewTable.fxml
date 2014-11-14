@@ -5,17 +5,29 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane minHeight="0.0" minWidth="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="no.flaming_adventure.controller.OverviewController">
    <children>
-      <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <columns>
-            <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" sortable="false" text="Koie" />
-            <TableColumn fx:id="capacityColumn" editable="false" prefWidth="75.0" sortable="false" text="Kapasitet" />
-            <TableColumn fx:id="firewoodColumn" editable="false" prefWidth="75.0" sortable="false" text="Ved (sekker)" />
-            <TableColumn fx:id="brokenCountColumn" editable="false" prefWidth="75.0" sortable="false" text="Ødelagt" />
-            <TableColumn fx:id="forgottenCountColumn" editable="false" prefWidth="75.0" sortable="false" text="Glemt" />
-            <TableColumn fx:id="nextReservationColumn" editable="false" prefWidth="200.0" sortable="false" text="Neste reservasjon" />
-            <TableColumn fx:id="occupancyColumn" editable="false" prefWidth="75.0" sortable="false" text="Bruk" />
-         </columns>
-      </TableView>
+      <VBox spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <HBox alignment="TOP_RIGHT" spacing="8.0">
+               <children>
+                  <Label text="Fra:" />
+                  <DatePicker fx:id="fromDatePicker" />
+                  <Label text="Til:" />
+                  <DatePicker fx:id="toDatePicker" />
+               </children>
+            </HBox>
+            <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
+               <columns>
+                  <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" sortable="false" text="Koie" />
+                  <TableColumn fx:id="capacityColumn" editable="false" prefWidth="75.0" sortable="false" text="Kapasitet" />
+                  <TableColumn fx:id="firewoodColumn" editable="false" prefWidth="75.0" sortable="false" text="Ved (sekker)" />
+                  <TableColumn fx:id="brokenCountColumn" editable="false" prefWidth="75.0" sortable="false" text="Ødelagt" />
+                  <TableColumn fx:id="forgottenCountColumn" editable="false" prefWidth="75.0" sortable="false" text="Glemt" />
+                  <TableColumn fx:id="nextReservationColumn" editable="false" prefWidth="200.0" sortable="false" text="Neste reservasjon" />
+                  <TableColumn fx:id="occupancyColumn" editable="false" prefWidth="75.0" sortable="false" text="Bruk" />
+               </columns>
+            </TableView>
+         </children>
+      </VBox>
    </children>
    <padding>
       <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />

@@ -3,6 +3,7 @@ package no.flaming_adventure.controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import no.flaming_adventure.model.DataModel;
@@ -30,6 +31,9 @@ public class OverviewController {
     private DataModel dataModel;
     private Consumer<Throwable> unhandledExceptionHook;
 
+    @FXML private DatePicker fromDatePicker;
+    @FXML private DatePicker toDatePicker;
+
     @FXML private TableView<OverviewRow>                tableView;
     @FXML private TableColumn<OverviewRow, String>      hutColumn;
     @FXML private TableColumn<OverviewRow, Number>      capacityColumn;
@@ -53,7 +57,7 @@ public class OverviewController {
     public void load() {
         ObservableList<OverviewRow> overviewRows;
         try {
-            overviewRows = dataModel.overviewRows(LocalDate.now().minusDays(30), LocalDate.now());
+            overviewRows = dataModel.overviewRows(fromDatePicker.getValue(), toDatePicker.getValue());
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
@@ -81,5 +85,8 @@ public class OverviewController {
         nextReservationColumn.setCellValueFactory(p -> p.getValue().nextReservationProperty());
         brokenCountColumn.setCellValueFactory(p -> p.getValue().brokenCountProperty());
         forgottenCountColumn.setCellValueFactory(p -> p.getValue().forgottenCountProperty());
+
+        fromDatePicker.setOnAction(e -> load());
+        toDatePicker.setOnAction(e -> load());
     }
 }
