@@ -5,17 +5,16 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class OverviewRow {
     private final ObjectProperty<Hut>           hut;
     private final IntegerProperty               brokenCount;
     private final IntegerProperty               forgottenCount;
-    private final ObjectProperty<BigDecimal>    occupancy;
+    private final ObjectProperty<Number>        occupancy;
     private final ObjectProperty<LocalDate>     nextReservation;
 
-    public OverviewRow(Hut hut, Integer brokenCount, Integer forgottenCount, BigDecimal occupancy,
+    public OverviewRow(Hut hut, Integer brokenCount, Integer forgottenCount, Number occupancy,
                        LocalDate nextReservation) {
         this.hut = new SimpleObjectProperty<>(hut);
         this.brokenCount = new SimpleIntegerProperty(brokenCount);
@@ -48,11 +47,11 @@ public class OverviewRow {
         return forgottenCount;
     }
 
-    public BigDecimal getOccupancy() {
+    public Number getOccupancy() {
         return occupancy.get();
     }
 
-    public ObjectProperty<BigDecimal> occupancyProperty() {
+    public ObjectProperty<Number> occupancyProperty() {
         return occupancy;
     }
 

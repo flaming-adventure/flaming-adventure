@@ -245,8 +245,7 @@ public class DataModel {
             BigDecimal occupancy = null;
             if (days > 0 && count != null) {
                 BigDecimal totalCapacity = BigDecimal.valueOf(days * hut.getCapacity());
-                occupancy = count.divide(totalCapacity, MathContext.DECIMAL32)
-                        .multiply(BigDecimal.valueOf(100), MathContext.DECIMAL32);
+                occupancy = count.divide(totalCapacity, MathContext.DECIMAL32);
             }
 
             // Get possible next date.
