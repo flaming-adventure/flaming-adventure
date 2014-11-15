@@ -3,6 +3,7 @@ package no.flaming_adventure.controller;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.model.Reservation;
@@ -92,6 +93,7 @@ public class ReservationTableController {
     @FXML private void initialize() {
         hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
+        dateColumn.setCellFactory(new Util.DateCellFactory<>());
         nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         emailColumn.setCellValueFactory(param -> param.getValue().emailProperty());
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());

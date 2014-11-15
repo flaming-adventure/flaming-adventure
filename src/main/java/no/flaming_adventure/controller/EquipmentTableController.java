@@ -4,6 +4,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Equipment;
 
@@ -64,5 +65,6 @@ public class EquipmentTableController {
         itemColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().purchaseDateProperty());
+        dateColumn.setCellFactory(new Util.DateCellFactory<>());
     }
 }

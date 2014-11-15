@@ -53,7 +53,7 @@ public class App extends Application {
      * @param args commandline arguments.
      */
     public static void main(String[] args) {
-        Locale.setDefault(new Locale("NO", "no"));
+        Locale.setDefault(Util.LOCALE);
         LOGGER.log(Level.FINEST, "Launching application.");
         launch(args);
     }

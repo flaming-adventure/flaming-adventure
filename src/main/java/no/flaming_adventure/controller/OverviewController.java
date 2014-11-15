@@ -6,6 +6,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.OverviewRow;
 
@@ -115,6 +116,7 @@ public class OverviewController {
         occupancyColumn.setCellValueFactory(p -> p.getValue().occupancyProperty());
         occupancyColumn.setCellFactory(ignored -> new OccupancyCell());
         nextReservationColumn.setCellValueFactory(p -> p.getValue().nextReservationProperty());
+        nextReservationColumn.setCellFactory(new Util.DateCellFactory<>());
         brokenCountColumn.setCellValueFactory(p -> p.getValue().brokenCountProperty());
         forgottenCountColumn.setCellValueFactory(p -> p.getValue().forgottenCountProperty());
     }

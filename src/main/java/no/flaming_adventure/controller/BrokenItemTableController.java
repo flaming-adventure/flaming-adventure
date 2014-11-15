@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import no.flaming_adventure.Util;
 import no.flaming_adventure.model.BrokenItem;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
@@ -106,6 +107,7 @@ public class BrokenItemTableController {
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
+        dateColumn.setCellFactory(new Util.DateCellFactory<>());
 
         EventHandler<KeyEvent> enterHandler = event -> {
             if (event.getCode() == KeyCode.ENTER) {
