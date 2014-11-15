@@ -1,8 +1,10 @@
 package no.flaming_adventure.controller;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import no.flaming_adventure.SQLSortPolicy;
 import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
@@ -36,9 +38,13 @@ public class ReservationTableController {
     private DataModel dataModel;
     private Consumer<Throwable> unhandledExceptionHook;
 
+    private String ordering = null;
+
     @FXML private ComboBox<Hut> hutFilter;
     @FXML private DatePicker    fromDateFilter;
     @FXML private DatePicker    toDateFilter;
+
+    private final ObservableList<Reservation> reservations = FXCollections.observableArrayList();
 
     @FXML private TableView<Reservation>              tableView;
     @FXML private TableColumn<Reservation, String>    hutColumn;
@@ -60,12 +66,16 @@ public class ReservationTableController {
         this.dataModel = dataModel;
         this.unhandledExceptionHook = unhandledExceptionHook;
 
-        hutFilter.setOnAction(e -> loadPage(0));
-        fromDateFilter.setOnAction(e -> loadPage(0));
-        toDateFilter.setOnAction(e -> loadPage(0));
+        // This is necessary so that we don't try to reselect a row that no longer exists.
+        tableView.setOnSort(e -> tableView.getSelectionModel().clearSelection());
+        tableView.setSortPolicy(new SQLSortPolicy<>(this::setOrdering));
+
+        hutFilter.setOnAction(event -> setData());
+        fromDateFilter.setOnAction(event -> setData());
+        toDateFilter.setOnAction(event -> setData());
 
         pagination.currentPageIndexProperty()
-                  .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
+                  .addListener((observable, oldValue, newValue) -> setData(newValue.intValue()));
     }
 
     public void load() {
@@ -105,30 +115,54 @@ public class ReservationTableController {
         emailColumn.setCellValueFactory(param -> param.getValue().emailProperty());
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
+
+        // Set column IDs to the names of database columns.
+        dateColumn.setId("date");
+        nameColumn.setId("name");
+        emailColumn.setId("email");
+        countColumn.setId("count");
+        commentColumn.setId("comment");
+
+        tableView.setItems(reservations);
     }
 
-    private void loadPage(Integer pageIndex) {
+    private void setOrdering(String ordering) {
+        this.ordering = ordering;
+        setData();
+    }
+
+    private void setData() {
         Hut hut = hutFilter.getValue();
         if (hut == ALL_HUTS) { hut = null; }
-        LocalDate fromDate = fromDateFilter.getValue();
-        LocalDate toDate = toDateFilter.getValue();
+        setData(0, ordering, hut, fromDateFilter.getValue(), toDateFilter.getValue());
+    }
 
+    private void setData(Integer pageIndex) {
+        Hut hut = hutFilter.getValue();
+        if (hut == ALL_HUTS) { hut = null; }
+        setData(pageIndex, ordering, hut, fromDateFilter.getValue(), toDateFilter.getValue());
+    }
+
+    private void setData(Integer pageIndex, String ordering, Hut hutFilter,
+                         LocalDate fromDateFilter, LocalDate toDateFilter) {
         Integer reservationCount;
         ObservableList<Reservation> reservations;
         try {
-            reservationCount = dataModel.reservationCount(hut, fromDate, toDate);
+            reservationCount = dataModel.reservationCount(hutFilter, fromDateFilter, toDateFilter);
             reservations = dataModel.reservationPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
-                    hut, fromDate, toDate, null);
+                                                     hutFilter, fromDateFilter, toDateFilter, ordering);
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
         }
 
-        tableView.setItems(reservations);
+        this.reservations.setAll(reservations);
 
         if (reservationCount == 0) {
+            // There should always be at least a single page.
             pagination.setPageCount(1);
         } else {
+            // Ceiling[reservationCount / ITEMS_PER_PAGE]
             pagination.setPageCount((reservationCount + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
         }
 
