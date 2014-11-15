@@ -179,11 +179,11 @@ public class DataModel {
         return resultSet.getInt(1);
     }
 
-    public ObservableList<ForgottenItem> forgottenItemPage(Integer pageStart, Integer pageSize,
-                                                           Hut hut, LocalDate fromDate, LocalDate toDate)
+    public ObservableList<ForgottenItem> forgottenItemPage(Integer pageStart, Integer pageSize, Hut hut,
+                                                           LocalDate fromDate, LocalDate toDate, String orderBy)
             throws SQLException {
         ObservableList<ForgottenItem> forgottenItems = FXCollections.observableArrayList();
-        String query = genSQLGenericPage("forgotten_items", pageStart, pageSize, hut, fromDate, toDate, null);
+        String query = genSQLGenericPage("forgotten_items", pageStart, pageSize, hut, fromDate, toDate, orderBy);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             forgottenItems.add(forgottenItemFromResultSet(resultSet));

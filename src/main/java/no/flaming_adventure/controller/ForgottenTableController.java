@@ -17,40 +17,34 @@ import java.util.function.Consumer;
 /**
  * Controller for the forgotten item tab, responsible for both table and form.
  */
-public class ForgottenTableController {
+public class ForgottenTableController extends TableControllerBase<ForgottenItem> {
 
-    /************************************************************************
-     *
-     * Static fields
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Static variables and methods                                            *
+     *                                                                         *
+     **************************************************************************/
 
-    static private final Integer ITEMS_PER_PAGE = 50;
-    static private final Hut ALL_HUTS = new Hut(-1, "ALLE", 0, 0);
-    static private final LocalDate YESTERDAY = LocalDate.now().minusDays(1);
+    static private final Hut HUT_FILTER_NO_SELECTION = new Hut(-1, "<ALLE>", 0, 0);
 
-    /************************************************************************
-     *
-     * Fields
-     *
-     ************************************************************************/
+    static private final LocalDate TODAY = LocalDate.now();
 
-    private DataModel dataModel;
-    private Consumer<Throwable> unhandledExceptionHook;
+    /***************************************************************************
+     *                                                                         *
+     * Instance Variables                                                      *
+     *                                                                         *
+     **************************************************************************/
 
     @FXML private ComboBox<Hut> hutFilter;
     @FXML private DatePicker    fromDateFilter;
     @FXML private DatePicker    toDateFilter;
 
-    @FXML private TableView<ForgottenItem>              tableView;
     @FXML private TableColumn<ForgottenItem, String>    hutColumn;
     @FXML private TableColumn<ForgottenItem, String>    itemColumn;
     @FXML private TableColumn<ForgottenItem, String>    commentColumn;
     @FXML private TableColumn<ForgottenItem, String>    nameColumn;
     @FXML private TableColumn<ForgottenItem, String>    emailColumn;
     @FXML private TableColumn<ForgottenItem, LocalDate> dateColumn;
-
-    @FXML private Pagination pagination;
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker    datePicker;
@@ -60,15 +54,14 @@ public class ForgottenTableController {
     @FXML private TextField     commentTextField;
     @FXML private Button        commitButton;
 
-    /************************************************************************
-     *
-     * Public API
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Public API                                                              *
+     *                                                                         *
+     **************************************************************************/
 
-    public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
-        this.dataModel = dataModel;
-        this.unhandledExceptionHook = unhandledExceptionHook;
+    @Override public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+        super.inject(dataModel, unhandledExceptionHook);
 
         hutFilter.setOnAction(e -> loadPage(0));
         fromDateFilter.setOnAction(e -> loadPage(0));
@@ -76,7 +69,7 @@ public class ForgottenTableController {
         commitButton.setOnAction(ignored -> commitButtonHook());
     }
 
-    public void load() {
+    @Override public void load() {
         ObservableList<Hut> huts;
         try {
             huts = dataModel.getHuts();
@@ -85,18 +78,20 @@ public class ForgottenTableController {
             throw new IllegalStateException(e);
         }
 
-        hutFilter.setItems(huts);
-        hutFilter.getItems().add(0, ALL_HUTS);
+        hutFilter.getItems().clear();
+        hutFilter.getItems().add(HUT_FILTER_NO_SELECTION);
+        hutFilter.getItems().addAll(huts);
 
-        pagination.currentPageIndexProperty()
-                .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
-        // This triggers loadPage(0).
-        hutFilter.setValue(ALL_HUTS);
+        dataLock = true;
+        hutFilter.setValue(HUT_FILTER_NO_SELECTION);
+        dataLock = false;
+
+        super.load();
 
         hutComboBox.setItems(huts);
         hutComboBox.getSelectionModel().selectFirst();
 
-        datePicker.setValue(YESTERDAY);
+        datePicker.setValue(TODAY);
     }
 
     /************************************************************************
@@ -113,8 +108,7 @@ public class ForgottenTableController {
      * <p> This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by
      * user code.
      */
-    @FXML
-    private void initialize() {
+    @Override @FXML protected void initialize() {
         hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
@@ -122,6 +116,14 @@ public class ForgottenTableController {
         emailColumn.setCellValueFactory(param -> param.getValue().contactProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         dateColumn.setCellFactory(new Util.DateCellFactory<>());
+
+        itemColumn.setId("item");
+        commentColumn.setId("comment");
+        nameColumn.setId("name");
+        emailColumn.setId("contact");
+        dateColumn.setId("date");
+
+        super.initialize();
 
         hutComboBox.setOnKeyReleased(this::formKeyReleaseHandler);
         datePicker.setOnKeyReleased(this::formKeyReleaseHandler);
@@ -137,9 +139,9 @@ public class ForgottenTableController {
         }
     }
 
-    private void loadPage(Integer pageIndex) {
+    @Override protected void loadPageImpl(Integer pageIndex) {
         Hut hut = hutFilter.getValue();
-        if (hut == ALL_HUTS) { hut = null; }
+        if (hut == HUT_FILTER_NO_SELECTION) { hut = null; }
         LocalDate fromDate  = fromDateFilter.getValue();
         LocalDate toDate    = toDateFilter.getValue();
 
@@ -148,19 +150,15 @@ public class ForgottenTableController {
         try {
             forgottenItemCount = dataModel.forgottenItemCount(hut, fromDate, toDate);
             forgottenItems = dataModel.forgottenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
-                                                         hut, fromDate, toDate);
+                                                         hut, fromDate, toDate, ordering);
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
         }
 
-        tableView.setItems(forgottenItems);
+        tableView.getItems().setAll(forgottenItems);
 
-        if (forgottenItemCount == 0) {
-            pagination.setPageCount(1);
-        } else {
-            pagination.setPageCount((forgottenItemCount + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
-        }
+        setPageCount(forgottenItemCount);
 
         pagination.setCurrentPageIndex(pageIndex);
     }

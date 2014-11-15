@@ -77,7 +77,7 @@ public abstract class TableControllerBase<T> {
         tableView.setItems(items);
     }
 
-    protected void setOrdering(String ordering) {
+    protected final void setOrdering(String ordering) {
         this.ordering = ordering;
         loadPage(0);
     }
@@ -87,7 +87,7 @@ public abstract class TableControllerBase<T> {
         if (! newValue.equals(oldValue)) { loadPage(newValue.intValue()); }
     }
 
-    protected void setPageCount(Integer itemCount) {
+    protected final void setPageCount(Integer itemCount) {
         if (itemCount == null) {
             pagination.setPageCount(1);
         } else {
@@ -96,7 +96,7 @@ public abstract class TableControllerBase<T> {
         }
     }
 
-    protected void loadPage(Integer pageIndex) {
+    protected final void loadPage(Integer pageIndex) {
         if (!dataLock) { loadPageImpl(pageIndex); }
     }
 
