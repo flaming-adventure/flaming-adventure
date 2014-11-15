@@ -26,6 +26,40 @@
                </columns>
             </TableView>
             <Pagination fx:id="pagination" />
+            <HBox>
+               <children>
+                  <Label text="Legg til" textFill="#888888" />
+                  <Separator HBox.hgrow="ALWAYS">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <HBox.margin>
+                        <Insets left="8.0" top="8.0" />
+                     </HBox.margin>
+                  </Separator>
+               </children>
+            </HBox>
+            <GridPane hgap="8.0" vgap="4.0">
+               <children>
+                  <ComboBox fx:id="hutComboBox" prefWidth="150.0" />
+                  <DatePicker fx:id="datePicker" GridPane.rowIndex="1" />
+                  <TextField fx:id="itemTextField" promptText="Ting" GridPane.columnIndex="1" />
+                  <TextField fx:id="countTextField" promptText="Antall" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints fillHeight="false" vgrow="NEVER" />
+                  <RowConstraints vgrow="NEVER" />
+               </rowConstraints>
+            </GridPane>
+            <HBox alignment="TOP_RIGHT" spacing="8.0">
+               <children>
+                  <Button fx:id="commitButton" mnemonicParsing="false" text="Lagre" />
+               </children>
+            </HBox>
          </children>
       </VBox>
    </children>

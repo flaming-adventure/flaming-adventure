@@ -38,6 +38,7 @@ public class DataModel {
     /*language=MySQL*/ private static final String SQL_INSERT_RESERVATION;
     /*language=MySQL*/ private static final String SQL_INSERT_FORGOTTEN_ITEM;
     /*language=MySQL*/ private static final String SQL_INSERT_BROKEN_ITEM;
+    /*language=MySQL*/ private static final String SQL_INSERT_EQUIPMENT;
 
     private static final Logger LOGGER = Logger.getLogger(DataModel.class.getName());
 
@@ -59,6 +60,7 @@ public class DataModel {
     private final PreparedStatement reservationInsertStmt;
     private final PreparedStatement forgottenItemInsertStmt;
     private final PreparedStatement brokenItemInsertStmt;
+    private final PreparedStatement equipmentInsertStmt;
 
     private final Map<Integer, Hut> hutMap = new HashMap<>();
 
@@ -93,6 +95,8 @@ public class DataModel {
         forgottenItemInsertStmt = connection.prepareStatement(SQL_INSERT_FORGOTTEN_ITEM,
                                                               Statement.RETURN_GENERATED_KEYS);
         brokenItemInsertStmt    = connection.prepareStatement(SQL_INSERT_BROKEN_ITEM,
+                                                              Statement.RETURN_GENERATED_KEYS);
+        equipmentInsertStmt     = connection.prepareStatement(SQL_INSERT_EQUIPMENT,
                                                               Statement.RETURN_GENERATED_KEYS);
 
         LOGGER.fine("Data model successfully initialized.");
@@ -308,6 +312,21 @@ public class DataModel {
         ResultSet resultSet = brokenItemInsertStmt.getGeneratedKeys();
         resultSet.next();
         brokenItem.setId(resultSet.getInt(1));
+    }
+
+    public void insertEquipment(Equipment item) throws SQLException {
+        LOGGER.log(Level.INFO, "Adding broken item to database.");
+
+        equipmentInsertStmt.setInt(1, item.getHut().getId());
+        equipmentInsertStmt.setString(2, item.getName());
+        equipmentInsertStmt.setDate(3, Date.valueOf(item.getPurchaseDate()));
+        equipmentInsertStmt.setInt(4, item.getCount());
+
+        equipmentInsertStmt.executeUpdate();
+
+        ResultSet resultSet = equipmentInsertStmt.getGeneratedKeys();
+        resultSet.next();
+        item.setId(resultSet.getInt(1));
     }
 
     /************************************************************************
@@ -606,6 +625,10 @@ public class DataModel {
 
         SQL_INSERT_BROKEN_ITEM =
                 "INSERT INTO broken_items (hut_id, item, date, fixed, comment)\n" + "VALUES (?, ?, ?, ?, ?);";
+
+        SQL_INSERT_EQUIPMENT =
+                "INSERT INTO equipment (hut_id, name, purchase_date, count)\n" +
+                "VALUES (?, ?, ?, ?);";
 
         SQL_ALL_HUTS = "SELECT * FROM huts;";
 

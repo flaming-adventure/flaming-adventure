@@ -1,10 +1,11 @@
 package no.flaming_adventure.controller;
 
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Equipment;
@@ -24,6 +25,8 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
 
     private static final Hut HUT_FILTER_NO_SELECTION = new Hut(-1, "<ALLE>", 0, 0);
 
+    private static final LocalDate TODAY = LocalDate.now();
+
     /***************************************************************************
      *                                                                         *
      * Instance Variables                                                      *
@@ -39,6 +42,12 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
     @FXML private TableColumn<Equipment, Number>    countColumn;
     @FXML private TableColumn<Equipment, LocalDate> dateColumn;
 
+    @FXML private ComboBox<Hut> hutComboBox;
+    @FXML private DatePicker    datePicker;
+    @FXML private TextField     itemTextField;
+    @FXML private TextField     countTextField;
+    @FXML private Button        commitButton;
+
     /***************************************************************************
      *                                                                         *
      * Public API                                                              *
@@ -51,6 +60,7 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
         hutFilter.setOnAction(event -> loadPage(0));
         fromDateFilter.setOnAction(event -> loadPage(0));
         toDateFilter.setOnAction(event -> loadPage(0));
+        commitButton.setOnAction(event -> commitButtonHook());
     }
 
     @Override public void load() {
@@ -72,6 +82,11 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
         dataLock = false;
 
         super.load();
+
+        hutComboBox.setItems(huts);
+        hutComboBox.getSelectionModel().selectFirst();
+
+        datePicker.setValue(TODAY);
     }
 
 
@@ -94,6 +109,17 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
         dateColumn.setId("equipment.purchase_date");
 
         super.initialize();
+
+        EventHandler<KeyEvent> enterHandler = event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                commitButton.fire();
+            }
+        };
+
+        hutComboBox.setOnKeyReleased(enterHandler);
+        datePicker.setOnKeyReleased(enterHandler);
+        itemTextField.setOnKeyReleased(enterHandler);
+        countTextField.setOnKeyReleased(enterHandler);
     }
 
     @Override protected void loadPageImpl(Integer pageIndex) {
@@ -114,9 +140,29 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
         }
 
         this.items.setAll(items);
-        System.out.println(itemCount);
+
         setPageCount(itemCount);
 
         pagination.setCurrentPageIndex(pageIndex);
+    }
+
+    private void commitButtonHook() {
+        Hut hut         = hutComboBox.getValue();
+        LocalDate date  = datePicker.getValue();
+        String item     = itemTextField.getText();
+        Integer count   = Integer.parseUnsignedInt(countTextField.getText());
+
+        try {
+            Equipment equipment = new Equipment(-1, hut, item, date, count);
+            dataModel.insertEquipment(equipment);
+        } catch (NullPointerException|SQLException e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+
+        itemTextField.clear();
+        countTextField.clear();
+
+        loadPage(pagination.getCurrentPageIndex());
     }
 }
