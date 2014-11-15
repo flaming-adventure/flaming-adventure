@@ -7,6 +7,16 @@
    <children>
       <VBox layoutX="8.0" layoutY="8.0" spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
+            <HBox alignment="TOP_RIGHT" spacing="8.0" VBox.vgrow="NEVER">
+               <children>
+                  <Label text="Koie:" />
+                  <ComboBox fx:id="hutFilter" prefWidth="150.0" />
+                  <Label text="Fra:" />
+                  <DatePicker fx:id="fromDateFilter" />
+                  <Label text="Til:" />
+                  <DatePicker fx:id="toDateFilter" />
+               </children>
+            </HBox>
             <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
                <columns>
                   <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" sortable="false" text="Koie" />

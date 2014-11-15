@@ -26,6 +26,7 @@ public class ForgottenTableController {
      ************************************************************************/
 
     static private final Integer ITEMS_PER_PAGE = 50;
+    private static final Hut ALL_HUTS = new Hut(-1, "ALLE", 0, 0);
 
     static private final LocalDate YESTERDAY = LocalDate.now().minusDays(1);
 
@@ -37,6 +38,10 @@ public class ForgottenTableController {
 
     private DataModel dataModel;
     private Consumer<Throwable> unhandledExceptionHook;
+
+    @FXML private ComboBox<Hut> hutFilter;
+    @FXML private DatePicker    fromDateFilter;
+    @FXML private DatePicker    toDateFilter;
 
     @FXML private TableView<ForgottenItem>              tableView;
     @FXML private TableColumn<ForgottenItem, String>    hutColumn;
@@ -68,6 +73,9 @@ public class ForgottenTableController {
 
         commitButton.setOnAction(ignored -> commitButtonHook());
 
+        hutFilter.setOnAction(e -> loadPage(0));
+        fromDateFilter.setOnAction(e -> loadPage(0));
+        toDateFilter.setOnAction(e -> loadPage(0));
     }
 
     public void load() {
@@ -79,9 +87,13 @@ public class ForgottenTableController {
             throw new IllegalStateException(e);
         }
 
+        hutFilter.setItems(huts);
+        hutFilter.getItems().add(0, ALL_HUTS);
+
         pagination.currentPageIndexProperty()
                 .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
-        loadPage(0);
+        // This triggers loadPage(0).
+        hutFilter.setValue(ALL_HUTS);
 
         hutComboBox.setItems(huts);
         hutComboBox.getSelectionModel().selectFirst();
@@ -127,11 +139,17 @@ public class ForgottenTableController {
     }
 
     private void loadPage(Integer pageIndex) {
+        Hut hut = hutFilter.getValue();
+        if (hut == ALL_HUTS) { hut = null; }
+        LocalDate fromDate  = fromDateFilter.getValue();
+        LocalDate toDate    = toDateFilter.getValue();
+
         Integer forgottenItemCount;
         ObservableList<ForgottenItem> forgottenItems;
         try {
-            forgottenItemCount = dataModel.forgottenItemCount();
-            forgottenItems = dataModel.forgottenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+            forgottenItemCount = dataModel.forgottenItemCount(hut, fromDate, toDate);
+            forgottenItems = dataModel.forgottenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
+                                                         hut, fromDate, toDate);
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
