@@ -3,7 +3,6 @@ package no.flaming_adventure.controller;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import no.flaming_adventure.Util;
@@ -11,7 +10,6 @@ import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.OverviewRow;
 
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.function.Consumer;
 
@@ -22,21 +20,6 @@ public class OverviewController {
      * Static fields
      *
      ************************************************************************/
-
-    static private final NumberFormat occupancyFormat = NumberFormat.getPercentInstance();
-
-    static private final class OccupancyCell extends TableCell<OverviewRow, Number> {
-        @Override
-        protected void updateItem(Number item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (item == null) {
-                setText("");
-            } else {
-                setText(occupancyFormat.format(item));
-            }
-        }
-    }
 
     /************************************************************************
      *
@@ -114,7 +97,7 @@ public class OverviewController {
         capacityColumn.setCellValueFactory(p -> p.getValue().getHut().capacityProperty());
         firewoodColumn.setCellValueFactory(p -> p.getValue().getHut().firewoodProperty());
         occupancyColumn.setCellValueFactory(p -> p.getValue().occupancyProperty());
-        occupancyColumn.setCellFactory(ignored -> new OccupancyCell());
+        occupancyColumn.setCellFactory(new Util.PercentageCellFactory<>());
         nextReservationColumn.setCellValueFactory(p -> p.getValue().nextReservationProperty());
         nextReservationColumn.setCellFactory(new Util.DateCellFactory<>());
         brokenCountColumn.setCellValueFactory(p -> p.getValue().brokenCountProperty());

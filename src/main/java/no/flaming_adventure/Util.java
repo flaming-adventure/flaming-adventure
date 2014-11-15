@@ -4,6 +4,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -15,7 +16,28 @@ public class Util {
     static private DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(LOCALE);
 
-    static public class DateCell<X> extends TableCell<X, LocalDate> {
+    static private NumberFormat NUMBER_FORMAT_PERCENT = NumberFormat.getPercentInstance(LOCALE);
+
+    static public final class PercentageCell<X> extends TableCell<X, Number> {
+        @Override protected void updateItem(Number item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (item != null) {
+                setText(NUMBER_FORMAT_PERCENT.format(item));
+            } else {
+                setText(null);
+            }
+        }
+    }
+
+    static public final class PercentageCellFactory<X>
+            implements Callback<TableColumn<X, Number>, TableCell<X, Number>> {
+        @Override public TableCell<X, Number> call(TableColumn<X, Number> param) {
+            return new PercentageCell<>();
+        }
+    }
+
+    static public final class DateCell<X> extends TableCell<X, LocalDate> {
         @Override protected void updateItem(LocalDate item, boolean empty) {
             super.updateItem(item, empty);
 
@@ -27,7 +49,8 @@ public class Util {
         }
     }
 
-    static public class DateCellFactory<X> implements Callback<TableColumn<X, LocalDate>, TableCell<X, LocalDate>> {
+    static public final class DateCellFactory<X>
+            implements Callback<TableColumn<X, LocalDate>, TableCell<X, LocalDate>> {
         @Override public TableCell<X, LocalDate> call(TableColumn<X, LocalDate> param) {
             return new DateCell<>();
         }
