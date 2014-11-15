@@ -1,7 +1,6 @@
 package no.flaming_adventure.controller;
 
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -26,8 +25,7 @@ public class ForgottenTableController {
      ************************************************************************/
 
     static private final Integer ITEMS_PER_PAGE = 50;
-    private static final Hut ALL_HUTS = new Hut(-1, "ALLE", 0, 0);
-
+    static private final Hut ALL_HUTS = new Hut(-1, "ALLE", 0, 0);
     static private final LocalDate YESTERDAY = LocalDate.now().minusDays(1);
 
     /************************************************************************
@@ -54,12 +52,12 @@ public class ForgottenTableController {
     @FXML private Pagination pagination;
 
     @FXML private ComboBox<Hut> hutComboBox;
-    @FXML private DatePicker datePicker;
-    @FXML private TextField itemTextField;
-    @FXML private TextField nameTextField;
-    @FXML private TextField contactTextField;
-    @FXML private TextField commentTextField;
-    @FXML private Button commitButton;
+    @FXML private DatePicker    datePicker;
+    @FXML private TextField     itemTextField;
+    @FXML private TextField     nameTextField;
+    @FXML private TextField     contactTextField;
+    @FXML private TextField     commentTextField;
+    @FXML private Button        commitButton;
 
     /************************************************************************
      *
@@ -71,11 +69,10 @@ public class ForgottenTableController {
         this.dataModel = dataModel;
         this.unhandledExceptionHook = unhandledExceptionHook;
 
-        commitButton.setOnAction(ignored -> commitButtonHook());
-
         hutFilter.setOnAction(e -> loadPage(0));
         fromDateFilter.setOnAction(e -> loadPage(0));
         toDateFilter.setOnAction(e -> loadPage(0));
+        commitButton.setOnAction(ignored -> commitButtonHook());
     }
 
     public void load() {
@@ -109,11 +106,11 @@ public class ForgottenTableController {
 
     /**
      * JavaFX initialization method.
-     * <p>
-     * Initialize static data and set defaults not depending on business data.
-     * <p>
-     * This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by user
-     * code.
+     *
+     * <p> Initialize static data and set defaults not depending on business data.
+     *
+     * <p> This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by
+     * user code.
      */
     @FXML
     private void initialize() {
@@ -124,18 +121,18 @@ public class ForgottenTableController {
         emailColumn.setCellValueFactory(param -> param.getValue().contactProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
 
-        EventHandler<KeyEvent> enterHandler = event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                commitButton.fire();
-            }
-        };
+        hutComboBox.setOnKeyReleased(this::formKeyReleaseHandler);
+        datePicker.setOnKeyReleased(this::formKeyReleaseHandler);
+        itemTextField.setOnKeyReleased(this::formKeyReleaseHandler);
+        nameTextField.setOnKeyReleased(this::formKeyReleaseHandler);
+        contactTextField.setOnKeyReleased(this::formKeyReleaseHandler);
+        commentTextField.setOnKeyReleased(this::formKeyReleaseHandler);
+    }
 
-        hutComboBox.setOnKeyReleased(enterHandler);
-        datePicker.setOnKeyReleased(enterHandler);
-        itemTextField.setOnKeyReleased(enterHandler);
-        nameTextField.setOnKeyReleased(enterHandler);
-        contactTextField.setOnKeyReleased(enterHandler);
-        commentTextField.setOnKeyReleased(enterHandler);
+    private void formKeyReleaseHandler(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            commitButton.fire();
+        }
     }
 
     private void loadPage(Integer pageIndex) {
