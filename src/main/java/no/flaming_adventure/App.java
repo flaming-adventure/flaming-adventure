@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.sql.Connection;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,6 +53,7 @@ public class App extends Application {
      * @param args commandline arguments.
      */
     public static void main(String[] args) {
+        Locale.setDefault(new Locale("NO", "no"));
         LOGGER.log(Level.FINEST, "Launching application.");
         launch(args);
     }
