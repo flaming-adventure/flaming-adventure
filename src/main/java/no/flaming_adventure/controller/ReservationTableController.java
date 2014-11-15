@@ -118,7 +118,7 @@ public class ReservationTableController {
         try {
             reservationCount = dataModel.reservationCount(hut, fromDate, toDate);
             reservations = dataModel.reservationPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
-                    hut, fromDate, toDate);
+                    hut, fromDate, toDate, null);
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);

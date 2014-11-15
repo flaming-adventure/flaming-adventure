@@ -143,9 +143,9 @@ public class DataModel {
 
 
     public ObservableList<Reservation> reservationPage(Integer pageStart, Integer pageSize, Hut hut, LocalDate fromDate,
-                                                       LocalDate toDate) throws SQLException {
+                                                       LocalDate toDate, String orderBy) throws SQLException {
         ObservableList<Reservation> reservations = FXCollections.observableArrayList();
-        String query = genSQLGenericPage("reservations", pageStart, pageSize, hut, fromDate, toDate, "");
+        String query = genSQLGenericPage("reservations", pageStart, pageSize, hut, fromDate, toDate, orderBy);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             reservations.add(reservationFromResultSet(resultSet));
@@ -183,7 +183,7 @@ public class DataModel {
                                                            Hut hut, LocalDate fromDate, LocalDate toDate)
             throws SQLException {
         ObservableList<ForgottenItem> forgottenItems = FXCollections.observableArrayList();
-        String query = genSQLGenericPage("forgotten_items", pageStart, pageSize, hut, fromDate, toDate, "");
+        String query = genSQLGenericPage("forgotten_items", pageStart, pageSize, hut, fromDate, toDate, null);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             forgottenItems.add(forgottenItemFromResultSet(resultSet));
@@ -325,18 +325,17 @@ public class DataModel {
      *                  table. Can optionally be <code>null</code>.
      * @param toDate    exclude all records after this date. Assumes that <code>date</code> is a column in the given
      *                  table. Can optionally be <code>null</code>.
-     * @param postfix   added to the end of the query. Intended use is sorting.
+     * @param orderBy   ordering, can optionally be <code>null</code>.
      * @return a string with the requested SQL query.
      */
     private static String genSQLGenericPage(String table, Integer pageStart, Integer pageSize,
                                             Hut hut, LocalDate fromDate, LocalDate toDate,
-                                            String postfix) {
+                                            String orderBy) {
         StringBuilder builder = new StringBuilder("SELECT * FROM ").append(table);
         String hutDatePredicate = genHutDatePredicate("hut_id", hut, "date", fromDate, toDate);
         if (hutDatePredicate != null) { builder.append(" WHERE ").append(hutDatePredicate); }
-        builder.append(" LIMIT ").append(pageStart).append(", ").append(pageSize);
-        if (postfix != null) { builder.append(' ').append(postfix); }
-        builder.append(';');
+        if (orderBy != null) { builder.append(" ORDER BY ").append(orderBy); }
+        builder.append(" LIMIT ").append(pageStart).append(", ").append(pageSize).append(';');
         return builder.toString();
     }
 
