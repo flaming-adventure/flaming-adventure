@@ -153,16 +153,18 @@ public class DataModel {
         return reservations;
     }
 
-    public Integer brokenItemCount() throws SQLException {
-        String query = genSQLGenericCount("broken_items", null, null, null);
+    public Integer brokenItemCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
+        String query = genSQLGenericCount("broken_items", hut, fromDate, toDate);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
     }
 
-    public ObservableList<BrokenItem> brokenItemPage(Integer pageStart, Integer pageSize) throws SQLException {
+    public ObservableList<BrokenItem> brokenItemPage(Integer pageStart, Integer pageSize,
+                                                     Hut hut, LocalDate fromDate, LocalDate toDate)
+            throws SQLException {
         ObservableList<BrokenItem> brokenItems = FXCollections.observableArrayList();
-        String query = genSQLGenericPage("broken_items", pageStart, pageSize, null, null, null, null);
+        String query = genSQLGenericPage("broken_items", pageStart, pageSize, hut, fromDate, toDate, null);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             brokenItems.add(brokenItemFromResultSet(resultSet));

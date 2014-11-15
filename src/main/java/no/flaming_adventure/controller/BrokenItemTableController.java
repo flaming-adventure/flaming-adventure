@@ -23,6 +23,7 @@ public class BrokenItemTableController {
      ************************************************************************/
 
     private static final Integer ITEMS_PER_PAGE = 50;
+    static private final Hut ALL_HUTS = new Hut(-1, "ALLE", 0, 0);
 
     private static final LocalDate YESTERDAY = LocalDate.now().minusDays(1);
 
@@ -34,6 +35,10 @@ public class BrokenItemTableController {
 
     private DataModel dataModel;
     private Consumer<Throwable> unhandledExceptionHook;
+
+    @FXML private ComboBox<Hut> hutFilter;
+    @FXML private DatePicker    fromDateFilter;
+    @FXML private DatePicker    toDateFilter;
 
     @FXML private TableView<BrokenItem>                 tableView;
     @FXML private TableColumn<BrokenItem, String>       hutColumn;
@@ -59,6 +64,9 @@ public class BrokenItemTableController {
         this.dataModel = dataModel;
         this.unhandledExceptionHook = unhandledExceptionHook;
 
+        hutFilter.setOnAction(e -> loadPage(0));
+        fromDateFilter.setOnAction(e -> loadPage(0));
+        toDateFilter.setOnAction(e -> loadPage(0));
         commitButton.setOnAction(ignored -> commitButtonHook());
     }
 
@@ -71,9 +79,14 @@ public class BrokenItemTableController {
             throw new IllegalStateException(e);
         }
 
+        hutFilter.setItems(huts);
+        hutFilter.getItems().add(0, ALL_HUTS);
+
         pagination.currentPageIndexProperty()
                 .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
-        loadPage(0);
+
+        // This triggers loadPage(0).
+        hutFilter.setValue(ALL_HUTS);
 
         hutComboBox.setItems(huts);
         hutComboBox.getSelectionModel().selectFirst();
@@ -107,11 +120,17 @@ public class BrokenItemTableController {
     }
 
     private void loadPage(Integer pageIndex) {
+        Hut hut = hutFilter.getValue();
+        if (hut == ALL_HUTS) { hut = null; }
+        LocalDate fromDate  = fromDateFilter.getValue();
+        LocalDate toDate    = toDateFilter.getValue();
+
         Integer brokenItemCount;
         ObservableList<BrokenItem> brokenItems;
         try {
-            brokenItemCount = dataModel.brokenItemCount();
-            brokenItems = dataModel.brokenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+            brokenItemCount = dataModel.brokenItemCount(hut, fromDate, toDate);
+            brokenItems = dataModel.brokenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
+                                                   hut, fromDate, toDate);
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
