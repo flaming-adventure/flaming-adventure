@@ -14,17 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The data model for the application.
+ * Manager for the application's data layer. Responsible for communication with the SQL server.
  *
- * <p> An object of this class wraps around an SQL connection and is responsible for all communications with the
- * database during a single user session.
- *
- * <h3>Database layout</h3>
- *
- * <p> For the most up to date database layout see <code>src/dist/schema.ddl</code> in the source directory or
- * <code>schema.ddl</code> in the distributed files. This section deals mostly with architecture decisions.
- *
- * <p> <em>Section removed during refactor.</em>
+ * <p> See <pre>src/dist/schema.ddl</pre> for the database layout.
  */
 public class DataModel {
 
@@ -34,16 +26,18 @@ public class DataModel {
      *
      ************************************************************************/
 
-    private static final String SQL_INSERT_RESERVATION =
-            "INSERT INTO reservations (hut_id, date, name, email, count, comment) VALUES (?, ?, ?, ?, ?, ?);";
+    // The following strings are turned into prepared SQL statements on construction.
 
-    private static final String SQL_INSERT_FORGOTTEN_ITEM =
-            "INSERT INTO forgotten_items (hut_id, item, name, contact, date, delivered, comment) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?);";
-
-    private static final String SQL_INSERT_BROKEN_ITEM =
-            "INSERT INTO broken_items (hut_id, item, date, fixed, comment) " +
-                    "VALUES (?, ?, ?, ?, ?);";
+    /*language=MySQL*/ private static final String SQL_OVERVIEW_BETWEEN_DATES;
+    /*language=MySQL*/ private static final String SQL_OVERVIEW_FROM_DATE;
+    /*language=MySQL*/ private static final String SQL_OVERVIEW_TO_DATE;
+    /*language=MySQL*/ private static final String SQL_OVERVIEW_ALL;
+    /*language=MySQL*/ private static final String SQL_ALL_HUTS;
+    /*language=MySQL*/ private static final String SQL_HUT_FOR_ID;
+    /*language=MySQL*/ private static final String SQL_OCCUPANCY_AT_DATE;
+    /*language=MySQL*/ private static final String SQL_INSERT_RESERVATION;
+    /*language=MySQL*/ private static final String SQL_INSERT_FORGOTTEN_ITEM;
+    /*language=MySQL*/ private static final String SQL_INSERT_BROKEN_ITEM;
 
     private static final Logger LOGGER = Logger.getLogger(DataModel.class.getName());
 
@@ -54,9 +48,14 @@ public class DataModel {
      ************************************************************************/
 
     private final Statement statement;
-    private final Statement altStatement;
 
-    private final PreparedStatement occupancyStmt;
+    private final PreparedStatement overviewBetweenDatesStmt;
+    private final PreparedStatement overviewFromDateStmt;
+    private final PreparedStatement overviewToDateStmt;
+    private final PreparedStatement overviewAllStmt;
+    private final PreparedStatement hutsAllStmt;
+    private final PreparedStatement hutForIdStmt;
+    private final PreparedStatement occupancyAtDateStmt;
     private final PreparedStatement reservationInsertStmt;
     private final PreparedStatement forgottenItemInsertStmt;
     private final PreparedStatement brokenItemInsertStmt;
@@ -72,21 +71,29 @@ public class DataModel {
     /**
      * Create a data model from the given SQL connection.
      *
-     * @param connection        Connection to the SQL database.
-     * @throws java.sql.SQLException     Any conceivable SQL exception.
+     * @param connection Connection to the SQL database.
+     * @throws java.sql.SQLException if an SQLException occurred.
      */
     public DataModel(Connection connection) throws SQLException {
         LOGGER.log(Level.FINE, "Initializing data model.");
 
         statement = connection.createStatement();
-        altStatement = connection.createStatement();
-        occupancyStmt = connection.prepareStatement("SELECT SUM(reservations.count) FROM reservations " +
-                        "WHERE reservations.hut_id = ? AND reservations.date = ?;");
 
-        reservationInsertStmt   = connection.prepareStatement(SQL_INSERT_RESERVATION, Statement.RETURN_GENERATED_KEYS);
+        overviewBetweenDatesStmt    = connection.prepareStatement(SQL_OVERVIEW_BETWEEN_DATES);
+        overviewFromDateStmt        = connection.prepareStatement(SQL_OVERVIEW_FROM_DATE);
+        overviewToDateStmt          = connection.prepareStatement(SQL_OVERVIEW_TO_DATE);
+        overviewAllStmt             = connection.prepareStatement(SQL_OVERVIEW_ALL);
+
+        hutsAllStmt                 = connection.prepareStatement(SQL_ALL_HUTS);
+        hutForIdStmt                = connection.prepareStatement(SQL_HUT_FOR_ID);
+        occupancyAtDateStmt         = connection.prepareStatement(SQL_OCCUPANCY_AT_DATE);
+
+        reservationInsertStmt   = connection.prepareStatement(SQL_INSERT_RESERVATION,
+                                                              Statement.RETURN_GENERATED_KEYS);
         forgottenItemInsertStmt = connection.prepareStatement(SQL_INSERT_FORGOTTEN_ITEM,
-                Statement.RETURN_GENERATED_KEYS);
-        brokenItemInsertStmt    = connection.prepareStatement(SQL_INSERT_BROKEN_ITEM, Statement.RETURN_GENERATED_KEYS);
+                                                              Statement.RETURN_GENERATED_KEYS);
+        brokenItemInsertStmt    = connection.prepareStatement(SQL_INSERT_BROKEN_ITEM,
+                                                              Statement.RETURN_GENERATED_KEYS);
 
         LOGGER.fine("Data model successfully initialized.");
     }
@@ -99,34 +106,13 @@ public class DataModel {
 
     public ObservableList<Hut> getHuts() throws SQLException {
         ObservableList<Hut> huts = FXCollections.observableArrayList();
-        String query = "SELECT * FROM huts;";
-        ResultSet resultSet = statement.executeQuery(query);
+        ResultSet resultSet = hutsAllStmt.executeQuery();
         while (resultSet.next()) {
             Hut hut = hutFromResultSet(resultSet);
             huts.add(hut);
             hutMap.put(hut.getId(), hut);
         }
         return huts;
-    }
-
-    public ObservableList<ForgottenItem> getForgottenItems() throws SQLException {
-        ObservableList<ForgottenItem> forgottenItems = FXCollections.observableArrayList();
-        String query = "SELECT * FROM forgotten_items;";
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            forgottenItems.add(forgottenItemFromResultSet(resultSet));
-        }
-        return forgottenItems;
-    }
-
-    public ObservableList<BrokenItem> getBrokenItems() throws SQLException {
-        ObservableList<BrokenItem> brokenItems = FXCollections.observableArrayList();
-        String query = "SELECT * FROM broken_items;";
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            brokenItems.add(brokenItemFromResultSet(resultSet));
-        }
-        return brokenItems;
     }
 
     public ObservableList<Equipment> getEquipmentList() throws SQLException {
@@ -140,30 +126,26 @@ public class DataModel {
     }
 
     public Integer occupancy(Hut hut, LocalDate date) throws SQLException {
-        occupancyStmt.setInt(1, hut.getId());
-        occupancyStmt.setDate(2, Date.valueOf(date));
+        occupancyAtDateStmt.setInt(1, hut.getId());
+        occupancyAtDateStmt.setDate(2, Date.valueOf(date));
 
-        ResultSet resultSet = occupancyStmt.executeQuery();
+        ResultSet resultSet = occupancyAtDateStmt.executeQuery();
         resultSet.next();
         return resultSet.getInt(1);
     }
 
     public Integer reservationCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
-        String query = String.format("SELECT COUNT(*), hut_id FROM reservations %s;",
-                hutDatePredicate("hut_id", "date", hut, fromDate, toDate));
+        String query = genSQLGenericCount("reservations", hut, fromDate, toDate);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
     }
 
 
-
-    public ObservableList<Reservation> reservationPage(Integer pageStart, Integer pageSize,
-                                                       Hut hut, LocalDate fromDate, LocalDate toDate)
-            throws SQLException {
+    public ObservableList<Reservation> reservationPage(Integer pageStart, Integer pageSize, Hut hut, LocalDate fromDate,
+                                                       LocalDate toDate) throws SQLException {
         ObservableList<Reservation> reservations = FXCollections.observableArrayList();
-        String query = String.format("SELECT * FROM reservations %3$s LIMIT %1$d, %2$d;", pageStart, pageSize,
-                hutDatePredicate("hut_id", "date", hut, fromDate, toDate));
+        String query = genSQLGenericPage("reservations", pageStart, pageSize, hut, fromDate, toDate, "");
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             reservations.add(reservationFromResultSet(resultSet));
@@ -172,14 +154,15 @@ public class DataModel {
     }
 
     public Integer brokenItemCount() throws SQLException {
-        ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM broken_items;");
+        String query = genSQLGenericCount("broken_items", null, null, null);
+        ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
     }
 
     public ObservableList<BrokenItem> brokenItemPage(Integer pageStart, Integer pageSize) throws SQLException {
         ObservableList<BrokenItem> brokenItems = FXCollections.observableArrayList();
-        String query = String.format("SELECT * FROM broken_items LIMIT %d, %d;", pageStart, pageSize);
+        String query = genSQLGenericPage("broken_items", pageStart, pageSize, null, null, null, null);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             brokenItems.add(brokenItemFromResultSet(resultSet));
@@ -188,14 +171,15 @@ public class DataModel {
     }
 
     public Integer forgottenItemCount() throws SQLException {
-        ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM forgotten_items;");
+        String query = genSQLGenericCount("forgotten_items", null, null, null);
+        ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
     }
 
     public ObservableList<ForgottenItem> forgottenItemPage(Integer pageStart, Integer pageSize) throws SQLException {
         ObservableList<ForgottenItem> forgottenItems = FXCollections.observableArrayList();
-        String query = String.format("SELECT * FROM forgotten_items LIMIT %d, %d;", pageStart, pageSize);
+        String query = genSQLGenericPage("forgotten_items", pageStart, pageSize, null, null, null, null);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             forgottenItems.add(forgottenItemFromResultSet(resultSet));
@@ -203,44 +187,24 @@ public class DataModel {
         return forgottenItems;
     }
 
+
     /**
      * Retrieve the records required for the overview table.
      *
      * <p> This is a potentially costly query.
      */
-    public ObservableList<OverviewRow> overviewRows(LocalDate from, LocalDate to) throws SQLException {
-        final String queryFormat = "SELECT" +
-                "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count " +
-                "FROM huts " +
-                "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) as next" +
-                "             FROM reservations" +
-                "             %1$s" +
-                "             GROUP BY hut_id)" +
-                "    AS R ON R.hut_id = huts.id" +
-                "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count" +
-                "             FROM broken_items" +
-                "             %1$s" +
-                "             GROUP BY hut_id)" +
-                "    AS B ON B.hut_id = huts.id" +
-                "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS forgotten_count" +
-                "             FROM forgotten_items" +
-                "             %1$s" +
-                "             GROUP BY hut_id)" +
-                "    AS F ON F.hut_id = huts.id " +
-                ";";
-        String query = String.format(queryFormat, hutDatePredicate(null, "date", null, from, to));
-        long days = 0;
-
-        if (from != null && to != null) {
-            days =  to.getLong(ChronoField.EPOCH_DAY) - from.getLong(ChronoField.EPOCH_DAY) + 1;
-        }
-
+    public ObservableList<OverviewRow> overviewRows(LocalDate fromDate, LocalDate toDate) throws SQLException {
         ObservableList<OverviewRow> overviewRows = FXCollections.observableArrayList();
-        ResultSet resultSet = statement.executeQuery(query);
+
+        PreparedStatement stmt = prepareOverviewStmt(fromDate, toDate);
+
+        long days = daysInRange(fromDate, toDate);
+
+        ResultSet resultSet = stmt.executeQuery();
         while (resultSet.next()) {
             Hut hut = hutFromResultSet(resultSet);
 
-            // Calculate occupancy percentage.
+            // Calculate occupancy.
             BigDecimal count = resultSet.getBigDecimal("count");
             BigDecimal occupancy = null;
             if (days > 0 && count != null) {
@@ -251,7 +215,9 @@ public class DataModel {
             // Get possible next date.
             Date sqlDate = resultSet.getDate("next");
             LocalDate date = null;
-            if (sqlDate != null) { date = sqlDate.toLocalDate(); }
+            if (sqlDate != null) {
+                date = sqlDate.toLocalDate();
+            }
 
             Integer brokenCount = resultSet.getInt("broken_count");
             Integer forgottenCount = resultSet.getInt("forgotten_count");
@@ -324,100 +290,285 @@ public class DataModel {
      *
      ************************************************************************/
 
+    /**
+     * Return an SQL query for a filtered count of records in the given table.
+     *
+     * @param table     the name of the database table.
+     * @param hut       a hut to filter on (optionally <code>null</code>). Assumes that <code>hut_id</code> is a column
+     *                  in the given table.
+     * @param fromDate  exclude all records before this date. Assumes that <code>date</code> is a column in the given
+     *                  table. Can optionally be <code>null</code>.
+     * @param toDate    exclude all records after this date. Assumes that <code>date</code> is a column in the given
+     *                  table. Can optionally be <code>null</code>.
+     * @return a string with the requested SQL query.
+     */
+    private static String genSQLGenericCount(String table, Hut hut, LocalDate fromDate, LocalDate toDate) {
+        StringBuilder builder = new StringBuilder("SELECT COUNT(*) FROM ").append(table);
+        String hutDatePredicate = genHutDatePredicate("hut_id", hut, "date", fromDate, toDate);
+        if (hutDatePredicate != null) { builder.append(" WHERE ").append(hutDatePredicate); }
+        return builder.append(';').toString();
+    }
+
+    /**
+     * Return an SQL query for a filtered set of records from the given table.
+     *
+     * @param table     the name of the database table.
+     * @param pageStart the first record to return. Counts from zero.
+     * @param pageSize  the number of records to return.
+     * @param hut       a hut to filter on (optionally <code>null</code>). Assumes that <code>hut_id</code> is a column
+     *                  in the given table.
+     * @param fromDate  exclude all records before this date. Assumes that <code>date</code> is a column in the given
+     *                  table. Can optionally be <code>null</code>.
+     * @param toDate    exclude all records after this date. Assumes that <code>date</code> is a column in the given
+     *                  table. Can optionally be <code>null</code>.
+     * @param postfix   added to the end of the query. Intended use is sorting.
+     * @return a string with the requested SQL query.
+     */
+    private static String genSQLGenericPage(String table, Integer pageStart, Integer pageSize,
+                                            Hut hut, LocalDate fromDate, LocalDate toDate,
+                                            String postfix) {
+        StringBuilder builder = new StringBuilder("SELECT * FROM ").append(table);
+        String hutDatePredicate = genHutDatePredicate("hut_id", hut, "date", fromDate, toDate);
+        if (hutDatePredicate != null) { builder.append(" WHERE ").append(hutDatePredicate); }
+        builder.append(" LIMIT ").append(pageStart).append(", ").append(pageSize);
+        if (postfix != null) { builder.append(' ').append(postfix); }
+        builder.append(';');
+        return builder.toString();
+    }
+
+    /**
+     * Generate an SQL predicate for the given date range.
+     *
+     * @param field     the name of the field to filter on.
+     * @param fromDate  exclude all records before this date. Can optionally be <code>null</code>.
+     * @param toDate    exclude all records after this date. Can optionally be <code>null</code>.
+     * @return a string containing an SQL predicate (the part following a <code>WHERE</code> clause).
+     */
+    private static String genDatePredicate(String field, LocalDate fromDate, LocalDate toDate) {
+        if (fromDate != null && toDate != null) {
+            return String.format("%s BETWEEN '%s' AND '%s'", field, Date.valueOf(fromDate), Date.valueOf(toDate));
+        } else if (fromDate != null) {
+            return String.format("%s >= '%s'", field, Date.valueOf(fromDate));
+        } else if (toDate != null) {
+            return String.format("%s <= '%s'", field, Date.valueOf(toDate));
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Generate an SQL predicate for the given hut and date range.
+     *
+     * @param hutField  the name of the hut column.
+     * @param hut       the hut to filter on. Can optionally be <code>null</code>.
+     * @param dateField the name of the date column.
+     * @param fromDate  exclude all records before this date. Can optionally be <code>null</code>.
+     * @param toDate    exclude all records after this date. Can optionally be <code>null</code>.
+     * @return a string containing an SQL predicate (the part following a <code>WHERE</code> clause).
+     */
+    private static String genHutDatePredicate(String hutField, Hut hut,
+                                              String dateField, LocalDate fromDate, LocalDate toDate) {
+        String datePredicate = genDatePredicate(dateField, fromDate, toDate);
+        if (hut != null && datePredicate != null) {
+            return String.format("%s = %d AND %s", hutField, hut.getId(), datePredicate);
+        } else if (hut != null) {
+            return String.format("%s = %d", hutField, hut.getId());
+        } else if (datePredicate != null) {
+            return datePredicate;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Return the correct, fully prepared, overview statement for the given dates.
+     *
+     * @param fromDate  exclude all records before this date. Can optionally be <code>null</code>.
+     * @param toDate    exclude all records after this date. Can optionally be <code>null</code>.
+     * @return a prepared statement filtered on the given dates.
+     * @throws SQLException if an SQLException occurred.
+     */
+    private PreparedStatement prepareOverviewStmt(LocalDate fromDate, LocalDate toDate) throws SQLException {
+        PreparedStatement stmt;
+        if (fromDate != null && toDate != null) {
+            stmt = overviewBetweenDatesStmt;
+            for (int i = 1; i <= 6; ) {
+                stmt.setDate(i++, Date.valueOf(fromDate));
+                stmt.setDate(i++, Date.valueOf(toDate));
+            }
+        } else if (fromDate != null) {
+            stmt = overviewFromDateStmt;
+            for (int i = 1; i <= 3; ) {
+                stmt.setDate(i++, Date.valueOf(fromDate));
+            }
+        } else if (toDate != null) {
+            stmt = overviewToDateStmt;
+            for (int i = 1; i <= 3; ) {
+                stmt.setDate(i++, Date.valueOf(toDate));
+            }
+        } else {
+            stmt = overviewAllStmt;
+        }
+        return stmt;
+    }
+
+    /**
+     * Return the hut matching the given database ID if at all possible.
+     *
+     * @param id the ID of the hut to return.
+     * @return the hut.
+     * @throws SQLException if an SQLException occurred.
+     */
     private Hut hutFromId(Integer id) throws SQLException {
         Hut hut = hutMap.get(id);
         if (hut == null) {
-            String query = String.format("SELECT * FROM huts WHERE id = %d;", id);
-            ResultSet resultSet = altStatement.executeQuery(query);
-            // The result set might not contain a hut, but we simply let exception be thrown.
+            hutForIdStmt.setInt(1, id);
+            ResultSet resultSet = hutForIdStmt.executeQuery();
             resultSet.next();
             hut = hutFromResultSet(resultSet);
         }
         return hut;
     }
 
+    /**
+     * Attempt to create a hut from the given result set.
+     *
+     * @param resultSet a result set pointing at a valid hut record.
+     * @return a hut.
+     * @throws SQLException if an SQLException occurred.
+     */
     private Hut hutFromResultSet(ResultSet resultSet) throws SQLException {
-        return new Hut(
-                resultSet.getInt("id"),
-                resultSet.getString("name"),
-                resultSet.getInt("capacity"),
-                resultSet.getInt("firewood")
-        );
+        return new Hut(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("capacity"),
+                       resultSet.getInt("firewood"));
     }
 
     private Reservation reservationFromResultSet(ResultSet resultSet) throws SQLException {
         Hut hut = hutFromId(resultSet.getInt("hut_id"));
-        return new Reservation(
-                resultSet.getInt("id"),
-                hut,
-                resultSet.getDate("date").toLocalDate(),
-                resultSet.getString("name"),
-                resultSet.getString("email"),
-                resultSet.getInt("count"),
-                resultSet.getString("comment")
-        );
+        return new Reservation(resultSet.getInt("id"), hut, resultSet.getDate("date").toLocalDate(),
+                               resultSet.getString("name"), resultSet.getString("email"), resultSet.getInt("count"),
+                               resultSet.getString("comment"));
     }
 
     private ForgottenItem forgottenItemFromResultSet(ResultSet resultSet) throws SQLException {
         Hut hut = hutFromId(resultSet.getInt("hut_id"));
-        return new ForgottenItem(
-                resultSet.getInt("id"),
-                hut,
-                resultSet.getString("item"),
-                resultSet.getString("name"),
-                resultSet.getString("contact"),
-                resultSet.getDate("date").toLocalDate(),
-                resultSet.getBoolean("delivered"),
-                resultSet.getString("comment")
-        );
+        return new ForgottenItem(resultSet.getInt("id"), hut, resultSet.getString("item"), resultSet.getString("name"),
+                                 resultSet.getString("contact"), resultSet.getDate("date").toLocalDate(),
+                                 resultSet.getBoolean("delivered"), resultSet.getString("comment"));
     }
 
     private BrokenItem brokenItemFromResultSet(ResultSet resultSet) throws SQLException {
         Hut hut = hutFromId(resultSet.getInt("hut_id"));
-        return new BrokenItem(
-                resultSet.getInt("id"),
-                hut,
-                resultSet.getString("item"),
-                resultSet.getDate("date").toLocalDate(),
-                resultSet.getBoolean("fixed"),
-                resultSet.getString("comment")
-        );
+        return new BrokenItem(resultSet.getInt("id"), hut, resultSet.getString("item"),
+                              resultSet.getDate("date").toLocalDate(), resultSet.getBoolean("fixed"),
+                              resultSet.getString("comment"));
     }
 
     private Equipment equipmentFromResultSet(ResultSet resultSet) throws SQLException {
         Hut hut = hutFromId(resultSet.getInt("hut_id"));
-        return new Equipment(
-                resultSet.getInt("id"),
-                hut,
-                resultSet.getString("name"),
-                resultSet.getDate("purchase_date").toLocalDate(),
-                resultSet.getInt("count")
-        );
+        return new Equipment(resultSet.getInt("id"), hut, resultSet.getString("name"),
+                             resultSet.getDate("purchase_date").toLocalDate(), resultSet.getInt("count"));
     }
 
-    private String hutDatePredicate(String hutField, String dateField, Hut hut, LocalDate from, LocalDate to) {
-        StringBuilder builder = new StringBuilder();
-        String datePredicate = datePredicate(dateField, from, to);
-        if (hut != null) {
-            builder.append("WHERE ").append(hutField).append(" = ").append(hut.getId());
-            if (datePredicate.isEmpty()) { return builder.toString(); }
-        } else if (! datePredicate.isEmpty()) {
-            return builder.append("WHERE ").append(datePredicate).toString();
+    private long daysInRange(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            return 0;
         } else {
-            return "";
+            // Add 1 for inclusive range.
+            return to.getLong(ChronoField.EPOCH_DAY) - from.getLong(ChronoField.EPOCH_DAY) + 1;
         }
-        return builder.append(" AND ").append(datePredicate).toString();
     }
 
-    private String datePredicate(String field, LocalDate from, LocalDate to) {
-        String predicate = "";
-        if (from != null && to != null) {
-            predicate = String.format("%s BETWEEN '%s' AND '%s'", field, Date.valueOf(from), Date.valueOf(to));
-        } else if (from != null) {
-            predicate = String.format("%s >= '%s'", field, Date.valueOf(from));
-        } else if (to != null) {
-            predicate = String.format("%s <= '%s'", field, Date.valueOf(to));
-        }
-        return predicate;
+    static {
+        SQL_OVERVIEW_BETWEEN_DATES = "SELECT\n" +
+                                     "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count\n" +
+                                     "FROM huts\n" +
+                                     "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) AS next\n" +
+                                     "             FROM reservations\n" +
+                                     "             WHERE date BETWEEN ? AND ?\n" +
+                                     "             GROUP BY hut_id)\n" +
+                                     "    AS R ON R.hut_id = huts.id\n" +
+                                     "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count\n" +
+                                     "             FROM broken_items\n" +
+                                     "             WHERE date BETWEEN ? AND ?\n" +
+                                     "             GROUP BY hut_id)\n" +
+                                     "    AS B ON B.hut_id = huts.id\n" +
+                                     "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS forgotten_count\n" +
+                                     "             FROM forgotten_items\n" +
+                                     "             WHERE date BETWEEN ? AND ?\n" +
+                                     "             GROUP BY hut_id)\n" +
+                                     "    AS F ON F.hut_id = huts.id ;";
+
+        SQL_OVERVIEW_FROM_DATE = "SELECT\n" +
+                                 "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count\n" +
+                                 "FROM huts\n" +
+                                 "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) AS next\n" +
+                                 "             FROM reservations\n" +
+                                 "             WHERE date >= ?\n" +
+                                 "             GROUP BY hut_id)\n" +
+                                 "    AS R ON R.hut_id = huts.id\n" +
+                                 "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count\n" +
+                                 "             FROM broken_items\n" +
+                                 "             WHERE date >= ?\n" +
+                                 "             GROUP BY hut_id)\n" +
+                                 "    AS B ON B.hut_id = huts.id\n" +
+                                 "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS forgotten_count\n" +
+                                 "             FROM forgotten_items\n" +
+                                 "             WHERE date >= ?\n" +
+                                 "             GROUP BY hut_id)\n" +
+                                 "    AS F ON F.hut_id = huts.id ;";
+
+
+        SQL_OVERVIEW_TO_DATE = "SELECT\n" +
+                               "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count\n" +
+                               "FROM huts\n" +
+                               "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) AS next\n" +
+                               "             FROM reservations\n" +
+                               "             WHERE date <= ?\n" +
+                               "             GROUP BY hut_id)\n" +
+                               "    AS R ON R.hut_id = huts.id\n" +
+                               "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count\n" +
+                               "             FROM broken_items\n" +
+                               "             WHERE date <= ?\n" +
+                               "             GROUP BY hut_id)\n" +
+                               "    AS B ON B.hut_id = huts.id\n" +
+                               "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS forgotten_count\n" +
+                               "             FROM forgotten_items\n" +
+                               "             WHERE date <= ?\n" +
+                               "             GROUP BY hut_id)\n" +
+                               "    AS F ON F.hut_id = huts.id ;";
+
+        SQL_OVERVIEW_ALL = "SELECT\n" +
+                           "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count\n" +
+                           "FROM huts\n" +
+                           "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) AS next\n" +
+                           "             FROM reservations\n" +
+                           "             GROUP BY hut_id)\n" +
+                           "    AS R ON R.hut_id = huts.id\n" +
+                           "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count\n" +
+                           "             FROM broken_items\n" +
+                           "             GROUP BY hut_id)\n" +
+                           "    AS B ON B.hut_id = huts.id\n" +
+                           "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS forgotten_count\n" +
+                           "             FROM forgotten_items\n" +
+                           "             GROUP BY hut_id)\n" +
+                           "    AS F ON F.hut_id = huts.id ;";
+
+        SQL_INSERT_RESERVATION =
+                "INSERT INTO reservations (hut_id, date, name, email, count, comment)\n" + "VALUES (?, ?, ?, ?, ?, ?);";
+
+        SQL_INSERT_FORGOTTEN_ITEM = "INSERT INTO forgotten_items\n" +
+                                    "(hut_id, item, name, contact, date, delivered, comment)\n" +
+                                    "VALUES (?, ?, ?, ?, ?, ?, ?);";
+
+        SQL_INSERT_BROKEN_ITEM =
+                "INSERT INTO broken_items (hut_id, item, date, fixed, comment)\n" + "VALUES (?, ?, ?, ?, ?);";
+
+        SQL_ALL_HUTS = "SELECT * FROM huts;";
+
+        SQL_OCCUPANCY_AT_DATE = "SELECT SUM(reservations.count)\n" +
+                                "FROM reservations\n" +
+                                "WHERE reservations.hut_id = ?\n" +
+                                "      AND reservations.date = ?;";
+        SQL_HUT_FOR_ID = "SELECT * FROM huts WHERE id = ?;";
     }
 }
