@@ -1,10 +1,11 @@
 package no.flaming_adventure.controller;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import no.flaming_adventure.SQLSortPolicy;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TableColumn;
 import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
@@ -17,36 +18,26 @@ import java.util.function.Consumer;
 /**
  * Controller for the reservation table view.
  */
-public class ReservationTableController {
+public class ReservationTableController extends TableControllerBase<Reservation> {
 
-    /************************************************************************
-     *
-     * Static fields
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Static variables and methods                                            *
+     *                                                                         *
+     **************************************************************************/
 
-    private static final Integer ITEMS_PER_PAGE = 50;
-    private static final Hut ALL_HUTS = new Hut(-1, "ALLE", 0, 0);
+    private static final Hut HUT_FILTER_NO_SELECTION = new Hut(-1, "<ALLE>", 0, 0);
 
-    /************************************************************************
-     *
-     * Fields
-     *
-     ************************************************************************/
-
-    /* Injected fields. */
-    private DataModel dataModel;
-    private Consumer<Throwable> unhandledExceptionHook;
-
-    private String ordering = null;
+    /***************************************************************************
+     *                                                                         *
+     * Instance Variables                                                      *
+     *                                                                         *
+     **************************************************************************/
 
     @FXML private ComboBox<Hut> hutFilter;
     @FXML private DatePicker    fromDateFilter;
     @FXML private DatePicker    toDateFilter;
 
-    private final ObservableList<Reservation> reservations = FXCollections.observableArrayList();
-
-    @FXML private TableView<Reservation>              tableView;
     @FXML private TableColumn<Reservation, String>    hutColumn;
     @FXML private TableColumn<Reservation, LocalDate> dateColumn;
     @FXML private TableColumn<Reservation, String>    nameColumn;
@@ -54,31 +45,21 @@ public class ReservationTableController {
     @FXML private TableColumn<Reservation, Number>    countColumn;
     @FXML private TableColumn<Reservation, String>    commentColumn;
 
-    @FXML private Pagination pagination;
+    /***************************************************************************
+     *                                                                         *
+     * Public API                                                              *
+     *                                                                         *
+     **************************************************************************/
 
-    /************************************************************************
-     *
-     * Public API
-     *
-     ************************************************************************/
+    @Override public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+        super.inject(dataModel, unhandledExceptionHook);
 
-    public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
-        this.dataModel = dataModel;
-        this.unhandledExceptionHook = unhandledExceptionHook;
-
-        // This is necessary so that we don't try to reselect a row that no longer exists.
-        tableView.setOnSort(e -> tableView.getSelectionModel().clearSelection());
-        tableView.setSortPolicy(new SQLSortPolicy<>(this::setOrdering));
-
-        hutFilter.setOnAction(event -> setData());
-        fromDateFilter.setOnAction(event -> setData());
-        toDateFilter.setOnAction(event -> setData());
-
-        pagination.currentPageIndexProperty()
-                  .addListener((observable, oldValue, newValue) -> setData(newValue.intValue()));
+        hutFilter.setOnAction(this::setDataEventHandler);
+        fromDateFilter.setOnAction(this::setDataEventHandler);
+        toDateFilter.setOnAction(this::setDataEventHandler);
     }
 
-    public void load() {
+    @Override public void load() {
         ObservableList<Hut> huts;
         try {
             huts = dataModel.getHuts();
@@ -87,19 +68,23 @@ public class ReservationTableController {
             throw new IllegalStateException(e);
         }
 
-        hutFilter.setItems(huts);
-        hutFilter.getItems().add(0, ALL_HUTS);
+        hutFilter.getItems().clear();
+        hutFilter.getItems().add(HUT_FILTER_NO_SELECTION);
+        hutFilter.getItems().addAll(huts);
 
-        pagination.setCurrentPageIndex(0);
-        // This triggers loadPage(0).
-        hutFilter.setValue(ALL_HUTS);
+        // Don't load the data just because we changed the filter.
+        dataLock = true;
+        hutFilter.getSelectionModel().selectFirst();
+        dataLock = false;
+
+        super.load();
     }
 
-    /************************************************************************
-     *
-     * Private implementation
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Implementation                                                          *
+     *                                                                         *
+     **************************************************************************/
 
     /**
      * JavaFX initialization method.
@@ -107,7 +92,7 @@ public class ReservationTableController {
      * <p> This method is called by JavaFX when all FXML dependencies have been injected. It should not be called by
      * user code.
      */
-    @FXML private void initialize() {
+    @Override @FXML protected void initialize() {
         hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         dateColumn.setCellFactory(new Util.DateCellFactory<>());
@@ -123,28 +108,20 @@ public class ReservationTableController {
         countColumn.setId("count");
         commentColumn.setId("comment");
 
-        tableView.setItems(reservations);
+        super.initialize();
     }
 
-    private void setOrdering(String ordering) {
-        this.ordering = ordering;
-        setData();
+    private void setDataEventHandler(ActionEvent event) {
+        loadPage(0);
     }
 
-    private void setData() {
+    @Override protected void loadPageImpl(Integer pageIndex) {
         Hut hut = hutFilter.getValue();
-        if (hut == ALL_HUTS) { hut = null; }
-        setData(0, ordering, hut, fromDateFilter.getValue(), toDateFilter.getValue());
+        if (hut == HUT_FILTER_NO_SELECTION) { hut = null; }
+        setData(pageIndex, hut, fromDateFilter.getValue(), toDateFilter.getValue());
     }
 
-    private void setData(Integer pageIndex) {
-        Hut hut = hutFilter.getValue();
-        if (hut == ALL_HUTS) { hut = null; }
-        setData(pageIndex, ordering, hut, fromDateFilter.getValue(), toDateFilter.getValue());
-    }
-
-    private void setData(Integer pageIndex, String ordering, Hut hutFilter,
-                         LocalDate fromDateFilter, LocalDate toDateFilter) {
+    private void setData(Integer pageIndex, Hut hutFilter, LocalDate fromDateFilter, LocalDate toDateFilter) {
         Integer reservationCount;
         ObservableList<Reservation> reservations;
         try {
@@ -156,15 +133,9 @@ public class ReservationTableController {
             throw new IllegalStateException(e);
         }
 
-        this.reservations.setAll(reservations);
+        this.items.setAll(reservations);
 
-        if (reservationCount == 0) {
-            // There should always be at least a single page.
-            pagination.setPageCount(1);
-        } else {
-            // Ceiling[reservationCount / ITEMS_PER_PAGE]
-            pagination.setPageCount((reservationCount + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
-        }
+        setPageCount(reservationCount);
 
         pagination.setCurrentPageIndex(pageIndex);
     }
