@@ -23,7 +23,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
      *                                                                         *
      **************************************************************************/
 
-    static private final Hut HUT_FILTER_NO_SELECTION = new Hut(-1, "ALLE", 0, 0);
+    static private final Hut HUT_FILTER_NO_SELECTION = new Hut(-1, "<ALLE>", 0, 0);
 
     private static final LocalDate TODAY = LocalDate.now();
 
