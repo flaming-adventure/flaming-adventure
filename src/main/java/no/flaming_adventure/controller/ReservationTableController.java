@@ -59,6 +59,13 @@ public class ReservationTableController {
     public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
         this.dataModel = dataModel;
         this.unhandledExceptionHook = unhandledExceptionHook;
+
+        hutFilter.setOnAction(e -> loadPage(0));
+        fromDateFilter.setOnAction(e -> loadPage(0));
+        toDateFilter.setOnAction(e -> loadPage(0));
+
+        pagination.currentPageIndexProperty()
+                  .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
     }
 
     public void load() {
@@ -98,13 +105,6 @@ public class ReservationTableController {
         emailColumn.setCellValueFactory(param -> param.getValue().emailProperty());
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
-
-        hutFilter.setOnAction(e -> loadPage(0));
-        fromDateFilter.setOnAction(e -> loadPage(0));
-        toDateFilter.setOnAction(e -> loadPage(0));
-
-        pagination.currentPageIndexProperty()
-                .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
     }
 
     private void loadPage(Integer pageIndex) {
