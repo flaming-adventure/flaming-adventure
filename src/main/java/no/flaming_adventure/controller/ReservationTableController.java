@@ -101,12 +101,12 @@ public class ReservationTableController extends TableControllerBase<Reservation>
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
 
-        // Set column IDs to the names of database columns.
-        dateColumn.setId("date");
-        nameColumn.setId("name");
-        emailColumn.setId("email");
-        countColumn.setId("count");
-        commentColumn.setId("comment");
+        hutColumn.setId("huts.name");
+        dateColumn.setId("reservations.date");
+        nameColumn.setId("reservations.name");
+        emailColumn.setId("reservations.email");
+        countColumn.setId("reservations.count");
+        commentColumn.setId("reservations.comment");
 
         super.initialize();
     }

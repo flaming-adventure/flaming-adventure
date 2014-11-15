@@ -117,11 +117,12 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         dateColumn.setCellFactory(new Util.DateCellFactory<>());
 
-        itemColumn.setId("item");
-        commentColumn.setId("comment");
-        nameColumn.setId("name");
-        emailColumn.setId("contact");
-        dateColumn.setId("date");
+        hutColumn.setId("huts.name");
+        itemColumn.setId("forgotten_items.item");
+        commentColumn.setId("forgotten_items.comment");
+        nameColumn.setId("forgotten_items.name");
+        emailColumn.setId("forgotten_items.contact");
+        dateColumn.setId("forgotten_items.date");
 
         super.initialize();
 

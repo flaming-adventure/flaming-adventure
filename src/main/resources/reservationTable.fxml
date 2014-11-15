@@ -19,7 +19,7 @@
             </HBox>
             <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
                <columns>
-                  <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" sortable="false" text="Koie" />
+                  <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" text="Koie" />
                   <TableColumn fx:id="dateColumn" editable="false" prefWidth="75.0" text="Dato" />
                   <TableColumn fx:id="nameColumn" editable="false" prefWidth="200.0" text="Navn" />
                   <TableColumn fx:id="emailColumn" editable="false" prefWidth="200.0" text="E-Post" />

@@ -331,8 +331,9 @@ public class DataModel {
     private static String genSQLGenericPage(String table, Integer pageStart, Integer pageSize,
                                             Hut hut, LocalDate fromDate, LocalDate toDate,
                                             String orderBy) {
-        StringBuilder builder = new StringBuilder("SELECT * FROM ").append(table);
-        String hutDatePredicate = genHutDatePredicate("hut_id", hut, "date", fromDate, toDate);
+        StringBuilder builder = new StringBuilder("SELECT huts.name, ").append(table).append(".* FROM ").append(table)
+                .append(" LEFT JOIN huts ON huts.id = ").append(table).append(".hut_id");
+        String hutDatePredicate = genHutDatePredicate("hut_id", hut, table + ".date", fromDate, toDate);
         if (hutDatePredicate != null) { builder.append(" WHERE ").append(hutDatePredicate); }
         if (orderBy != null) { builder.append(" ORDER BY ").append(orderBy); }
         builder.append(" LIMIT ").append(pageStart).append(", ").append(pageSize).append(';');
