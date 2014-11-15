@@ -442,35 +442,52 @@ public class DataModel {
      * @throws SQLException if an SQLException occurred.
      */
     private Hut hutFromResultSet(ResultSet resultSet) throws SQLException {
-        return new Hut(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("capacity"),
-                       resultSet.getInt("firewood"));
+        return new Hut(resultSet.getInt("huts.id"),
+                       resultSet.getString("huts.name"),
+                       resultSet.getInt("huts.capacity"),
+                       resultSet.getInt("huts.firewood"));
     }
 
     private Reservation reservationFromResultSet(ResultSet resultSet) throws SQLException {
-        Hut hut = hutFromId(resultSet.getInt("hut_id"));
-        return new Reservation(resultSet.getInt("id"), hut, resultSet.getDate("date").toLocalDate(),
-                               resultSet.getString("name"), resultSet.getString("email"), resultSet.getInt("count"),
-                               resultSet.getString("comment"));
+        Hut hut = hutFromId(resultSet.getInt("reservations.hut_id"));
+        return new Reservation(resultSet.getInt("reservations.id"),
+                               hut,
+                               resultSet.getDate("reservations.date").toLocalDate(),
+                               resultSet.getString("reservations.name"),
+                               resultSet.getString("reservations.email"),
+                               resultSet.getInt("reservations.count"),
+                               resultSet.getString("reservations.comment"));
     }
 
     private ForgottenItem forgottenItemFromResultSet(ResultSet resultSet) throws SQLException {
-        Hut hut = hutFromId(resultSet.getInt("hut_id"));
-        return new ForgottenItem(resultSet.getInt("id"), hut, resultSet.getString("item"), resultSet.getString("name"),
-                                 resultSet.getString("contact"), resultSet.getDate("date").toLocalDate(),
-                                 resultSet.getBoolean("delivered"), resultSet.getString("comment"));
+        Hut hut = hutFromId(resultSet.getInt("forgotten_items.hut_id"));
+        return new ForgottenItem(resultSet.getInt("forgotten_items.id"),
+                                 hut,
+                                 resultSet.getString("forgotten_items.item"),
+                                 resultSet.getString("forgotten_items.name"),
+                                 resultSet.getString("forgotten_items.contact"),
+                                 resultSet.getDate("forgotten_items.date").toLocalDate(),
+                                 resultSet.getBoolean("forgotten_items.delivered"),
+                                 resultSet.getString("forgotten_items.comment"));
     }
 
     private BrokenItem brokenItemFromResultSet(ResultSet resultSet) throws SQLException {
-        Hut hut = hutFromId(resultSet.getInt("hut_id"));
-        return new BrokenItem(resultSet.getInt("id"), hut, resultSet.getString("item"),
-                              resultSet.getDate("date").toLocalDate(), resultSet.getBoolean("fixed"),
-                              resultSet.getString("comment"));
+        Hut hut = hutFromId(resultSet.getInt("broken_items.hut_id"));
+        return new BrokenItem(resultSet.getInt("broken_items.id"),
+                              hut,
+                              resultSet.getString("broken_items.item"),
+                              resultSet.getDate("broken_items.date").toLocalDate(),
+                              resultSet.getBoolean("broken_items.fixed"),
+                              resultSet.getString("broken_items.comment"));
     }
 
     private Equipment equipmentFromResultSet(ResultSet resultSet) throws SQLException {
-        Hut hut = hutFromId(resultSet.getInt("hut_id"));
-        return new Equipment(resultSet.getInt("id"), hut, resultSet.getString("name"),
-                             resultSet.getDate("purchase_date").toLocalDate(), resultSet.getInt("count"));
+        Hut hut = hutFromId(resultSet.getInt("equipment.hut_id"));
+        return new Equipment(resultSet.getInt("equipment.id"),
+                             hut,
+                             resultSet.getString("equipment.name"),
+                             resultSet.getDate("equipment.purchase_date").toLocalDate(),
+                             resultSet.getInt("equipment.count"));
     }
 
     private long daysInRange(LocalDate from, LocalDate to) {
