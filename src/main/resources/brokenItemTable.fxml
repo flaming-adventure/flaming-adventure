@@ -19,10 +19,10 @@
             </HBox>
             <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
                <columns>
-                  <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" sortable="false" text="Koie" />
-                  <TableColumn fx:id="dateColumn" editable="false" prefWidth="75.0" sortable="false" text="Dato" />
-                  <TableColumn fx:id="itemColumn" editable="false" prefWidth="300.0" sortable="false" text="Ting" />
-                  <TableColumn fx:id="commentColumn" editable="false" prefWidth="300.0" sortable="false" text="Kommentar" />
+                  <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" text="Koie" />
+                  <TableColumn fx:id="dateColumn" editable="false" prefWidth="75.0" text="Dato" />
+                  <TableColumn fx:id="itemColumn" editable="false" prefWidth="300.0" text="Ting" />
+                  <TableColumn fx:id="commentColumn" editable="false" prefWidth="300.0" text="Kommentar" />
                </columns>
             </TableView>
             <Pagination fx:id="pagination" VBox.vgrow="NEVER" />

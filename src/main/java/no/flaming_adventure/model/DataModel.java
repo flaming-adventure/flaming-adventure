@@ -160,11 +160,11 @@ public class DataModel {
         return resultSet.getInt(1);
     }
 
-    public ObservableList<BrokenItem> brokenItemPage(Integer pageStart, Integer pageSize,
-                                                     Hut hut, LocalDate fromDate, LocalDate toDate)
+    public ObservableList<BrokenItem> brokenItemPage(Integer pageStart, Integer pageSize, Hut hut,
+                                                     LocalDate fromDate, LocalDate toDate, String orderBy)
             throws SQLException {
         ObservableList<BrokenItem> brokenItems = FXCollections.observableArrayList();
-        String query = genSQLGenericPage("broken_items", pageStart, pageSize, hut, fromDate, toDate, null);
+        String query = genSQLGenericPage("broken_items", pageStart, pageSize, hut, fromDate, toDate, orderBy);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             brokenItems.add(brokenItemFromResultSet(resultSet));

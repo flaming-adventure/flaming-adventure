@@ -15,39 +15,32 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.function.Consumer;
 
-public class BrokenItemTableController {
+public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
 
-    /************************************************************************
-     *
-     * Static fields
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Static variables and methods                                            *
+     *                                                                         *
+     **************************************************************************/
 
-    private static final Integer ITEMS_PER_PAGE = 50;
-    static private final Hut ALL_HUTS = new Hut(-1, "ALLE", 0, 0);
+    static private final Hut HUT_FILTER_NO_SELECTION = new Hut(-1, "ALLE", 0, 0);
 
-    private static final LocalDate YESTERDAY = LocalDate.now().minusDays(1);
+    private static final LocalDate TODAY = LocalDate.now();
 
-    /************************************************************************
-     *
-     * Fields
-     *
-     ************************************************************************/
-
-    private DataModel dataModel;
-    private Consumer<Throwable> unhandledExceptionHook;
+    /***************************************************************************
+     *                                                                         *
+     * Instance Variables                                                      *
+     *                                                                         *
+     **************************************************************************/
 
     @FXML private ComboBox<Hut> hutFilter;
     @FXML private DatePicker    fromDateFilter;
     @FXML private DatePicker    toDateFilter;
 
-    @FXML private TableView<BrokenItem>                 tableView;
-    @FXML private TableColumn<BrokenItem, String>       hutColumn;
-    @FXML private TableColumn<BrokenItem, LocalDate>    dateColumn;
-    @FXML private TableColumn<BrokenItem, String>       itemColumn;
-    @FXML private TableColumn<BrokenItem, String>       commentColumn;
-
-    @FXML private Pagination pagination;
+    @FXML private TableColumn<BrokenItem, String>    hutColumn;
+    @FXML private TableColumn<BrokenItem, LocalDate> dateColumn;
+    @FXML private TableColumn<BrokenItem, String>    itemColumn;
+    @FXML private TableColumn<BrokenItem, String>    commentColumn;
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker    datePicker;
@@ -55,15 +48,14 @@ public class BrokenItemTableController {
     @FXML private TextField     commentTextField;
     @FXML private Button        commitButton;
 
-    /************************************************************************
-     *
-     * Public API
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Public API                                                              *
+     *                                                                         *
+     **************************************************************************/
 
-    public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
-        this.dataModel = dataModel;
-        this.unhandledExceptionHook = unhandledExceptionHook;
+    @Override public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+        super.inject(dataModel, unhandledExceptionHook);
 
         hutFilter.setOnAction(e -> loadPage(0));
         fromDateFilter.setOnAction(e -> loadPage(0));
@@ -71,7 +63,7 @@ public class BrokenItemTableController {
         commitButton.setOnAction(ignored -> commitButtonHook());
     }
 
-    public void load() {
+    @Override public void load() {
         ObservableList<Hut>         huts;
         try {
             huts = dataModel.getHuts();
@@ -80,34 +72,41 @@ public class BrokenItemTableController {
             throw new IllegalStateException(e);
         }
 
-        hutFilter.setItems(huts);
-        hutFilter.getItems().add(0, ALL_HUTS);
+        hutFilter.getItems().clear();
+        hutFilter.getItems().add(HUT_FILTER_NO_SELECTION);
+        hutFilter.getItems().addAll(huts);
 
-        pagination.currentPageIndexProperty()
-                .addListener((observable, oldValue, newValue) -> loadPage(newValue.intValue()));
+        dataLock = true;
+        hutFilter.setValue(HUT_FILTER_NO_SELECTION);
+        dataLock = false;
 
-        // This triggers loadPage(0).
-        hutFilter.setValue(ALL_HUTS);
+        super.load();
 
         hutComboBox.setItems(huts);
         hutComboBox.getSelectionModel().selectFirst();
 
-        datePicker.setValue(YESTERDAY);
+        datePicker.setValue(TODAY);
     }
 
-    /************************************************************************
-     *
-     * Private implementation
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Implementation                                                          *
+     *                                                                         *
+     **************************************************************************/
 
-    @FXML
-    private void initialize() {
+    @Override @FXML protected void initialize() {
         hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
+        dateColumn.setCellFactory(new Util.DateCellFactory<>());
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
-        dateColumn.setCellFactory(new Util.DateCellFactory<>());
+
+        hutColumn.setId("huts.name");
+        dateColumn.setId("broken_items.date");
+        itemColumn.setId("broken_items.item");
+        commentColumn.setId("broken_items.comment");
+
+        super.initialize();
 
         EventHandler<KeyEvent> enterHandler = event -> {
             if (event.getCode() == KeyCode.ENTER) {
@@ -121,9 +120,9 @@ public class BrokenItemTableController {
         commentTextField.setOnKeyReleased(enterHandler);
     }
 
-    private void loadPage(Integer pageIndex) {
+    @Override protected void loadPageImpl(Integer pageIndex) {
         Hut hut = hutFilter.getValue();
-        if (hut == ALL_HUTS) { hut = null; }
+        if (hut == HUT_FILTER_NO_SELECTION) { hut = null; }
         LocalDate fromDate  = fromDateFilter.getValue();
         LocalDate toDate    = toDateFilter.getValue();
 
@@ -132,19 +131,15 @@ public class BrokenItemTableController {
         try {
             brokenItemCount = dataModel.brokenItemCount(hut, fromDate, toDate);
             brokenItems = dataModel.brokenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
-                                                   hut, fromDate, toDate);
+                                                   hut, fromDate, toDate, ordering);
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
         }
 
-        tableView.setItems(brokenItems);
+        items.setAll(brokenItems);
 
-        if (brokenItemCount == 0) {
-            pagination.setPageCount(1);
-        } else {
-            pagination.setPageCount((brokenItemCount + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
-        }
+        setPageCount(brokenItemCount);
 
         pagination.setCurrentPageIndex(pageIndex);
     }
