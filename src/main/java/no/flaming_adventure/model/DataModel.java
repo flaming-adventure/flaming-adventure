@@ -135,7 +135,7 @@ public class DataModel {
     }
 
     public Integer reservationCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
-        String query = genSQLGenericCount("reservations", hut, fromDate, toDate);
+        String query = genSQLGenericCount("reservations", hut, "date", fromDate, toDate);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
@@ -145,7 +145,8 @@ public class DataModel {
     public ObservableList<Reservation> reservationPage(Integer pageStart, Integer pageSize, Hut hut, LocalDate fromDate,
                                                        LocalDate toDate, String orderBy) throws SQLException {
         ObservableList<Reservation> reservations = FXCollections.observableArrayList();
-        String query = genSQLGenericPage("reservations", pageStart, pageSize, hut, fromDate, toDate, orderBy);
+        String query = genSQLGenericPage("reservations", pageStart, pageSize, "hut_id", hut, "date", fromDate, toDate,
+                                         orderBy);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             reservations.add(reservationFromResultSet(resultSet));
@@ -153,8 +154,27 @@ public class DataModel {
         return reservations;
     }
 
+    public Integer equipmentCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
+        String query = genSQLGenericCount("equipment", hut, "purchase_date", fromDate, toDate);
+        ResultSet resultSet = statement.executeQuery(query);
+        resultSet.next();
+        return resultSet.getInt(1);
+    }
+
+    public ObservableList<Equipment> equipmentPage(Integer pageStart, Integer pageSize, Hut hut, LocalDate fromDate,
+                                                   LocalDate toDate, String orderBy) throws SQLException {
+        ObservableList<Equipment> items = FXCollections.observableArrayList();
+        String query = genSQLGenericPage("equipment", pageStart, pageSize, "hut_id", hut, "purchase_date", fromDate,
+                                         toDate, orderBy);
+        ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            items.add(equipmentFromResultSet(resultSet));
+        }
+        return items;
+    }
+
     public Integer brokenItemCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
-        String query = genSQLGenericCount("broken_items", hut, fromDate, toDate);
+        String query = genSQLGenericCount("broken_items", hut, "date", fromDate, toDate);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
@@ -164,7 +184,8 @@ public class DataModel {
                                                      LocalDate fromDate, LocalDate toDate, String orderBy)
             throws SQLException {
         ObservableList<BrokenItem> brokenItems = FXCollections.observableArrayList();
-        String query = genSQLGenericPage("broken_items", pageStart, pageSize, hut, fromDate, toDate, orderBy);
+        String query = genSQLGenericPage("broken_items", pageStart, pageSize, "hut_id", hut, "date", fromDate, toDate,
+                                         orderBy);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             brokenItems.add(brokenItemFromResultSet(resultSet));
@@ -173,7 +194,7 @@ public class DataModel {
     }
 
     public Integer forgottenItemCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
-        String query = genSQLGenericCount("forgotten_items", hut, fromDate, toDate);
+        String query = genSQLGenericCount("forgotten_items", hut, "date", fromDate, toDate);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
@@ -183,7 +204,8 @@ public class DataModel {
                                                            LocalDate fromDate, LocalDate toDate, String orderBy)
             throws SQLException {
         ObservableList<ForgottenItem> forgottenItems = FXCollections.observableArrayList();
-        String query = genSQLGenericPage("forgotten_items", pageStart, pageSize, hut, fromDate, toDate, orderBy);
+        String query = genSQLGenericPage("forgotten_items", pageStart, pageSize, "hut_id", hut, "date", fromDate,
+                                         toDate, orderBy);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             forgottenItems.add(forgottenItemFromResultSet(resultSet));
@@ -306,9 +328,10 @@ public class DataModel {
      *                  table. Can optionally be <code>null</code>.
      * @return a string with the requested SQL query.
      */
-    private static String genSQLGenericCount(String table, Hut hut, LocalDate fromDate, LocalDate toDate) {
+    private static String genSQLGenericCount(String table, Hut hut, String dateField,
+                                             LocalDate fromDate, LocalDate toDate) {
         StringBuilder builder = new StringBuilder("SELECT COUNT(*) FROM ").append(table);
-        String hutDatePredicate = genHutDatePredicate("hut_id", hut, "date", fromDate, toDate);
+        String hutDatePredicate = genHutDatePredicate("hut_id", hut, dateField, fromDate, toDate);
         if (hutDatePredicate != null) { builder.append(" WHERE ").append(hutDatePredicate); }
         return builder.append(';').toString();
     }
@@ -328,12 +351,12 @@ public class DataModel {
      * @param orderBy   ordering, can optionally be <code>null</code>.
      * @return a string with the requested SQL query.
      */
-    private static String genSQLGenericPage(String table, Integer pageStart, Integer pageSize,
-                                            Hut hut, LocalDate fromDate, LocalDate toDate,
+    private static String genSQLGenericPage(String table, Integer pageStart, Integer pageSize, String hutField,
+                                            Hut hut, String dateField, LocalDate fromDate, LocalDate toDate,
                                             String orderBy) {
         StringBuilder builder = new StringBuilder("SELECT huts.name, ").append(table).append(".* FROM ").append(table)
-                .append(" LEFT JOIN huts ON huts.id = ").append(table).append(".hut_id");
-        String hutDatePredicate = genHutDatePredicate("hut_id", hut, table + ".date", fromDate, toDate);
+                .append(" LEFT JOIN huts ON huts.id = ").append(table).append('.').append(hutField);
+        String hutDatePredicate = genHutDatePredicate(hutField, hut, table + '.' + dateField, fromDate, toDate);
         if (hutDatePredicate != null) { builder.append(" WHERE ").append(hutDatePredicate); }
         if (orderBy != null) { builder.append(" ORDER BY ").append(orderBy); }
         builder.append(" LIMIT ").append(pageStart).append(", ").append(pageSize).append(';');

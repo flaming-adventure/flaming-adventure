@@ -88,7 +88,7 @@ public abstract class TableControllerBase<T> {
     }
 
     protected final void setPageCount(Integer itemCount) {
-        if (itemCount == null) {
+        if (itemCount == null || itemCount == 0) {
             pagination.setPageCount(1);
         } else {
             // Ceiling[itemCount / ITEMS_PER_PAGE]
