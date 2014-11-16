@@ -329,10 +329,10 @@ public class DataModel {
         item.setId(resultSet.getInt(1));
     }
 
-    public void updateBrokenItemFixed(Integer id, Boolean value) throws SQLException {
+    public void updateBrokenItemFixed(BrokenItem item) throws SQLException {
         /*language=MySQL*/
-        String query = "UPDATE broken_items SET fixed=" + sqlBool(value) + "\n" +
-                       "WHERE id=" + id + ';';
+        String query = "UPDATE broken_items SET fixed=" + sqlBool(item.getFixed()) + "\n" +
+                       "WHERE id=" + item.getId() + ';';
         statement.executeUpdate(query);
     }
 

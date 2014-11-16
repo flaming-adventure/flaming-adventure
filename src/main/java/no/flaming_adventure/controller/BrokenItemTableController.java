@@ -104,21 +104,16 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
     }
 
     @Override protected ListChangeListener<BrokenItem> listChangeListenerSupplier() {
-        return change -> {
-            while (change.next()) {
-                if (change.wasUpdated()) {
-                    for (int i = change.getFrom(); i < change.getTo(); i++) {
-                        try {
-                            BrokenItem item = change.getList().get(i);
-                            dataModel.updateBrokenItemFixed(item.getId(), item.getFixed());
-                        } catch (SQLException e) {
-                            unhandledExceptionHook.accept(e);
-                            throw new IllegalStateException(e);
-                        }
-                    }
-                }
-            }
-        };
+        return Util.listUpdateListener(this::updateItem);
+    }
+
+    private void updateItem(BrokenItem item) {
+        try {
+            dataModel.updateBrokenItemFixed(item);
+        } catch (Throwable e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override @FXML protected void initialize() {

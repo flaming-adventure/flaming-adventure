@@ -1,5 +1,6 @@
 package no.flaming_adventure;
 
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 public class Util {
     static public final Locale LOCALE = new Locale("NO", "no");
@@ -28,6 +30,16 @@ public class Util {
                 setText(null);
             }
         }
+    }
+
+    static public <T> ListChangeListener<T> listUpdateListener(Consumer<T> consumer) {
+        return change -> {
+            while (change.next()) {
+                if (change.wasUpdated()) {
+                    change.getList().subList(change.getFrom(), change.getTo()).forEach(consumer);
+                }
+            }
+        };
     }
 
     static public final class PercentageCellFactory<X>
