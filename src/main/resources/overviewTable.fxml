@@ -23,7 +23,7 @@
                   <TableColumn fx:id="brokenCountColumn" editable="false" prefWidth="75.0" text="Ødelagt" />
                   <TableColumn fx:id="forgottenCountColumn" editable="false" prefWidth="75.0" text="Glemt" />
                   <TableColumn fx:id="nextReservationColumn" editable="false" prefWidth="200.0" text="Neste reservasjon" />
-                  <TableColumn fx:id="occupancyColumn" editable="false" prefWidth="75.0" text="Bruk" />
+                  <TableColumn fx:id="occupancyColumn" editable="false" prefWidth="100.0" text="Bruksprosent" />
                </columns>
             </TableView>
          </children>
