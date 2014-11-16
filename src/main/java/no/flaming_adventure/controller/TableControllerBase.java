@@ -1,12 +1,15 @@
 package no.flaming_adventure.controller;
 
+import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.SortEvent;
 import javafx.scene.control.TableView;
+import javafx.util.Callback;
 import no.flaming_adventure.SQLSortPolicy;
 import no.flaming_adventure.model.DataModel;
 
@@ -37,13 +40,30 @@ public abstract class TableControllerBase<T> {
     protected DataModel           dataModel;
     protected Consumer<Throwable> unhandledExceptionHook;
 
-    protected final ObservableList<T> items = FXCollections.observableArrayList();
+    protected final ObservableList<T> items;
 
     protected String ordering   = null;
     protected Boolean dataLock  = false;
 
     @FXML protected TableView<T>  tableView;
     @FXML protected Pagination    pagination;
+
+    /***************************************************************************
+     *                                                                         *
+     * Constructors                                                            *
+     *                                                                         *
+     **************************************************************************/
+
+    TableControllerBase() {
+        Callback<T, Observable[]> extractor = extractorSupplier();
+        if (extractor == null) {
+            items = FXCollections.observableArrayList();
+        } else {
+            items = FXCollections.observableArrayList(extractor);
+            ListChangeListener<T> listChangeListener = listChangeListenerSupplier();
+            if (listChangeListener != null) { items.addListener(listChangeListener); }
+        }
+    }
 
     /***************************************************************************
      *                                                                         *
@@ -72,6 +92,14 @@ public abstract class TableControllerBase<T> {
      * Implementation                                                          *
      *                                                                         *
      **************************************************************************/
+
+    protected Callback<T, Observable[]> extractorSupplier() {
+        return null;
+    }
+
+    protected ListChangeListener<T> listChangeListenerSupplier() {
+        return null;
+    }
 
     @FXML protected void initialize() {
         tableView.setItems(items);

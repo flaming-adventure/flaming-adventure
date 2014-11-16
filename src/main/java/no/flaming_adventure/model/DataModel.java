@@ -329,11 +329,26 @@ public class DataModel {
         item.setId(resultSet.getInt(1));
     }
 
+    public void updateBrokenItemFixed(Integer id, Boolean value) throws SQLException {
+        /*language=MySQL*/
+        String query = "UPDATE broken_items SET fixed=" + sqlBool(value) + "\n" +
+                       "WHERE id=" + id + ';';
+        statement.executeUpdate(query);
+    }
+
     /************************************************************************
      *
      * Private implementation
      *
      ************************************************************************/
+
+    private static String sqlBool(Boolean bool) {
+        if (bool == Boolean.TRUE) {
+            return "TRUE";
+        } else {
+            return "FALSE";
+        }
+    }
 
     /**
      * Return an SQL query for a filtered count of records in the given table.

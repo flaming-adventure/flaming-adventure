@@ -1,5 +1,7 @@
 package no.flaming_adventure.controller;
 
+import javafx.beans.Observable;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -7,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.util.Callback;
 import no.flaming_adventure.Util;
 import no.flaming_adventure.model.BrokenItem;
 import no.flaming_adventure.model.DataModel;
@@ -24,7 +27,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
      *                                                                         *
      **************************************************************************/
 
-    static private final Hut HUT_FILTER_NO_SELECTION = new Hut(-1, "<ALLE>", 0, 0);
+    private static final Hut HUT_FILTER_NO_SELECTION = new Hut(-1, "<ALLE>", 0, 0);
 
     private static final LocalDate TODAY = LocalDate.now();
 
@@ -96,13 +99,35 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
      *                                                                         *
      **************************************************************************/
 
+    @Override protected Callback<BrokenItem, Observable[]> extractorSupplier() {
+        return param -> new Observable[]{param.fixedProperty()};
+    }
+
+    @Override protected ListChangeListener<BrokenItem> listChangeListenerSupplier() {
+        return change -> {
+            while (change.next()) {
+                if (change.wasUpdated()) {
+                    for (int i = change.getFrom(); i < change.getTo(); i++) {
+                        try {
+                            BrokenItem item = change.getList().get(i);
+                            dataModel.updateBrokenItemFixed(item.getId(), item.getFixed());
+                        } catch (SQLException e) {
+                            unhandledExceptionHook.accept(e);
+                            throw new IllegalStateException(e);
+                        }
+                    }
+                }
+            }
+        };
+    }
+
     @Override @FXML protected void initialize() {
         hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         dateColumn.setCellFactory(new Util.DateCellFactory<>());
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
-        fixedColumn.setCellValueFactory(data -> data.getValue().fixedProperty());
+        fixedColumn.setCellValueFactory(param -> param.getValue().fixedProperty());
         fixedColumn.setCellFactory(CheckBoxTableCell.forTableColumn(fixedColumn));
 
         hutColumn.setId("huts.name");
