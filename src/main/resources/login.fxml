@@ -26,8 +26,8 @@
                 <Font size="14.0" />
             </font>
         </PasswordField>
-      <CheckBox fx:id="rememberMeCheckBox" mnemonicParsing="false" text="Remember me" />
-        <Button fx:id="logInButton" mnemonicParsing="false" text="Log in">
+      <CheckBox fx:id="rememberMeCheckBox" mnemonicParsing="false" text="Husk meg" />
+        <Button fx:id="logInButton" mnemonicParsing="false" text="Logg inn">
             <font>
                 <Font size="14.0" />
             </font>
