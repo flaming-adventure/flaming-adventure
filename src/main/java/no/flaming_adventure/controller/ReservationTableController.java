@@ -6,10 +6,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
-import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.model.Reservation;
+import no.flaming_adventure.util.DateCellFactory;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -95,7 +95,7 @@ public class ReservationTableController extends TableControllerBase<Reservation>
     @Override @FXML protected void initialize() {
         hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
-        dateColumn.setCellFactory(new Util.DateCellFactory<>());
+        dateColumn.setCellFactory(new DateCellFactory<>());
         nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         emailColumn.setCellValueFactory(param -> param.getValue().emailProperty());
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());

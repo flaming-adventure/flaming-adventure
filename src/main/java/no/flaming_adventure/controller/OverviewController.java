@@ -5,9 +5,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.OverviewRow;
+import no.flaming_adventure.util.DateCellFactory;
+import no.flaming_adventure.util.PercentageCellFactory;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -97,9 +98,9 @@ public class OverviewController {
         capacityColumn.setCellValueFactory(p -> p.getValue().getHut().capacityProperty());
         firewoodColumn.setCellValueFactory(p -> p.getValue().getHut().firewoodProperty());
         occupancyColumn.setCellValueFactory(p -> p.getValue().occupancyProperty());
-        occupancyColumn.setCellFactory(new Util.PercentageCellFactory<>());
+        occupancyColumn.setCellFactory(new PercentageCellFactory<>());
         nextReservationColumn.setCellValueFactory(p -> p.getValue().nextReservationProperty());
-        nextReservationColumn.setCellFactory(new Util.DateCellFactory<>());
+        nextReservationColumn.setCellFactory(new DateCellFactory<>());
         brokenCountColumn.setCellValueFactory(p -> p.getValue().brokenCountProperty());
         forgottenCountColumn.setCellValueFactory(p -> p.getValue().forgottenCountProperty());
     }
