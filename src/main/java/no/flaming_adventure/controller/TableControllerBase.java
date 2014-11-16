@@ -10,8 +10,8 @@ import javafx.scene.control.SortEvent;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 import no.flaming_adventure.SQLSortPolicy;
-import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
+import no.flaming_adventure.util.ListUpdateListener;
 
 import java.util.function.Consumer;
 
@@ -120,7 +120,7 @@ public abstract class TableControllerBase<T> {
             items = FXCollections.observableArrayList();
         } else {
             items = FXCollections.observableArrayList(extractor);
-            items.addListener(Util.listUpdateListener(this::updateItem));
+            items.addListener(new ListUpdateListener<T>(this::updateItem));
         }
     }
 

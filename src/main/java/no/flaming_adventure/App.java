@@ -53,7 +53,6 @@ public class App extends Application {
      * @param args commandline arguments.
      */
     public static void main(String[] args) {
-        Locale.setDefault(Util.LOCALE);
         LOGGER.log(Level.FINEST, "Launching application.");
         launch(args);
     }
@@ -81,6 +80,7 @@ public class App extends Application {
      */
     @Override
     public void start(Stage stage) {
+        Locale.setDefault(Util.LOCALE);
         this.stage = stage;
 
         LOGGER.log(Level.INFO, "Loading database driver...");
