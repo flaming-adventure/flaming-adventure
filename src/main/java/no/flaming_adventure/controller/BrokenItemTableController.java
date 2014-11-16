@@ -4,6 +4,7 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import no.flaming_adventure.Util;
@@ -41,6 +42,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
     @FXML private TableColumn<BrokenItem, LocalDate> dateColumn;
     @FXML private TableColumn<BrokenItem, String>    itemColumn;
     @FXML private TableColumn<BrokenItem, String>    commentColumn;
+    @FXML private TableColumn<BrokenItem, Boolean>   fixedColumn;
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker    datePicker;
@@ -100,11 +102,14 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
         dateColumn.setCellFactory(new Util.DateCellFactory<>());
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
+        fixedColumn.setCellValueFactory(data -> data.getValue().fixedProperty());
+        fixedColumn.setCellFactory(CheckBoxTableCell.forTableColumn(fixedColumn));
 
         hutColumn.setId("huts.name");
         dateColumn.setId("broken_items.date");
         itemColumn.setId("broken_items.item");
         commentColumn.setId("broken_items.comment");
+        fixedColumn.setId("broken_items.fixed");
 
         super.initialize();
 
