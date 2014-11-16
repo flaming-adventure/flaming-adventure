@@ -3,6 +3,7 @@ package no.flaming_adventure.controller;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import no.flaming_adventure.Util;
@@ -45,6 +46,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
     @FXML private TableColumn<ForgottenItem, String>    nameColumn;
     @FXML private TableColumn<ForgottenItem, String>    emailColumn;
     @FXML private TableColumn<ForgottenItem, LocalDate> dateColumn;
+    @FXML private TableColumn<ForgottenItem, Boolean>   deliveredColumn;
 
     @FXML private ComboBox<Hut> hutComboBox;
     @FXML private DatePicker    datePicker;
@@ -116,6 +118,8 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
         emailColumn.setCellValueFactory(param -> param.getValue().contactProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
         dateColumn.setCellFactory(new Util.DateCellFactory<>());
+        deliveredColumn.setCellValueFactory(data -> data.getValue().deliveredProperty());
+        deliveredColumn.setCellFactory(CheckBoxTableCell.forTableColumn(deliveredColumn));
 
         hutColumn.setId("huts.name");
         itemColumn.setId("forgotten_items.item");
@@ -123,6 +127,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
         nameColumn.setId("forgotten_items.name");
         emailColumn.setId("forgotten_items.contact");
         dateColumn.setId("forgotten_items.date");
+        deliveredColumn.setId("forgotten_items.delivered");
 
         super.initialize();
 
