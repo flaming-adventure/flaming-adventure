@@ -1,11 +1,14 @@
 package no.flaming_adventure.controller;
 
+import javafx.beans.Observable;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.util.Callback;
 import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.ForgottenItem;
@@ -101,6 +104,23 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
      * Private API
      *
      ************************************************************************/
+
+    @Override protected Callback<ForgottenItem, Observable[]> extractorSupplier() {
+        return param -> new Observable[]{param.deliveredProperty()};
+    }
+
+    @Override protected ListChangeListener<ForgottenItem> listChangeListenerSupplier() {
+        return Util.listUpdateListener(this::updateItem);
+    }
+
+    private void updateItem(ForgottenItem item) {
+        try {
+            dataModel.updateForgottenItemDelivered(item);
+        } catch (Throwable e) {
+            unhandledExceptionHook.accept(e);
+            throw new IllegalStateException(e);
+        }
+    }
 
     /**
      * JavaFX initialization method.

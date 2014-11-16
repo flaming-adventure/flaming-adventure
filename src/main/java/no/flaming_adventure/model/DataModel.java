@@ -336,6 +336,13 @@ public class DataModel {
         statement.executeUpdate(query);
     }
 
+    public void updateForgottenItemDelivered(ForgottenItem item) throws SQLException {
+        /*language=MySQL*/
+        String query = "UPDATE forgotten_items SET delivered=" +sqlBool(item.getDelivered()) + '\n' +
+                       "WHERE id=" + item.getId() + ';';
+        statement.executeUpdate(query);
+    }
+
     /************************************************************************
      *
      * Private implementation
