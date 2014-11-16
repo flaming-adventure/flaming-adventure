@@ -3,7 +3,6 @@ package no.flaming_adventure.controller;
 import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Pagination;
@@ -11,6 +10,7 @@ import javafx.scene.control.SortEvent;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 import no.flaming_adventure.SQLSortPolicy;
+import no.flaming_adventure.Util;
 import no.flaming_adventure.model.DataModel;
 
 import java.util.function.Consumer;
@@ -23,10 +23,26 @@ public abstract class TableControllerBase<T> {
      *                                                                         *
      **************************************************************************/
 
+    /**
+     * {@link javafx.event.EventHandler Event handler} for the
+     * {@link javafx.scene.control.TableView table view}'s sort events.
+     *
+     * <p> This is required for the {@link no.flaming_adventure.SQLSortPolicy default
+     * sort policy} to work as otherwise the table view might try to reselect one or more
+     * items that no longer exist after the sort.
+     *
+     * @see TableView#setOnSort
+     * @see TableView#setSortPolicy
+     * @param sortEvent a sort event.
+     * @param <T> the type of the object contained in the table.
+     */
     protected static <T> void onSortEventHandler(SortEvent<TableView<T>> sortEvent) {
         sortEvent.getSource().getSelectionModel().clearSelection();
     }
 
+    /**
+     * The number of items on a table page.
+     */
     protected static final Integer ITEMS_PER_PAGE = 50;
 
 
@@ -36,17 +52,46 @@ public abstract class TableControllerBase<T> {
      *                                                                         *
      **************************************************************************/
 
-    /* Injected fields. */
-    protected DataModel           dataModel;
+    /**
+     * The table's data model, should be injected in {@link #inject}.
+     */
+    protected DataModel dataModel;
+
+    /**
+     * A function with the purpose of showing the user an exception in some manner
+     * before exiting. Should be injected in {@link #inject}.
+     */
     protected Consumer<Throwable> unhandledExceptionHook;
 
+    /**
+     * The table's list of items.
+     */
     protected final ObservableList<T> items;
 
-    protected String ordering   = null;
-    protected Boolean dataLock  = false;
+    /**
+     * A string used as parameter to an SQL <code>ORDER BY</code> clause.
+     */
+    protected String ordering = null;
 
-    @FXML protected TableView<T>  tableView;
-    @FXML protected Pagination    pagination;
+    /**
+     * The {@link #items item list} should only be updated by user code if this is false.
+     *
+     * <p> This exists so that we can avoid updating the item list multiple times on what
+     * will seem like a single event to the user.
+     */
+    protected Boolean dataLock = false;
+
+    /**
+     * The JavaFX table view displaying the {@link #items item list}.
+     */
+    @FXML protected TableView<T> tableView;
+
+    /**
+     * A JavaFX pagination control.
+     *
+     * @see #loadPage(Integer)
+     */
+    @FXML protected Pagination pagination;
 
     /***************************************************************************
      *                                                                         *
@@ -54,14 +99,28 @@ public abstract class TableControllerBase<T> {
      *                                                                         *
      **************************************************************************/
 
-    TableControllerBase() {
-        Callback<T, Observable[]> extractor = extractorSupplier();
+    /**
+     * Construct a table controller base with no editable fields.
+     */
+    protected TableControllerBase() {
+        this(null);
+    }
+
+    /**
+     * Construct a table controller base with editable fields.
+     *
+     * <p> The update behaviour of the table can be specified by overriding the
+     * {@link #updateItem(T)} method.
+     *
+     * @param extractor element to Observable[] converter. The Observable[] is used to
+     *                  listen for list updates.
+     */
+    protected TableControllerBase(Callback<T, Observable[]> extractor) {
         if (extractor == null) {
             items = FXCollections.observableArrayList();
         } else {
             items = FXCollections.observableArrayList(extractor);
-            ListChangeListener<T> listChangeListener = listChangeListenerSupplier();
-            if (listChangeListener != null) { items.addListener(listChangeListener); }
+            items.addListener(Util.listUpdateListener(this::updateItem));
         }
     }
 
@@ -93,13 +152,7 @@ public abstract class TableControllerBase<T> {
      *                                                                         *
      **************************************************************************/
 
-    protected Callback<T, Observable[]> extractorSupplier() {
-        return null;
-    }
-
-    protected ListChangeListener<T> listChangeListenerSupplier() {
-        return null;
-    }
+    protected void updateItem(T item) { }
 
     @FXML protected void initialize() {
         tableView.setItems(items);

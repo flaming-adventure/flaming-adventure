@@ -1,7 +1,6 @@
 package no.flaming_adventure.controller;
 
 import javafx.beans.Observable;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -9,7 +8,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
 import no.flaming_adventure.Util;
 import no.flaming_adventure.model.BrokenItem;
 import no.flaming_adventure.model.DataModel;
@@ -52,6 +50,16 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
     @FXML private TextField     itemTextField;
     @FXML private TextField     commentTextField;
     @FXML private Button        commitButton;
+
+    /***************************************************************************
+     *                                                                         *
+     * Constructors                                                            *
+     *                                                                         *
+     **************************************************************************/
+
+    public BrokenItemTableController() {
+        super(param -> new Observable[]{param.fixedProperty()});
+    }
 
     /***************************************************************************
      *                                                                         *
@@ -99,15 +107,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
      *                                                                         *
      **************************************************************************/
 
-    @Override protected Callback<BrokenItem, Observable[]> extractorSupplier() {
-        return param -> new Observable[]{param.fixedProperty()};
-    }
-
-    @Override protected ListChangeListener<BrokenItem> listChangeListenerSupplier() {
-        return Util.listUpdateListener(this::updateItem);
-    }
-
-    private void updateItem(BrokenItem item) {
+    protected void updateItem(BrokenItem item) {
         try {
             dataModel.updateBrokenItemFixed(item);
         } catch (Throwable e) {
