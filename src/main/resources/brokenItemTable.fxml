@@ -15,6 +15,7 @@
                   <DatePicker fx:id="fromDateFilter" />
                   <Label text="Til:" />
                   <DatePicker fx:id="toDateFilter" />
+                  <CheckBox mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" selected="true" text="Vis reparerte:" />
                </children>
             </HBox>
             <TableView fx:id="tableView" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
