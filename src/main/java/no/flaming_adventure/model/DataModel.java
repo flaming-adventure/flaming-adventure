@@ -139,7 +139,7 @@ public class DataModel {
     }
 
     public Integer reservationCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
-        String query = genSQLGenericCount("reservations", hut, "date", fromDate, toDate);
+        String query = genSQLGenericCount("reservations", hut, "date", fromDate, toDate, null);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
@@ -150,7 +150,7 @@ public class DataModel {
                                                        LocalDate toDate, String orderBy) throws SQLException {
         ObservableList<Reservation> reservations = FXCollections.observableArrayList();
         String query = genSQLGenericPage("reservations", pageStart, pageSize, "hut_id", hut, "date", fromDate, toDate,
-                                         orderBy);
+                                         orderBy, null);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             reservations.add(reservationFromResultSet(resultSet));
@@ -159,7 +159,7 @@ public class DataModel {
     }
 
     public Integer equipmentCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
-        String query = genSQLGenericCount("equipment", hut, "purchase_date", fromDate, toDate);
+        String query = genSQLGenericCount("equipment", hut, "purchase_date", fromDate, toDate, null);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
@@ -169,7 +169,7 @@ public class DataModel {
                                                    LocalDate toDate, String orderBy) throws SQLException {
         ObservableList<Equipment> items = FXCollections.observableArrayList();
         String query = genSQLGenericPage("equipment", pageStart, pageSize, "hut_id", hut, "purchase_date", fromDate,
-                                         toDate, orderBy);
+                                         toDate, orderBy, null);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             items.add(equipmentFromResultSet(resultSet));
@@ -178,7 +178,7 @@ public class DataModel {
     }
 
     public Integer brokenItemCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
-        String query = genSQLGenericCount("broken_items", hut, "date", fromDate, toDate);
+        String query = genSQLGenericCount("broken_items", hut, "date", fromDate, toDate, null);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
@@ -189,7 +189,7 @@ public class DataModel {
             throws SQLException {
         ObservableList<BrokenItem> brokenItems = FXCollections.observableArrayList();
         String query = genSQLGenericPage("broken_items", pageStart, pageSize, "hut_id", hut, "date", fromDate, toDate,
-                                         orderBy);
+                                         orderBy, null);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             brokenItems.add(brokenItemFromResultSet(resultSet));
@@ -197,19 +197,21 @@ public class DataModel {
         return brokenItems;
     }
 
-    public Integer forgottenItemCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
-        String query = genSQLGenericCount("forgotten_items", hut, "date", fromDate, toDate);
+    public Integer forgottenItemCount(Hut hut, LocalDate fromDate, LocalDate toDate, String filterBy)
+            throws SQLException {
+        String query = genSQLGenericCount("forgotten_items", hut, "date", fromDate, toDate, filterBy);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
     }
 
     public ObservableList<ForgottenItem> forgottenItemPage(Integer pageStart, Integer pageSize, Hut hut,
-                                                           LocalDate fromDate, LocalDate toDate, String orderBy)
+                                                           LocalDate fromDate, LocalDate toDate, String orderBy,
+                                                           String filterBy)
             throws SQLException {
         ObservableList<ForgottenItem> forgottenItems = FXCollections.observableArrayList();
         String query = genSQLGenericPage("forgotten_items", pageStart, pageSize, "hut_id", hut, "date", fromDate,
-                                         toDate, orderBy);
+                                         toDate, orderBy, filterBy);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             forgottenItems.add(forgottenItemFromResultSet(resultSet));
@@ -367,13 +369,24 @@ public class DataModel {
      *                  table. Can optionally be <code>null</code>.
      * @param toDate    exclude all records after this date. Assumes that <code>date</code> is a column in the given
      *                  table. Can optionally be <code>null</code>.
+     * @param filterBy  parameter to the WHERE clause.
      * @return a string with the requested SQL query.
      */
     private static String genSQLGenericCount(String table, Hut hut, String dateField,
-                                             LocalDate fromDate, LocalDate toDate) {
+                                             LocalDate fromDate, LocalDate toDate, String filterBy) {
         StringBuilder builder = new StringBuilder("SELECT COUNT(*) FROM ").append(table);
         String hutDatePredicate = genHutDatePredicate("hut_id", hut, dateField, fromDate, toDate);
-        if (hutDatePredicate != null) { builder.append(" WHERE ").append(hutDatePredicate); }
+        if (hutDatePredicate != null) {
+            builder.append(" WHERE ")
+                   .append(hutDatePredicate); }
+        if (filterBy != null) {
+            if (hutDatePredicate != null) {
+                builder.append(" AND ");
+            } else {
+                builder.append(" WHERE ");
+            }
+            builder.append(filterBy);
+        }
         return builder.append(';').toString();
     }
 
@@ -390,17 +403,36 @@ public class DataModel {
      * @param toDate    exclude all records after this date. Assumes that <code>date</code> is a column in the given
      *                  table. Can optionally be <code>null</code>.
      * @param orderBy   ordering, can optionally be <code>null</code>.
+     * @param filterBy  parameter to the WHERE clause, can optionally be <code>null</code>.
      * @return a string with the requested SQL query.
      */
     private static String genSQLGenericPage(String table, Integer pageStart, Integer pageSize, String hutField,
                                             Hut hut, String dateField, LocalDate fromDate, LocalDate toDate,
-                                            String orderBy) {
+                                            String orderBy, String filterBy) {
         StringBuilder builder = new StringBuilder("SELECT huts.name, ").append(table).append(".* FROM ").append(table)
                 .append(" LEFT JOIN huts ON huts.id = ").append(table).append('.').append(hutField);
         String hutDatePredicate = genHutDatePredicate(hutField, hut, table + '.' + dateField, fromDate, toDate);
-        if (hutDatePredicate != null) { builder.append(" WHERE ").append(hutDatePredicate); }
-        if (orderBy != null) { builder.append(" ORDER BY ").append(orderBy); }
-        builder.append(" LIMIT ").append(pageStart).append(", ").append(pageSize).append(';');
+        if (hutDatePredicate != null) {
+            builder.append(" WHERE ")
+                   .append(hutDatePredicate);
+        }
+        if (filterBy != null) {
+            if (hutDatePredicate != null) {
+                builder.append(" AND ");
+            } else {
+                builder.append(" WHERE ");
+            }
+            builder.append(filterBy);
+        }
+        if (orderBy != null) {
+            builder.append(" ORDER BY ")
+                   .append(orderBy);
+        }
+        builder.append(" LIMIT ")
+               .append(pageStart)
+               .append(", ")
+               .append(pageSize)
+               .append(';');
         return builder.toString();
     }
 

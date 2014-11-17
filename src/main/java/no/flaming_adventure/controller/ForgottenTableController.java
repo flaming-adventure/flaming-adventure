@@ -41,6 +41,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
     @FXML private ComboBox<Hut> hutFilter;
     @FXML private DatePicker    fromDateFilter;
     @FXML private DatePicker    toDateFilter;
+    @FXML private CheckBox      deliveredFilter;
 
     @FXML private TableColumn<ForgottenItem, String>    hutColumn;
     @FXML private TableColumn<ForgottenItem, String>    itemColumn;
@@ -80,6 +81,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
         hutFilter.setOnAction(e -> loadPage(0));
         fromDateFilter.setOnAction(e -> loadPage(0));
         toDateFilter.setOnAction(e -> loadPage(0));
+        deliveredFilter.setOnAction(e -> loadPage(0));
         commitButton.setOnAction(ignored -> commitButtonHook());
     }
 
@@ -169,15 +171,19 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
     @Override protected void loadPageImpl(Integer pageIndex) {
         Hut hut = hutFilter.getValue();
         if (hut == HUT_FILTER_NO_SELECTION) { hut = null; }
-        LocalDate fromDate  = fromDateFilter.getValue();
-        LocalDate toDate    = toDateFilter.getValue();
+        LocalDate fromDate      = fromDateFilter.getValue();
+        LocalDate toDate        = toDateFilter.getValue();
+        Boolean showDelivered   = deliveredFilter.isSelected();
+
+        String filterBy = null;
+        if (! showDelivered) { filterBy = "forgotten_items.delivered = FALSE"; }
 
         Integer forgottenItemCount;
         ObservableList<ForgottenItem> forgottenItems;
         try {
-            forgottenItemCount = dataModel.forgottenItemCount(hut, fromDate, toDate);
+            forgottenItemCount = dataModel.forgottenItemCount(hut, fromDate, toDate, filterBy);
             forgottenItems = dataModel.forgottenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
-                                                         hut, fromDate, toDate, ordering);
+                                                         hut, fromDate, toDate, ordering, filterBy);
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);
