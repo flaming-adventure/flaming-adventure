@@ -39,6 +39,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
     @FXML private ComboBox<Hut> hutFilter;
     @FXML private DatePicker    fromDateFilter;
     @FXML private DatePicker    toDateFilter;
+    @FXML private CheckBox      fixedFilter;
 
     @FXML private TableColumn<BrokenItem, String>    hutColumn;
     @FXML private TableColumn<BrokenItem, LocalDate> dateColumn;
@@ -74,6 +75,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
         hutFilter.setOnAction(e -> loadPage(0));
         fromDateFilter.setOnAction(e -> loadPage(0));
         toDateFilter.setOnAction(e -> loadPage(0));
+        fixedFilter.setOnAction(e -> loadPage(0));
         commitButton.setOnAction(ignored -> commitButtonHook());
     }
 
@@ -151,13 +153,17 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
         if (hut == HUT_FILTER_NO_SELECTION) { hut = null; }
         LocalDate fromDate  = fromDateFilter.getValue();
         LocalDate toDate    = toDateFilter.getValue();
+        Boolean showFixed   = fixedFilter.isSelected();
+
+        String filterBy = null;
+        if (! showFixed) { filterBy = "broken_items.fixed = FALSE"; }
 
         Integer brokenItemCount;
         ObservableList<BrokenItem> brokenItems;
         try {
-            brokenItemCount = dataModel.brokenItemCount(hut, fromDate, toDate);
+            brokenItemCount = dataModel.brokenItemCount(hut, fromDate, toDate, filterBy);
             brokenItems = dataModel.brokenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
-                                                   hut, fromDate, toDate, ordering);
+                                                   hut, fromDate, toDate, ordering, filterBy);
         } catch (SQLException e) {
             unhandledExceptionHook.accept(e);
             throw new IllegalStateException(e);

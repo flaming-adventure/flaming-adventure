@@ -177,19 +177,20 @@ public class DataModel {
         return items;
     }
 
-    public Integer brokenItemCount(Hut hut, LocalDate fromDate, LocalDate toDate) throws SQLException {
-        String query = genSQLGenericCount("broken_items", hut, "date", fromDate, toDate, null);
+    public Integer brokenItemCount(Hut hut, LocalDate fromDate, LocalDate toDate, String filterBy) throws SQLException {
+        String query = genSQLGenericCount("broken_items", hut, "date", fromDate, toDate, filterBy);
         ResultSet resultSet = statement.executeQuery(query);
         resultSet.next();
         return resultSet.getInt(1);
     }
 
     public ObservableList<BrokenItem> brokenItemPage(Integer pageStart, Integer pageSize, Hut hut,
-                                                     LocalDate fromDate, LocalDate toDate, String orderBy)
+                                                     LocalDate fromDate, LocalDate toDate, String orderBy,
+                                                     String filterBy)
             throws SQLException {
         ObservableList<BrokenItem> brokenItems = FXCollections.observableArrayList();
         String query = genSQLGenericPage("broken_items", pageStart, pageSize, "hut_id", hut, "date", fromDate, toDate,
-                                         orderBy, null);
+                                         orderBy, filterBy);
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
             brokenItems.add(brokenItemFromResultSet(resultSet));
