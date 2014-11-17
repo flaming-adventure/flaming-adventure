@@ -9,9 +9,9 @@ import javafx.scene.control.Pagination;
 import javafx.scene.control.SortEvent;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
-import no.flaming_adventure.SQLSortPolicy;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.util.ListUpdateListener;
+import no.flaming_adventure.util.SQLSortPolicy;
 
 import java.util.function.Consumer;
 
@@ -27,7 +27,7 @@ public abstract class TableControllerBase<T> {
      * {@link javafx.event.EventHandler Event handler} for the
      * {@link javafx.scene.control.TableView table view}'s sort events.
      *
-     * <p> This is required for the {@link no.flaming_adventure.SQLSortPolicy default
+     * <p> This is required for the {@link no.flaming_adventure.util.SQLSortPolicy default
      * sort policy} to work as otherwise the table view might try to reselect one or more
      * items that no longer exist after the sort.
      *

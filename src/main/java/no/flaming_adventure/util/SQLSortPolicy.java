@@ -1,4 +1,4 @@
-package no.flaming_adventure;
+package no.flaming_adventure.util;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
