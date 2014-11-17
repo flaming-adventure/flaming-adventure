@@ -5,7 +5,13 @@ import no.flaming_adventure.App;
 
 import java.time.LocalDate;
 
-public class DateCell<X> extends TableCell<X, LocalDate> {
+/**
+ * A date cell displaying the a date formatted by the application's {@link no.flaming_adventure.App#DATE_TIME_FORMATTER
+ * date formatter}.
+ *
+ * @param <T> the type of the table's records.
+ */
+public class DateCell<T> extends TableCell<T, LocalDate> {
     @Override protected void updateItem(LocalDate item, boolean empty) {
         super.updateItem(item, empty);
 
