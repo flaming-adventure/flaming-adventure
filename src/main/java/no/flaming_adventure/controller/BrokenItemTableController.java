@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import no.flaming_adventure.App;
 import no.flaming_adventure.model.BrokenItem;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
@@ -119,7 +120,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
     @Override @FXML protected void initialize() {
         hutColumn.setCellValueFactory(param -> param.getValue().getHut().nameProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
-        dateColumn.setCellFactory(new DateCellFactory<>());
+        dateColumn.setCellFactory(new DateCellFactory<>(App.DATE_TIME_FORMATTER));
         itemColumn.setCellValueFactory(param -> param.getValue().itemProperty());
         commentColumn.setCellValueFactory(param -> param.getValue().commentProperty());
         fixedColumn.setCellValueFactory(param -> param.getValue().fixedProperty());

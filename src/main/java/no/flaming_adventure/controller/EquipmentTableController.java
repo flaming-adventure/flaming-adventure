@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import no.flaming_adventure.App;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Equipment;
 import no.flaming_adventure.model.Hut;
@@ -101,7 +102,7 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
         itemColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         countColumn.setCellValueFactory(param -> param.getValue().countProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().purchaseDateProperty());
-        dateColumn.setCellFactory(new DateCellFactory<>());
+        dateColumn.setCellFactory(new DateCellFactory<>(App.DATE_TIME_FORMATTER));
 
         hutColumn.setId("huts.name");
         itemColumn.setId("equipment.name");

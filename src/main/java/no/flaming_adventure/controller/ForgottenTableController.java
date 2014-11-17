@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import no.flaming_adventure.App;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.ForgottenItem;
 import no.flaming_adventure.model.Hut;
@@ -137,7 +138,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
         nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         emailColumn.setCellValueFactory(param -> param.getValue().contactProperty());
         dateColumn.setCellValueFactory(param -> param.getValue().dateProperty());
-        dateColumn.setCellFactory(new DateCellFactory<>());
+        dateColumn.setCellFactory(new DateCellFactory<>(App.DATE_TIME_FORMATTER));
         deliveredColumn.setCellValueFactory(data -> data.getValue().deliveredProperty());
         deliveredColumn.setCellFactory(CheckBoxTableCell.forTableColumn(deliveredColumn));
 
