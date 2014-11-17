@@ -26,33 +26,51 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * The main application entry point.
+ *
+ * <p> This class is responsible for launching the JavaFX application and contains
+ * code to set up the environment that the
+ * {@link no.flaming_adventure.controller.MainController main controller} needs to
+ * run.
+ */
 public class App extends Application {
 
-    static public final  Locale            LOCALE                = new Locale("NO", "no");
-    static public        NumberFormat      NUMBER_FORMAT_PERCENT = NumberFormat.getPercentInstance(LOCALE);
-    static public        DateTimeFormatter DATE_TIME_FORMATTER   =
-            DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(LOCALE);
-    /************************************************************************
-     *
-     * Static fields
-     *
-     ************************************************************************/
-
-    private static final Logger            LOGGER                = Logger.getLogger(App.class.getName());
+    /***************************************************************************
+     *                                                                         *
+     * Static variables and methods                                            *
+     *                                                                         *
+     **************************************************************************/
 
     /**
-     * Database driver to use.
+     * The application's locale.
+     *
+     * <p> This is set here and used globally because Java's locale detection is a bit
+     * wonky, and because the application has been developed for a Norwegian audience.
+     *
+     * <p> If this needs to be changed a multitude of hardcoded strings need to be
+     * localized throughout the application.
+     */
+    public static final Locale LOCALE = new Locale("NO", "no");
+
+    // TODO: move to OverviewController.
+    public static final NumberFormat NUMBER_FORMAT_PERCENT = NumberFormat.getPercentInstance(LOCALE);
+
+    /**
+     * A date formatter using the {@link App#LOCALE locale} set by the application.
+     */
+    public static final  DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
+                                                                                  .withLocale(LOCALE);
+
+    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+
+    /**
+     * The database driver to use.
      *
      * <p> Note that we could possibly allow more dynamic loading of database
      * drivers, but it's not within the current scope of the application.
      */
     private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
-
-    /************************************************************************
-     *
-     * Static methods
-     *
-     ************************************************************************/
 
     /**
      * Program entry point.
@@ -64,29 +82,28 @@ public class App extends Application {
         launch(args);
     }
 
-    /************************************************************************
-     *
-     * Fields
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Instance variables                                                      *
+     *                                                                         *
+     **************************************************************************/
 
     private Stage stage;
 
-    /************************************************************************
-     *
-     * Public API
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Public API                                                              *
+     *                                                                         *
+     **************************************************************************/
 
     /**
      * Called by JavaFX when the stage is set for the application to run.
      *
      * <p> Note that this function shouldn't be called by user code.
      *
-     * @param stage Stage provided by JavaFX.
+     * @param stage the stage provided by JavaFX.
      */
-    @Override
-    public void start(Stage stage) {
+    @Override public void start(Stage stage) {
         Locale.setDefault(LOCALE);
         this.stage = stage;
 
@@ -108,11 +125,11 @@ public class App extends Application {
         stage.show();
     }
 
-    /************************************************************************
-     *
-     * Private implementation
-     *
-     ************************************************************************/
+    /***************************************************************************
+     *                                                                         *
+     * Implementation                                                          *
+     *                                                                         *
+     **************************************************************************/
 
     /**
      * Display an error dialog showing the given throwable and exit.
@@ -122,8 +139,8 @@ public class App extends Application {
     private void unhandledExceptionHook(Throwable throwable) {
         // Create the alert dialog.
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error!");
-        alert.setHeaderText("An unhandled throwable occurred.");
+        alert.setTitle("Feil!");
+        alert.setHeaderText("En ukjent feil oppstod.");
         alert.setContentText(throwable.getMessage());
 
         // Get the stack trace.
