@@ -19,19 +19,26 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.sql.Connection;
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class App extends Application {
 
+    static public final  Locale            LOCALE                = new Locale("NO", "no");
+    static public        NumberFormat      NUMBER_FORMAT_PERCENT = NumberFormat.getPercentInstance(LOCALE);
+    static public        DateTimeFormatter DATE_TIME_FORMATTER   =
+            DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(LOCALE);
     /************************************************************************
      *
      * Static fields
      *
      ************************************************************************/
 
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+    private static final Logger            LOGGER                = Logger.getLogger(App.class.getName());
 
     /**
      * Database driver to use.
@@ -80,7 +87,7 @@ public class App extends Application {
      */
     @Override
     public void start(Stage stage) {
-        Locale.setDefault(Util.LOCALE);
+        Locale.setDefault(LOCALE);
         this.stage = stage;
 
         LOGGER.log(Level.INFO, "Loading database driver...");
