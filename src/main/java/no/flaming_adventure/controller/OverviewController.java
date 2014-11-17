@@ -9,7 +9,7 @@ import no.flaming_adventure.App;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.OverviewRow;
 import no.flaming_adventure.util.DateCellFactory;
-import no.flaming_adventure.util.PercentageCellFactory;
+import no.flaming_adventure.util.NumberCellFactory;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -99,7 +99,7 @@ public class OverviewController {
         capacityColumn.setCellValueFactory(p -> p.getValue().getHut().capacityProperty());
         firewoodColumn.setCellValueFactory(p -> p.getValue().getHut().firewoodProperty());
         occupancyColumn.setCellValueFactory(p -> p.getValue().occupancyProperty());
-        occupancyColumn.setCellFactory(new PercentageCellFactory<>());
+        occupancyColumn.setCellFactory(new NumberCellFactory<>(App.NUMBER_FORMAT_PERCENT));
         nextReservationColumn.setCellValueFactory(p -> p.getValue().nextReservationProperty());
         nextReservationColumn.setCellFactory(new DateCellFactory<>(App.DATE_TIME_FORMATTER));
         brokenCountColumn.setCellValueFactory(p -> p.getValue().brokenCountProperty());
