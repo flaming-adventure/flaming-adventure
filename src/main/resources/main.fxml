@@ -23,14 +23,14 @@
             <fx:include fx:id="forgottenTable" source="forgottenTable.fxml" />
          </content>
     </Tab>
-      <Tab fx:id="equipmentTab" text="Utstyr">
-         <content>
-            <fx:include fx:id="equipmentTable" source="equipmentTable.fxml" />
-         </content>
-      </Tab>
       <Tab fx:id="brokenTab" text="Ødelagt">
          <content>
             <fx:include fx:id="brokenItemTable" source="brokenItemTable.fxml" />
+         </content>
+      </Tab>
+      <Tab fx:id="equipmentTab" text="Utstyr">
+         <content>
+            <fx:include fx:id="equipmentTable" source="equipmentTable.fxml" />
          </content>
       </Tab>
   </tabs>
