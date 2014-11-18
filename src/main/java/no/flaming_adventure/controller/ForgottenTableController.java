@@ -123,6 +123,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
             UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
+        loadPage(pagination.getCurrentPageIndex());
     }
 
     /**

@@ -117,6 +117,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
             UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
+        loadPage(pagination.getCurrentPageIndex());
     }
 
     @Override @FXML protected void initialize() {
