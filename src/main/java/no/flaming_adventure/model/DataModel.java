@@ -594,14 +594,20 @@ public class DataModel {
     }
 
     static {
+        String TODAY = Date.valueOf(LocalDate.now()).toString();
         SQL_OVERVIEW_BETWEEN_DATES = "SELECT\n" +
-                                     "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count\n" +
+                                     "  huts.*, R.count, N.next, B.broken_count, F.forgotten_count\n" +
                                      "FROM huts\n" +
-                                     "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) AS next\n" +
+                                     "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count\n" +
                                      "             FROM reservations\n" +
                                      "             WHERE date BETWEEN ? AND ?\n" +
                                      "             GROUP BY hut_id)\n" +
                                      "    AS R ON R.hut_id = huts.id\n" +
+                                     "  LEFT JOIN (SELECT hut_id, date, MIN(date) AS next\n" +
+                                     "             FROM reservations\n" +
+                                     "             WHERE date >= '" + TODAY + "'\n" +
+                                     "             GROUP BY hut_id)\n" +
+                                     "    AS N ON N.hut_id = huts.id\n" +
                                      "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count\n" +
                                      "             FROM broken_items\n" +
                                      "             WHERE date BETWEEN ? AND ?\n" +
@@ -614,13 +620,18 @@ public class DataModel {
                                      "    AS F ON F.hut_id = huts.id ;";
 
         SQL_OVERVIEW_FROM_DATE = "SELECT\n" +
-                                 "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count\n" +
+                                 "  huts.*, R.count, N.next, B.broken_count, F.forgotten_count\n" +
                                  "FROM huts\n" +
-                                 "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) AS next\n" +
+                                 "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count\n" +
                                  "             FROM reservations\n" +
                                  "             WHERE date >= ?\n" +
                                  "             GROUP BY hut_id)\n" +
                                  "    AS R ON R.hut_id = huts.id\n" +
+                                 "  LEFT JOIN (SELECT hut_id, date, MIN(date) AS next\n" +
+                                 "             FROM reservations\n" +
+                                 "             WHERE date >= '" + TODAY + "'\n" +
+                                 "             GROUP BY hut_id)\n" +
+                                 "    AS N ON N.hut_id = huts.id\n" +
                                  "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count\n" +
                                  "             FROM broken_items\n" +
                                  "             WHERE date >= ?\n" +
@@ -634,13 +645,18 @@ public class DataModel {
 
 
         SQL_OVERVIEW_TO_DATE = "SELECT\n" +
-                               "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count\n" +
+                               "  huts.*, R.count, N.next, B.broken_count, F.forgotten_count\n" +
                                "FROM huts\n" +
-                               "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) AS next\n" +
+                               "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count\n" +
                                "             FROM reservations\n" +
                                "             WHERE date <= ?\n" +
                                "             GROUP BY hut_id)\n" +
                                "    AS R ON R.hut_id = huts.id\n" +
+                               "  LEFT JOIN (SELECT hut_id, date, MIN(date) AS next\n" +
+                               "             FROM reservations\n" +
+                               "             WHERE date >= '" + TODAY + "'\n" +
+                               "             GROUP BY hut_id)\n" +
+                               "    AS N ON N.hut_id = huts.id\n" +
                                "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count\n" +
                                "             FROM broken_items\n" +
                                "             WHERE date <= ?\n" +
@@ -653,12 +669,17 @@ public class DataModel {
                                "    AS F ON F.hut_id = huts.id ;";
 
         SQL_OVERVIEW_ALL = "SELECT\n" +
-                           "  huts.*, R.count, R.next, B.broken_count, F.forgotten_count\n" +
+                           "  huts.*, R.count, N.next, B.broken_count, F.forgotten_count\n" +
                            "FROM huts\n" +
-                           "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count, MIN(date) AS next\n" +
+                           "  LEFT JOIN (SELECT hut_id, date, SUM(count) AS count\n" +
                            "             FROM reservations\n" +
                            "             GROUP BY hut_id)\n" +
                            "    AS R ON R.hut_id = huts.id\n" +
+                           "  LEFT JOIN (SELECT hut_id, date, MIN(date) AS next\n" +
+                           "             FROM reservations\n" +
+                           "             WHERE date >= '" + TODAY + "'\n" +
+                           "             GROUP BY hut_id)\n" +
+                           "    AS N ON N.hut_id = huts.id\n" +
                            "  LEFT JOIN (SELECT hut_id, date, COUNT(id) AS broken_count\n" +
                            "             FROM broken_items\n" +
                            "             GROUP BY hut_id)\n" +
