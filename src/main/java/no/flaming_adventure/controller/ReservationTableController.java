@@ -11,10 +11,10 @@ import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.model.Reservation;
 import no.flaming_adventure.util.DateCellFactory;
+import no.flaming_adventure.util.UnhandledExceptionDialog;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.function.Consumer;
 
 /**
  * Controller for the reservation table view.
@@ -52,8 +52,8 @@ public class ReservationTableController extends TableControllerBase<Reservation>
      *                                                                         *
      **************************************************************************/
 
-    @Override public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
-        super.inject(dataModel, unhandledExceptionHook);
+    @Override public void inject(DataModel dataModel) {
+        super.inject(dataModel);
 
         hutFilter.setOnAction(this::setDataEventHandler);
         fromDateFilter.setOnAction(this::setDataEventHandler);
@@ -65,7 +65,7 @@ public class ReservationTableController extends TableControllerBase<Reservation>
         try {
             huts = dataModel.getHuts();
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -130,7 +130,7 @@ public class ReservationTableController extends TableControllerBase<Reservation>
             reservations = dataModel.reservationPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
                                                      hutFilter, fromDateFilter, toDateFilter, ordering);
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 

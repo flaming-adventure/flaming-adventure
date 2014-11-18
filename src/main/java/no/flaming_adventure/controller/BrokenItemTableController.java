@@ -13,10 +13,10 @@ import no.flaming_adventure.model.BrokenItem;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.util.DateCellFactory;
+import no.flaming_adventure.util.UnhandledExceptionDialog;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.function.Consumer;
 
 public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
 
@@ -69,8 +69,8 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
      *                                                                         *
      **************************************************************************/
 
-    @Override public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
-        super.inject(dataModel, unhandledExceptionHook);
+    @Override public void inject(DataModel dataModel) {
+        super.inject(dataModel);
 
         hutFilter.setOnAction(e -> loadPage(0));
         fromDateFilter.setOnAction(e -> loadPage(0));
@@ -84,7 +84,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
         try {
             huts = dataModel.getHuts();
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -114,7 +114,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
         try {
             dataModel.updateBrokenItemFixed(item);
         } catch (Throwable e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
     }
@@ -165,7 +165,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
             brokenItems = dataModel.brokenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
                                                    hut, fromDate, toDate, ordering, filterBy);
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -186,7 +186,7 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
             BrokenItem brokenItem = new BrokenItem(-1, hut, item, date, false, comment);
             dataModel.insertBrokenItem(brokenItem);
         } catch (NullPointerException|SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 

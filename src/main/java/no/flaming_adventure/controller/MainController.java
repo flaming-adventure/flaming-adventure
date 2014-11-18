@@ -5,8 +5,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import no.flaming_adventure.model.DataModel;
 
-import java.util.function.Consumer;
-
 /**
  * Controller for the main view.
  *
@@ -29,7 +27,6 @@ public class MainController {
      ************************************************************************/
 
     private final DataModel dataModel;
-    private final Consumer<Throwable> unhandledExceptionHook;
 
     @FXML private OverviewController            overviewTableController;
     @FXML private ReservationFormController     reservationFormController;
@@ -56,11 +53,9 @@ public class MainController {
      * Construct a MainController with the given data model and exception hook.
      *
      * @param dataModel                 active data model for the application instance.
-     * @param unhandledExceptionHook    a function to be called on exceptions where we intend to exit.
      */
-    public MainController(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+    public MainController(DataModel dataModel) {
         this.dataModel  = dataModel;
-        this.unhandledExceptionHook = unhandledExceptionHook;
     }
 
     /************************************************************************
@@ -76,12 +71,12 @@ public class MainController {
      * here to inject dependencies into the various subcontrollers and initialize tab-loading.
      */
     @FXML private void initialize() {
-        overviewTableController.inject(dataModel, unhandledExceptionHook);
-        reservationFormController.inject(dataModel, unhandledExceptionHook);
-        reservationTableController.inject(dataModel, unhandledExceptionHook);
-        forgottenTableController.inject(dataModel, unhandledExceptionHook);
-        brokenItemTableController.inject(dataModel, unhandledExceptionHook);
-        equipmentTableController.inject(dataModel, unhandledExceptionHook);
+        overviewTableController.inject(dataModel);
+        reservationFormController.inject(dataModel);
+        reservationTableController.inject(dataModel);
+        forgottenTableController.inject(dataModel);
+        brokenItemTableController.inject(dataModel);
+        equipmentTableController.inject(dataModel);
 
         tabPane.getSelectionModel().selectedItemProperty()
                 .addListener((observable, oldValue, tab) -> loadTab(tab));

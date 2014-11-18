@@ -1,22 +1,15 @@
 package no.flaming_adventure;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import no.flaming_adventure.controller.LoginController;
 import no.flaming_adventure.controller.MainController;
 import no.flaming_adventure.model.DataModel;
+import no.flaming_adventure.util.UnhandledExceptionDialog;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URL;
 import java.sql.Connection;
 import java.text.NumberFormat;
@@ -111,7 +104,7 @@ public class App extends Application {
         try {
             Class.forName(DB_DRIVER);
         } catch (ClassNotFoundException e) {
-            unhandledExceptionHook(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -132,48 +125,6 @@ public class App extends Application {
      **************************************************************************/
 
     /**
-     * Display an error dialog showing the given throwable and exit.
-     *
-     * @param throwable the throwable to display.
-     */
-    private void unhandledExceptionHook(Throwable throwable) {
-        // Create the alert dialog.
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Feil!");
-        alert.setHeaderText("En ukjent feil oppstod.");
-        alert.setContentText(throwable.getMessage());
-
-        // Get the stack trace.
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-        throwable.printStackTrace(printWriter);
-        String stackTrace = stringWriter.toString();
-
-        // Create the stack trace pane.
-        Label label = new Label("Stack trace:");
-        TextArea textArea = new TextArea(stackTrace);
-        textArea.setEditable(false);
-        textArea.setWrapText(false);
-        textArea.setMaxWidth(Double.MAX_VALUE);
-        textArea.setMaxHeight(Double.MAX_VALUE);
-        GridPane.setVgrow(textArea, Priority.ALWAYS);
-        GridPane.setHgrow(textArea, Priority.ALWAYS);
-        GridPane exceptionContent = new GridPane();
-        exceptionContent.setMaxWidth(Double.MAX_VALUE);
-        exceptionContent.add(label, 0, 0);
-        exceptionContent.add(textArea, 0, 1);
-
-        // Add the stack trace pane to the alert dialog.
-        alert.getDialogPane().setExpandableContent(exceptionContent);
-
-        alert.showAndWait();
-
-        LOGGER.log(Level.SEVERE, throwable.toString(), throwable);
-        stage.close();
-        Platform.exit();
-    }
-
-    /**
      * Function to be called when a database connection is established.
      *
      * @param connection A connection to the database (server).
@@ -183,11 +134,11 @@ public class App extends Application {
         try {
             dataModel = new DataModel(connection);
         } catch (Exception e) {
-            unhandledExceptionHook(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
-        MainController mainController = new MainController(dataModel, this::unhandledExceptionHook);
+        MainController mainController = new MainController(dataModel);
         Scene mainScene = loadScene("main.fxml", mainController);
         stage.hide();
         stage.setScene(mainScene);
@@ -215,7 +166,7 @@ public class App extends Application {
         try {
             root = loader.load();
         } catch (Exception e) {
-            unhandledExceptionHook(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 

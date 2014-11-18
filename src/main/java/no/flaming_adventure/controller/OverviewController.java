@@ -10,10 +10,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import no.flaming_adventure.App;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.OverviewRow;
-import no.flaming_adventure.util.DateCellFactory;
-import no.flaming_adventure.util.ListUpdateListener;
-import no.flaming_adventure.util.NumberCellFactory;
-import no.flaming_adventure.util.UnsignedStringConverter;
+import no.flaming_adventure.util.*;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -34,7 +31,6 @@ public class OverviewController {
      ************************************************************************/
 
     private DataModel dataModel;
-    private Consumer<Throwable> unhandledExceptionHook;
 
     private final ObservableList<OverviewRow> items;
 
@@ -61,9 +57,8 @@ public class OverviewController {
      *
      ************************************************************************/
 
-    public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+    public void inject(DataModel dataModel) {
         this.dataModel = dataModel;
-        this.unhandledExceptionHook = unhandledExceptionHook;
 
         fromDatePicker.setOnAction(e -> loadImpl());
         toDatePicker.setOnAction(e -> loadImpl());
@@ -84,7 +79,7 @@ public class OverviewController {
             try {
                 dataModel.updateHutFirewood(overviewRow.getHut());
             } catch (SQLException e) {
-                unhandledExceptionHook.accept(e);
+                UnhandledExceptionDialog.create(e);
                 throw new IllegalStateException(e);
             }
         }
@@ -104,7 +99,7 @@ public class OverviewController {
         try {
             overviewRows = dataModel.overviewRows(fromDate, toDate);
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 

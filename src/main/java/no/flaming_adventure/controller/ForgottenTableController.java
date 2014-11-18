@@ -12,10 +12,10 @@ import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.ForgottenItem;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.util.DateCellFactory;
+import no.flaming_adventure.util.UnhandledExceptionDialog;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.function.Consumer;
 
 /**
  * Controller for the forgotten item tab, responsible for both table and form.
@@ -75,8 +75,8 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
      *                                                                         *
      **************************************************************************/
 
-    @Override public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
-        super.inject(dataModel, unhandledExceptionHook);
+    @Override public void inject(DataModel dataModel) {
+        super.inject(dataModel);
 
         hutFilter.setOnAction(e -> loadPage(0));
         fromDateFilter.setOnAction(e -> loadPage(0));
@@ -90,7 +90,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
         try {
             huts = dataModel.getHuts();
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -120,7 +120,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
         try {
             dataModel.updateForgottenItemDelivered(item);
         } catch (Throwable e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
     }
@@ -185,7 +185,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
             forgottenItems = dataModel.forgottenItemPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE,
                                                          hut, fromDate, toDate, ordering, filterBy);
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -208,7 +208,7 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
             ForgottenItem forgottenItem = new ForgottenItem(-1, hut, item, name, contact, date, false, comment);
             dataModel.insertForgottenItem(forgottenItem);
         } catch (SQLException|NullPointerException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 

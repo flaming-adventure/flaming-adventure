@@ -11,10 +11,10 @@ import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Equipment;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.util.DateCellFactory;
+import no.flaming_adventure.util.UnhandledExceptionDialog;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.function.Consumer;
 
 public class EquipmentTableController extends TableControllerBase<Equipment> {
 
@@ -55,8 +55,8 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
      *                                                                         *
      **************************************************************************/
 
-    @Override public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
-        super.inject(dataModel, unhandledExceptionHook);
+    @Override public void inject(DataModel dataModel) {
+        super.inject(dataModel);
 
         hutFilter.setOnAction(event -> loadPage(0));
         fromDateFilter.setOnAction(event -> loadPage(0));
@@ -69,7 +69,7 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
         try {
             huts = dataModel.getHuts();
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -136,7 +136,7 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
             items = dataModel.equipmentPage(pageIndex * ITEMS_PER_PAGE, ITEMS_PER_PAGE, hut, fromDate, toDate,
                                             ordering);
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -157,7 +157,7 @@ public class EquipmentTableController extends TableControllerBase<Equipment> {
             Equipment equipment = new Equipment(-1, hut, item, date, count);
             dataModel.insertEquipment(equipment);
         } catch (NullPointerException|SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 

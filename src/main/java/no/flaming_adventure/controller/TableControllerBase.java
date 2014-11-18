@@ -13,8 +13,6 @@ import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.util.ListUpdateListener;
 import no.flaming_adventure.util.SQLSortPolicy;
 
-import java.util.function.Consumer;
-
 public abstract class TableControllerBase<T> {
 
     /***************************************************************************
@@ -56,12 +54,6 @@ public abstract class TableControllerBase<T> {
      * The table's data model, should be injected in {@link #inject}.
      */
     protected DataModel dataModel;
-
-    /**
-     * A function with the purpose of showing the user an exception in some manner
-     * before exiting. Should be injected in {@link #inject}.
-     */
-    protected Consumer<Throwable> unhandledExceptionHook;
 
     /**
      * The table's list of items.
@@ -130,9 +122,8 @@ public abstract class TableControllerBase<T> {
      *                                                                         *
      **************************************************************************/
 
-    public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+    public void inject(DataModel dataModel) {
         this.dataModel = dataModel;
-        this.unhandledExceptionHook = unhandledExceptionHook;
 
         tableView.setOnSort(TableControllerBase::onSortEventHandler);
         tableView.setSortPolicy(new SQLSortPolicy<>(this::setOrdering));

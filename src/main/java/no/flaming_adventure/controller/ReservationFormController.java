@@ -7,10 +7,10 @@ import javafx.scene.text.Text;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.model.Reservation;
+import no.flaming_adventure.util.UnhandledExceptionDialog;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.function.Consumer;
 
 /**
  * Controller for reservation form view.
@@ -61,7 +61,6 @@ public class ReservationFormController {
 
     /* Injected dependencies (see #inject()). */
     private DataModel           dataModel;
-    private Consumer<Throwable> unhandledExceptionHook;
 
     /* JavaFX injected dependencies. */
     @FXML private ComboBox<Hut>      hutComboBox;
@@ -79,9 +78,8 @@ public class ReservationFormController {
      *
      ************************************************************************/
 
-    public void inject(DataModel dataModel, Consumer<Throwable> unhandledExceptionHook) {
+    public void inject(DataModel dataModel) {
         this.dataModel = dataModel;
-        this.unhandledExceptionHook = unhandledExceptionHook;
     }
 
     /**
@@ -94,7 +92,7 @@ public class ReservationFormController {
         try {
             huts = dataModel.getHuts();
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -154,7 +152,7 @@ public class ReservationFormController {
         try {
             occupancy = dataModel.occupancy(hut, date);
         } catch (SQLException e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
@@ -232,7 +230,7 @@ public class ReservationFormController {
             Reservation reservation = new Reservation(-1, hut, date, name, email, count, comment);
             dataModel.insertReservation(reservation);
         } catch (Exception e) {
-            unhandledExceptionHook.accept(e);
+            UnhandledExceptionDialog.create(e);
             throw new IllegalStateException(e);
         }
 
