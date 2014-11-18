@@ -346,6 +346,13 @@ public class DataModel {
         statement.executeUpdate(query);
     }
 
+    public void updateHutFirewood(Hut hut) throws SQLException {
+        /*language=MySQL*/
+        String query = "UPDATE huts SET firewood=" + hut.getFirewood() + '\n' +
+                       "WHERE id=" + hut.getId() + ';';
+        statement.executeUpdate(query);
+    }
+
     /************************************************************************
      *
      * Private implementation

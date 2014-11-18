@@ -1,15 +1,19 @@
 package no.flaming_adventure.controller;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.TextFieldTableCell;
 import no.flaming_adventure.App;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.OverviewRow;
 import no.flaming_adventure.util.DateCellFactory;
+import no.flaming_adventure.util.ListUpdateListener;
 import no.flaming_adventure.util.NumberCellFactory;
+import no.flaming_adventure.util.UnsignedStringConverter;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -32,6 +36,8 @@ public class OverviewController {
     private DataModel dataModel;
     private Consumer<Throwable> unhandledExceptionHook;
 
+    private final ObservableList<OverviewRow> items;
+
     @FXML private DatePicker fromDatePicker;
     @FXML private DatePicker toDatePicker;
 
@@ -43,6 +49,11 @@ public class OverviewController {
     @FXML private TableColumn<OverviewRow, LocalDate>   nextReservationColumn;
     @FXML private TableColumn<OverviewRow, Number>      brokenCountColumn;
     @FXML private TableColumn<OverviewRow, Number>      forgottenCountColumn;
+
+    public OverviewController() {
+        items = FXCollections.observableArrayList(new OverviewRow.Extractor());
+        items.addListener(new ListUpdateListener<>(new RowUpdater()));
+    }
 
     /************************************************************************
      *
@@ -68,6 +79,17 @@ public class OverviewController {
      *
      ************************************************************************/
 
+    private class RowUpdater implements Consumer<OverviewRow> {
+        @Override public void accept(OverviewRow overviewRow) {
+            try {
+                dataModel.updateHutFirewood(overviewRow.getHut());
+            } catch (SQLException e) {
+                unhandledExceptionHook.accept(e);
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
     /**
      * Load the table contents based on the given filters.
      *
@@ -86,7 +108,7 @@ public class OverviewController {
             throw new IllegalStateException(e);
         }
 
-        tableView.setItems(overviewRows);
+        tableView.getItems().setAll(overviewRows);
     }
 
     /**
@@ -98,11 +120,14 @@ public class OverviewController {
         hutColumn.setCellValueFactory(p -> p.getValue().getHut().nameProperty());
         capacityColumn.setCellValueFactory(p -> p.getValue().getHut().capacityProperty());
         firewoodColumn.setCellValueFactory(p -> p.getValue().getHut().firewoodProperty());
+        firewoodColumn.setCellFactory(TextFieldTableCell.forTableColumn(new UnsignedStringConverter()));
         occupancyColumn.setCellValueFactory(p -> p.getValue().occupancyProperty());
         occupancyColumn.setCellFactory(new NumberCellFactory<>(App.NUMBER_FORMAT_PERCENT));
         nextReservationColumn.setCellValueFactory(p -> p.getValue().nextReservationProperty());
         nextReservationColumn.setCellFactory(new DateCellFactory<>(App.DATE_TIME_FORMATTER));
         brokenCountColumn.setCellValueFactory(p -> p.getValue().brokenCountProperty());
         forgottenCountColumn.setCellValueFactory(p -> p.getValue().forgottenCountProperty());
+
+        tableView.setItems(items);
     }
 }

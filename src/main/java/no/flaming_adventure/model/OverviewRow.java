@@ -1,13 +1,22 @@
 package no.flaming_adventure.model;
 
+import javafx.beans.Observable;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.util.Callback;
 
 import java.time.LocalDate;
 
 public class OverviewRow {
+
+    public static class Extractor implements Callback<OverviewRow, Observable[]> {
+        @Override public Observable[] call(OverviewRow param) {
+            return new Observable[]{param.getHut().firewoodProperty()};
+        }
+    }
+
     private final ObjectProperty<Hut>           hut;
     private final IntegerProperty               brokenCount;
     private final IntegerProperty               forgottenCount;

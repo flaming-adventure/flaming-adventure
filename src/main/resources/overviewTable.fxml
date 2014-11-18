@@ -15,11 +15,11 @@
                   <DatePicker fx:id="toDatePicker" />
                </children>
             </HBox>
-            <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
+            <TableView fx:id="tableView" editable="true" VBox.vgrow="ALWAYS">
                <columns>
                   <TableColumn fx:id="hutColumn" editable="false" prefWidth="150.0" text="Koie" />
                   <TableColumn fx:id="capacityColumn" editable="false" prefWidth="75.0" text="Kapasitet" />
-                  <TableColumn fx:id="firewoodColumn" editable="false" prefWidth="75.0" text="Ved (sekker)" />
+                  <TableColumn fx:id="firewoodColumn" prefWidth="75.0" text="Ved (sekker)" />
                   <TableColumn fx:id="brokenCountColumn" editable="false" prefWidth="75.0" text="Ødelagt" />
                   <TableColumn fx:id="forgottenCountColumn" editable="false" prefWidth="75.0" text="Glemt" />
                   <TableColumn fx:id="nextReservationColumn" editable="false" prefWidth="200.0" text="Neste reservasjon" />
