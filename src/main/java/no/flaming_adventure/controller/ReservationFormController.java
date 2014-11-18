@@ -41,7 +41,7 @@ public class ReservationFormController {
             if (date == null) { return; }
 
             if (date.isBefore(LocalDate.now())) {
-                this.setDisable(true);
+                //this.setDisable(true);
             }
         }
     }
