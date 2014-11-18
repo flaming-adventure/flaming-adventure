@@ -163,9 +163,12 @@ public class ReservationFormController {
 
         capacityText.setText(String.format(CAPACITY_TEXT_FORMAT, actualCapacity, totalCapacity));
 
+        int oldIndex = countChoiceBox.getSelectionModel().getSelectedIndex();
         ObservableList<Integer> countChoiceBoxItems = countChoiceBox.getItems();
         countChoiceBoxItems.clear();
         for (int i = 1; i <= actualCapacity; i++) { countChoiceBoxItems.add(i); }
+        countChoiceBox.getSelectionModel().selectFirst();
+        countChoiceBox.getSelectionModel().select(oldIndex);
 
         if (actualCapacity < 1) { disableInput(false); }
         else { enableInput(false); }
