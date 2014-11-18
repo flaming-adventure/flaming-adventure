@@ -25,6 +25,9 @@ public class ReservationFormController {
      *
      ************************************************************************/
 
+    public static final int NAME_MAX_LENGTH = 64;
+    public static final int EMAIL_MAX_LENGTH = 64;
+
     /**
      * Date cell for the date picker.
      *
@@ -57,18 +60,18 @@ public class ReservationFormController {
      ************************************************************************/
 
     /* Injected dependencies (see #inject()). */
-    private DataModel dataModel;
+    private DataModel           dataModel;
     private Consumer<Throwable> unhandledExceptionHook;
 
     /* JavaFX injected dependencies. */
-    @FXML private ComboBox<Hut>         hutComboBox;
-    @FXML private DatePicker            datePicker;
-    @FXML private Text                  capacityText;
-    @FXML private TextField             nameTextField;
-    @FXML private TextField             emailTextField;
-    @FXML private ChoiceBox<Integer>    countChoiceBox;
-    @FXML private TextArea              commentTextArea;
-    @FXML private Button                commitButton;
+    @FXML private ComboBox<Hut>      hutComboBox;
+    @FXML private DatePicker         datePicker;
+    @FXML private Text               capacityText;
+    @FXML private TextField          nameTextField;
+    @FXML private TextField          emailTextField;
+    @FXML private ChoiceBox<Integer> countChoiceBox;
+    @FXML private TextArea           commentTextArea;
+    @FXML private Button             commitButton;
 
     /************************************************************************
      *
@@ -125,6 +128,17 @@ public class ReservationFormController {
         hutComboBox.setOnAction(ignored -> updateAction());
         datePicker.setOnAction(ignored -> updateAction());
         commitButton.setOnAction(ignored -> commitAction());
+
+        nameTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.length() > NAME_MAX_LENGTH) {
+                nameTextField.setText(oldValue);
+            }
+        });
+        emailTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.length() > EMAIL_MAX_LENGTH) {
+                emailTextField.setText(oldValue);
+            }
+        });
     }
 
     /**
