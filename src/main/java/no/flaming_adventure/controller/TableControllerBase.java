@@ -102,7 +102,7 @@ public abstract class TableControllerBase<T> {
      * Construct a table controller base with editable fields.
      *
      * <p> The update behaviour of the table can be specified by overriding the
-     * {@link #updateItem(T)} method.
+     * #updateItem method.
      *
      * @param extractor element to Observable[] converter. The Observable[] is used to
      *                  listen for list updates.

@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  * columns in the ordering produced.
  *
  * <p> The policy does not perform the actual sorting operation itself. Instead it takes
- * a {@link java.util.function.Consumer<String> string consumer} on construction and
+ * a {@link java.util.function.Consumer string consumer} on construction and
  * calls that consumer with the created ordering every time the policy is called.
  *
  * @see javafx.scene.control.TableView#sortPolicyProperty
