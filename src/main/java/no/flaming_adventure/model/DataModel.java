@@ -119,16 +119,6 @@ public class DataModel {
         return huts;
     }
 
-    public ObservableList<Equipment> getEquipmentList() throws SQLException {
-        ObservableList<Equipment> equipmentList = FXCollections.observableArrayList();
-        String query = "SELECT * FROM equipment;";
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            equipmentList.add(equipmentFromResultSet(resultSet));
-        }
-        return equipmentList;
-    }
-
     public Integer occupancy(Hut hut, LocalDate date) throws SQLException {
         occupancyAtDateStmt.setInt(1, hut.getId());
         occupancyAtDateStmt.setDate(2, Date.valueOf(date));
