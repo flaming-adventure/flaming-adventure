@@ -163,15 +163,26 @@ public class ReservationFormController {
 
         capacityText.setText(String.format(CAPACITY_TEXT_FORMAT, actualCapacity, totalCapacity));
 
-        int oldIndex = countChoiceBox.getSelectionModel().getSelectedIndex();
-        ObservableList<Integer> countChoiceBoxItems = countChoiceBox.getItems();
-        countChoiceBoxItems.clear();
-        for (int i = 1; i <= actualCapacity; i++) { countChoiceBoxItems.add(i); }
-        countChoiceBox.getSelectionModel().selectFirst();
-        countChoiceBox.getSelectionModel().select(oldIndex);
+        updateCount(actualCapacity);
+    }
 
-        if (actualCapacity < 1) { disableInput(false); }
-        else { enableInput(false); }
+    private void updateCount(int max) {
+        SingleSelectionModel<Integer> selectionModel = countChoiceBox.getSelectionModel();
+        ObservableList<Integer> items = countChoiceBox.getItems();
+
+        Integer oldValue = selectionModel.getSelectedItem();
+        items.clear();
+        if (max < 1) {
+            disableInput(false);
+        } else {
+            for (int i = 1; i <= max; i++) { items.add(i); }
+            if (items.contains(oldValue)) {
+                selectionModel.select(oldValue);
+            } else {
+                selectionModel.selectFirst();
+            }
+            enableInput(false);
+        }
     }
 
     /**
