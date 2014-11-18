@@ -12,6 +12,7 @@ import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.ForgottenItem;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.util.DateCellFactory;
+import no.flaming_adventure.util.StringMaxLengthListener;
 import no.flaming_adventure.util.UnhandledExceptionDialog;
 
 import java.sql.SQLException;
@@ -154,6 +155,10 @@ public class ForgottenTableController extends TableControllerBase<ForgottenItem>
         deliveredColumn.setId("forgotten_items.delivered");
 
         super.initialize();
+
+        itemTextField.textProperty().addListener(new StringMaxLengthListener(24, itemTextField::setText));
+        nameTextField.textProperty().addListener(new StringMaxLengthListener(64, nameTextField::setText));
+        contactTextField.textProperty().addListener(new StringMaxLengthListener(64, contactTextField::setText));
 
         hutComboBox.setOnKeyReleased(this::formKeyReleaseHandler);
         datePicker.setOnKeyReleased(this::formKeyReleaseHandler);

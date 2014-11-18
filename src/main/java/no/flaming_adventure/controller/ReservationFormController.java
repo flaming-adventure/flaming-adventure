@@ -7,6 +7,7 @@ import javafx.scene.text.Text;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.model.Reservation;
+import no.flaming_adventure.util.StringMaxLengthListener;
 import no.flaming_adventure.util.UnhandledExceptionDialog;
 
 import java.sql.SQLException;
@@ -127,16 +128,10 @@ public class ReservationFormController {
         datePicker.setOnAction(ignored -> updateAction());
         commitButton.setOnAction(ignored -> commitAction());
 
-        nameTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.length() > NAME_MAX_LENGTH) {
-                nameTextField.setText(oldValue);
-            }
-        });
-        emailTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.length() > EMAIL_MAX_LENGTH) {
-                emailTextField.setText(oldValue);
-            }
-        });
+        nameTextField.textProperty().addListener(
+                new StringMaxLengthListener(NAME_MAX_LENGTH, nameTextField::setText));
+        emailTextField.textProperty().addListener(
+                new StringMaxLengthListener(EMAIL_MAX_LENGTH, emailTextField::setText));
     }
 
     /**

@@ -13,6 +13,7 @@ import no.flaming_adventure.model.BrokenItem;
 import no.flaming_adventure.model.DataModel;
 import no.flaming_adventure.model.Hut;
 import no.flaming_adventure.util.DateCellFactory;
+import no.flaming_adventure.util.StringMaxLengthListener;
 import no.flaming_adventure.util.UnhandledExceptionDialog;
 
 import java.sql.SQLException;
@@ -136,6 +137,8 @@ public class BrokenItemTableController extends TableControllerBase<BrokenItem> {
         fixedColumn.setId("broken_items.fixed");
 
         super.initialize();
+
+        itemTextField.textProperty().addListener(new StringMaxLengthListener(24, itemTextField::setText));
 
         EventHandler<KeyEvent> enterHandler = event -> {
             if (event.getCode() == KeyCode.ENTER) {
